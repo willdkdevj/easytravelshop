@@ -5,7 +5,7 @@
 [![Maven Badge](https://img.shields.io/badge/-Maven-000?style=flat-square&logo=Apache-Maven&logoColor=white&link=https://maven.apache.org/)](https://maven.apache.org/)
 
 
-<img align="right" width="280" height="95" src="https://github.com/InfoteraTecnologia/easytravel/blob/master/assets/logo_miketec.jpeg">
+<img align="right" width="280" height="95" src="https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/logo_miketec.jpeg">
 
 ## Sobre a Easy Travel Shop (ETS)
 A **Easy Travel Shop** (ETS) é uma agência que possuí uma plataforma para a venda de ingressos, passeios e atividades no Brasil. Além disso, ela tem o foco na montagem de atividades focadas em atividades no destino, trazendo informações especificas sobre as mesmas.
@@ -25,7 +25,7 @@ Como já mencionado, a API trata-se de um serviço para a disponibilidade de ing
 
 Abaixo segue um modelo os serviços de forma gráfica pela Miketec.
 
-<img align="middle" width="400" height="400" src="https://github.com/InfoteraTecnologia/easytravel/blob/master/assets/fluxo_principal.jpeg">
+<img align="middle" width="400" height="400" src="https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/fluxo_principal.jpeg">
 
 Mais adiante temos uma sessão específica para detalhamentos de cada serviço acima. Por enquanto, apenas
 um resumo da responsabilidade de cada um:
