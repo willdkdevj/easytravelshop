@@ -1,4 +1,4 @@
-# VirtusPay API 
+# EasyTravelShop API 
 > API consiste em uma ponte ao fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer.
 
 [![Spring Badge](https://img.shields.io/badge/-Spring-brightgreen?style=flat-square&logo=Spring&logoColor=white&link=https://spring.io/)](https://spring.io/)
@@ -81,15 +81,15 @@ Nas versões atuais do *Spring* é recomendado utilizar retornos do tipo **HttpE
 
 ***BODY (raw)***
 ```json
-{
-    "Username": "api_viagenspromo",
-    "Password": "ixRombF5@"
-}
+    {
+        "Username": "api_viagenspromo",
+        "Password": "ixRombF5@"
+    }
 ```
 
 > **NOTA:** *As credenciais presentes nesta documentação refere-se as credenciais de homologação (usuário/senha). Para utilização dos recursos da API, tanto Produção quanto Homologação, é necessário a passagem do token após autenticação (token.tokenId) a todos os demais serviços, observando o período de vigência do mesmo que atualmente tem a duração de 10 horas.*
 
-**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravel/blob/master/assets/Miketec-API-Documentation-V3.pdf)
+**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API-Documentation-V3.pdf)
 
 ### Ambientes
 Para acesso aos ambientes (*Homologação/Produção*) da MikeTec se faz necessário a criação de uma conta pelo suporte técnico, na qual estes ambientes são totalmente distintos um do outro, pois seus endpoints são diferentes. Desta forma, a criação de uma não implica na criação da outra, sendo necessário solicitar uma conta especifica para o ambiente a ser utilizado.
@@ -110,7 +110,7 @@ Para acesso aos ambientes (*Homologação/Produção*) da MikeTec se faz necess�
 Para permitir a serialização/deserialização de datas foi necessário implementar a instância do Gson para a passagem de um padrão (**pattern**) a fim de permitir o seu funcionamento. Desta forma, na configuração do Projeto (*EasyTravelShoponfiguration*) é implementado um Bean a fim de instância-lo ao iniciar o Spring.
 
 ```java
-	@Bean
+    @Bean
     public Gson gson() {
         GsonBuilder builder = new GsonBuilder();
         builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
@@ -205,6 +205,7 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 ## Observações Importantes
 - O token criado no serviço de Login é utilizado em todos demais serviços, o qual tem seu tempo de expiração de 10 (dez) horas atualmente. Caso ocorra problemas com expiração, verfique o response da requisição de login;
 - Foi recomendado a utilização de uma carga estática das localizações (cidades), mas foi observado que os IATAs dos aeroportos são poucos, sendo necessário realizar a consulta por nome da cidade, mas o Infotravel não retorna atualmente o nome da cidade (nmLocal) e sim o código, onde será necessário mapear os código do Miketec no banco de dados ou o Infotravel devolver o parâmetro nmLocal.
+- Foi informado que não é necessário realizar a chamada o método Confirm, pois o fornecedor (MikeTec - Evandro) alega que ao realizar a reserva o insumo é automaticamente *Confirmado*.
 
 ## Suporte Técnico
 O contato para suporte disponível é através de endereço eletrônico [suporte@miketec.com.br](suporte@miketec.com.br), na qual não é apontado prazos para SLA e horários para atendimento.
