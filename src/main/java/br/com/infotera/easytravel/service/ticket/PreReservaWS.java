@@ -135,7 +135,7 @@ public class PreReservaWS {
                                         dsServico = UtilsWS.montaDescritivo(preReservarRQ.getIntegrador(), ticket);
 
                                         // Mídias (Imagens)
-                                        mediaList = UtilsWS.montarMidias(preReservarRQ.getIntegrador(), ticket);
+                                        mediaList = UtilsWS.montarMidias(preReservarRQ.getIntegrador(), ticket.getImages());
                                         
                                         // Retorna datas disponíveis para o Ingresso
 //                                        utilizacaoDatasList = montarListaDatasUtilizacao(preReservarRQ.getIntegrador(), ticket);

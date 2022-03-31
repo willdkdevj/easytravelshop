@@ -205,7 +205,7 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 
 ## Observações Importantes
 - O token criado no serviço de Login é utilizado em todos as demais serviços, o qual tem seu tempo de expiração de 10 (dez) horas atualmente. Caso ocorra problemas com expiração, verfique o *response* da requisição de **Login**;
-- Será mapeadas os códigos das localidades registradas pela ETS a fim de atrela-las com as do Infotravel, onde periodicamente o time de Integração terá que validar e atualizar esta base a fim de mante-la pareada, desta forma, evitando problemas de não localização de atividades do fornecedor;
+- Serão mapeados os códigos referente as localidades registradas pela ETS a fim de atrela-los aos códigos presentes na base do Infotravel, onde periodicamente o time de Integração terá que validar e atualizar esta base a fim de mante-la pareada, desta forma, evitando problemas de não localização de atividades do fornecedor;
 - Foi informado que não é necessário realizar a chamada o método **Confirm**, pois o fornecedor (MikeTec - Evandro Kulm) alega que ao realizar a reserva o insumo é automaticamente *Confirmado*;
 - A API constituem de três serviços que possuem ***objetos distintos*** (*WSDisponibilidadeIngressoRQ, WSDisponibilidadeServicoRQ, WSDisponibilidadeTransferRQ*) para tratar a disponibilidade das atividades, desta forma, são segmentados os serviços a fim de melhor organização e facilidade de manutenção. Para isso, foram criado métodos auxiliares a fim de serem invocados pelos diferentes serviços, pois a **Disponibilidade** (*Search*) do fornecedor pode devolver os três serviços em uma mesma response. Mas este response apresenta objetos similares mas com parâmetros e valores diferentes sendo necessário realizar tratativas em cada caso. A seguir segue a relação dos métodos [public] [static] utilizados na classe ***UtilsWS***:
 	- MontarSearch - Realiza a passagem de parâmetros especificos para a chamada individualizada do serviço;
@@ -226,7 +226,7 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 - O parâmetro utilizado (DsParametro) são passado valores a fim de serem utilizados no processo do **TarifarWS** (*Reativar - Orçamento*), desta forma, para uso interno (API) é utilizado a função da classe String (**SPLIT** - split()) passando como parâmetro o valor [#] para "quebrar" o texto e utiliza-los em diferentes etapas, a seguir segue suas funcionalidades:
 	- *Dados da Modalidade* - Informação do Código (COD) da Modalida e Valor do Total da diária (vlNeto), separado pelo caracter [~], onde no Infotravel **será refatorado**; 
 	- *ActivityID* - Identificação da atividade (ingresso, passeio, transfer) a ser utilizado na requisição de pesquisa (*Search*);
-	- *ServiceRateID* - TAG única de identificação da atividade a ser utilizada na requisição de reserva (*DoBooking*);
+	- *ServiceRateID* - TAG única de identificação da atividade retornada em ***DatesRate*** a ser utilizada na requisição de reserva (*DoBooking*);
 	- *Data Inicio* - Data de início da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
 	- *Data Fim* - Data de termino da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
 	- *SearchID* - TAG única gerada a partir da pesquisa a fim de ser passada como parâmetro na requisição de reserva (*DoBooking*);
