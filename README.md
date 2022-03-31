@@ -1,5 +1,6 @@
 # EasyTravelShop API 
 > API consiste em uma ponte ao fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer.
+**Para navegar até as informações mais importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes)
 
 [![Spring Badge](https://img.shields.io/badge/-Spring-brightgreen?style=flat-square&logo=Spring&logoColor=white&link=https://spring.io/)](https://spring.io/)
 [![Maven Badge](https://img.shields.io/badge/-Maven-000?style=flat-square&logo=Apache-Maven&logoColor=white&link=https://maven.apache.org/)](https://maven.apache.org/)
@@ -222,13 +223,13 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 	- MontarReservaNomeList - Constroí a lista de Passageiros (List<WSReservaNome>) a fim de obter as informações do pax retornada pelo fornecedor;
 	- MontarServicoListTransfer - Constroí um tipo especifico de objeto para o serviço Transfer a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
 	- MontarServicoInfoList - Constroí um tipo de lista especifica de objetos para os serviços (Ingresso e Passeio) a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
-- O parâmetro utilizado (DsParametro) são passado valores a fim de serem utilizados no processo do **TarifarWS** (*Reativar - Orçamento*) as seguintes informações:
-	- DadosModalidade - Informação do Código (COD) da Modalida e Valor do Total da diária (vlNeto) separado pelo caracter [~], onde no Infotravel será refatorado; 
-	- ActivityID - Identificação da atividade (ingresso, passeio, transfer) a ser utilizado na requisição de pesquisa (*Search*);
-	- ServiceRateID - TAG única de identificação da atividade a ser utilizada na requisição de reserva (*DoBooking*);
-	- Data Inicio - Data de início da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
-	- Data Fim - Data de termino da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
-	- SearchID - TAG única gerada a partir da pesquisa a fim de ser passada como parâmetro na requisição de reserva (*DoBooking*);
+- O parâmetro utilizado (DsParametro) são passado valores a fim de serem utilizados no processo do **TarifarWS** (*Reativar - Orçamento*), desta forma, para uso interno (API) é utilizado a função da classe String (**SPLIT** - split()) passando como parâmetro o valor [#] para "quebrar" o texto e utiliza-los em diferentes etapas, a seguir segue suas funcionalidades:
+	- *Dados da Modalidade* - Informação do Código (COD) da Modalida e Valor do Total da diária (vlNeto), separado pelo caracter [~], onde no Infotravel **será refatorado**; 
+	- *ActivityID* - Identificação da atividade (ingresso, passeio, transfer) a ser utilizado na requisição de pesquisa (*Search*);
+	- *ServiceRateID* - TAG única de identificação da atividade a ser utilizada na requisição de reserva (*DoBooking*);
+	- *Data Inicio* - Data de início da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
+	- *Data Fim* - Data de termino da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
+	- *SearchID* - TAG única gerada a partir da pesquisa a fim de ser passada como parâmetro na requisição de reserva (*DoBooking*);
 
 ## Suporte Técnico
 O contato para suporte disponível é através de endereço eletrônico [suporte@miketec.com.br](suporte@miketec.com.br), na qual não é apontado prazos para SLA e horários para atendimento.
