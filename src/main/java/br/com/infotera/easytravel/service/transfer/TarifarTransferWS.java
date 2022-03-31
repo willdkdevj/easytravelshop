@@ -10,20 +10,15 @@ import br.com.infotera.common.WSReservaNome;
 import br.com.infotera.common.WSReservaServico;
 import br.com.infotera.common.WSTarifa;
 import br.com.infotera.common.enumerator.WSIntegracaoStatusEnum;
-import br.com.infotera.common.enumerator.WSMediaCategoriaEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
 import br.com.infotera.common.enumerator.WSServicoTipoEnum;
-import br.com.infotera.common.enumerator.WSTransferInOutEnum;
-import br.com.infotera.common.enumerator.WSVeiculoTransferTipoEnum;
 import br.com.infotera.common.media.WSMedia;
-import br.com.infotera.common.politica.WSPolitica;
 import br.com.infotera.common.servico.*;
 import br.com.infotera.common.servico.rqrs.WSTarifarServicoRQ;
 import br.com.infotera.common.servico.rqrs.WSTarifarServicoRS;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
 import br.com.infotera.easytravel.model.*;
-import br.com.infotera.easytravel.model.ENUM.TipoTransferEnum;
 import br.com.infotera.easytravel.model.RQRS.SearchRQ;
 import br.com.infotera.easytravel.model.RQRS.SearchRS;
 import br.com.infotera.easytravel.service.SessaoWS;
@@ -31,7 +26,6 @@ import br.com.infotera.easytravel.util.UtilsWS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -114,7 +108,7 @@ public class TarifarTransferWS {
                     } 
                     
                     // Foto do veiculo
-                    List<WSMedia> mediaList = UtilsWS.montarMidias(tarifarServicoRQ.getIntegrador(), transfer);
+                    List<WSMedia> mediaList = UtilsWS.montarMidias(tarifarServicoRQ.getIntegrador(), transfer.getImages());
 
                     // tarifa
                     WSTarifa tarifa = UtilsWS.retornarTarifa(tarifarServicoRQ.getIntegrador(), transfer.getDatesRate().get(0), reservaNomeList);//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());

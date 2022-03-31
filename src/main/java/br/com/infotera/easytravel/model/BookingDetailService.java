@@ -12,17 +12,19 @@ import java.util.Date;
  */
 public class BookingDetailService extends Integration {
     
-    public Integer bookingId;
-    public String name;
-    public String observation;
-    public String description;
-    public String locationPickup;
-    public String locationDropoff;
-    public String flightNumberArrival;
-    public String flightHourArrival;
-    public String activityType;
-    public String activityTypeName;
-    public Integer maxNumberBaggage;
+    private Integer bookingId;
+    private String name;
+    private String observation;
+    private String description;
+    private String locationPickup;
+    private String locationDropoff;
+    private String flightNumberArrival;
+    private String flightHourArrival;
+    private String activityType;
+    private String activityTypeName;
+    private Integer maxNumberBaggage;
+    private Boolean transferIn;
+    private Boolean transferOut;
 
     public BookingDetailService() {
     }
@@ -115,6 +117,19 @@ public class BookingDetailService extends Integration {
         this.maxNumberBaggage = maxNumberBaggage;
     }
 
-    
-    
+    public Boolean isTransferIn() {
+        return transferIn;
+    }
+
+    public void setTransferIn(Boolean transferIn) {
+        this.transferIn = transferIn;
+    }
+
+    public Boolean isTransferOut() {
+        return transferOut;
+    }
+
+    public void setTransferOut(Boolean transferOut) {
+        this.transferOut = transferOut;
+    }
 }

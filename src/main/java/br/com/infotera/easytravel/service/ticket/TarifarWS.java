@@ -35,10 +35,10 @@ public class TarifarWS {
     public WSTarifarServicoRS tarifar(WSTarifarServicoRQ tarifarServicoRQ) throws ErrorException {
         try { 
             WSServico servico = tarifarServicoRQ.getReservaServico().getServico();
-            String[] dsParamTarifarSplit = servico.getDsParametro().split("\\|#\\|");
+            String[] dsParamTarifarSplit = servico.getDsParametro().split("#");
 
-            Date dtInicio = Utils.toDate(dsParamTarifarSplit[2], "yyyy-MM-dd");
-            Date dtFim = Utils.toDate(dsParamTarifarSplit[3], "yyyy-MM-dd");
+            Date dtInicio = Utils.toDate(dsParamTarifarSplit[3], "yyyy-MM-dd");
+            Date dtFim = Utils.toDate(dsParamTarifarSplit[4], "yyyy-MM-dd");
 
             WSIngresso ingresso = null;
             WSDetalheIngressoRQ disDetalhesIngressoRQ = null;
@@ -69,7 +69,7 @@ public class TarifarWS {
                 WSDetalheIngresso detalheIngressoPesquisa = detalheIngressoRetorno.getDetalheIngresso();
 
                 // obtem modalidade do ingresso conforme localização por chave
-                String chave = dsParamTarifarSplit[0];
+                String chave = dsParamTarifarSplit[1];
                 WSIngressoModalidade modalidade = detalheIngressoPesquisa.getIngressoModalidadeList().stream()
                         .filter(modal -> modal.getCdModalidade().equals(chave))
                         .findFirst()

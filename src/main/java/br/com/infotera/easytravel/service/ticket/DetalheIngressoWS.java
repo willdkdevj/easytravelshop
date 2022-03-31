@@ -92,7 +92,7 @@ public class DetalheIngressoWS {
                                 dsTicket = ticket.getDescription();
                                 
                                 // Monta lista de IngressoUtilizacaoData
-                                List<WSIngressoUtilizacaoData> utilizacaoDatasList = montaDataUtilizacaoList(disDetalhesIngressoRQ.getIntegrador(), reservaNomeList, ticket.getModalities().get(0).getDatesRate());
+                                List<WSIngressoUtilizacaoData> utilizacaoDatasList = montaDataUtilizacaoList(disDetalhesIngressoRQ.getIntegrador(), reservaNomeList, ticket.getModalities().get(0).getDatesRate(), activityId, search.getSearchId());
                                 
                                 // Obter vlNeto a partir da lista de Datas de Utilização
                                 Double vlTarifa = utilizacaoDatasList.stream()
@@ -101,12 +101,9 @@ public class DetalheIngressoWS {
                                         .sum();
 
                                 //monta politica por diaria (ticket)
-                                String moeda = null;
                                 WSTarifa tarifa = null;
                                 for(DatesRateSearch rate : ticket.getModalities().get(0).getDatesRate()){
-                                    moeda = rate.getPrice() != null ? rate.getPrice().getCurrency().getIso() : rate.getPassengersRate().get(0).getPrice().getCurrency().getIso();
                                     tarifa = UtilsWS.retornarTarifa(disDetalhesIngressoRQ.getIntegrador(), rate, reservaNomeList);
-
                                 }
                                 
                                 // Lista a disponibilidade de datas e valor
@@ -136,7 +133,7 @@ public class DetalheIngressoWS {
         return new WSDetalheIngresso(WSServicoTipoEnum.INGRESSO, ingresso, ingressoModalidadeList);
     }
     
-    private List<WSIngressoUtilizacaoData> montaDataUtilizacaoList(WSIntegrador integrador, List<WSReservaNome> reservaNomeList, List<DatesRateSearch> datesrate) throws ErrorException{
+    private List<WSIngressoUtilizacaoData> montaDataUtilizacaoList(WSIntegrador integrador, List<WSReservaNome> reservaNomeList, List<DatesRateSearch> datesrate, String activityId, String searchId) throws ErrorException{
         List<WSIngressoUtilizacaoData> utilizacaoDatasList = new ArrayList();
         List<Double> vlPessoaNetoList = null;
         
@@ -168,7 +165,7 @@ public class DetalheIngressoWS {
                     // Soma o valor da diaria de todos os Pax
                     Double vlTotalDiaria = vlPessoaNetoList.stream().filter(valor -> valor > 0.0).mapToDouble(valor -> valor).sum();
                     
-                    ingressoUtilizacaoData.setDsTarifa(null + "~" + vlTotalDiaria + "#" + rate.getServiceId() + "#" + null + "#" + dtServicoInicio.toString() + "#" + dtServicoFim.toString());
+                    ingressoUtilizacaoData.setDsTarifa(null + "~" + vlTotalDiaria + "#" + activityId + "#" + rate.getServiceId() + "#" + Utils.formatData(dtServicoInicio, "yyyy-MM-dd") + "#" + Utils.formatData(dtServicoFim, "yyyy-MM-dd") + "#" + searchId);
                     ingressoUtilizacaoData.setVlTotal(vlTotalDiaria);
                     utilizacaoDatasList.add(ingressoUtilizacaoData);
                     

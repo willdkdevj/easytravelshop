@@ -15,11 +15,8 @@ import br.com.infotera.common.servico.rqrs.WSDisponibilidadeIngressoRQ;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeIngressoRS;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
-import br.com.infotera.easytravel.model.Activity;
 import br.com.infotera.easytravel.model.ActivitySearch;
-import br.com.infotera.easytravel.model.DatesRateGet;
 import br.com.infotera.easytravel.model.DatesRateSearch;
-import br.com.infotera.easytravel.model.Insumo;
 import br.com.infotera.easytravel.model.Ticket;
 import br.com.infotera.easytravel.model.RQRS.SearchRQ;
 import br.com.infotera.easytravel.model.RQRS.SearchRS;
@@ -30,8 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -102,7 +97,7 @@ public class DisponibilidadeWS {
                                 dsServico = utilsWS.montaDescritivo(dispRQ.getIntegrador(), ticket);
 
                                 // Mídias (Imagens)
-                                mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), ticket);
+                                mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), ticket.getImages());
 
                                 // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
                                 String dsParamTarifar = UtilsWS.montarParametro(dispRQ.getIntegrador(), ticket, dispRQ.getDtInicio(), dispRQ.getDtFim(), search.getSearchId());

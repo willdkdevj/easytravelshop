@@ -91,7 +91,7 @@ public class DisponibilidadePasseioWS {
 //                                                    ticket.getName(),
 //                                                    UtilsWS.retornarTarifa(dispRQ.getIntegrador(), ticket, dispRQ.getReservaNomeList()))); //utilsWS.montaIngressoModalidade(dispRQ.getIntegrador(), dispRQ.getReservaNomeList(), ticket);
                         // Mídias (Imagens)
-                        mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), tour);
+                        mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), tour.getImages());
 
                         // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
                         String dsParamTarifar = dispRQ.getDestino().getNmLocal() + "|#|" + Utils.formatData(dispRQ.getDtPartida(), "yyyy-MM-dd") + "|#|" + Utils.formatData(dispRQ.getDtRetorno(), "yyyy-MM-dd");

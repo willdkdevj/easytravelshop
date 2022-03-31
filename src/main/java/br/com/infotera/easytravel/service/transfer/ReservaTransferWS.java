@@ -3,18 +3,20 @@ package br.com.infotera.easytravel.service.transfer;
 import br.com.infotera.common.*;
 import br.com.infotera.common.enumerator.WSIntegracaoStatusEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
-import br.com.infotera.common.enumerator.WSTransferInOutEnum;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservarRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservarRS;
-import br.com.infotera.common.servico.WSPacoteServico;
+import br.com.infotera.common.servico.WSIngresso;
 import br.com.infotera.common.servico.WSServico;
-import br.com.infotera.common.servico.WSTransfer;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
 import br.com.infotera.easytravel.model.*;
+import br.com.infotera.easytravel.model.ENUM.TipoDocumentoEnum;
+import br.com.infotera.easytravel.model.RQRS.BookingRQ;
+import br.com.infotera.easytravel.model.RQRS.BookingRS;
+import br.com.infotera.easytravel.service.SessaoWS;
 import br.com.infotera.easytravel.service.ticket.ReservaWS;
-import com.google.gson.Gson;
+import br.com.infotera.easytravel.util.UtilsWS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,188 +30,123 @@ import java.util.List;
 @Service
 public class ReservaTransferWS {
 
-//    @Autowired
-//    private EasyTravelShopClient easyTravelShopClient;
+    @Autowired
+    private EasyTravelShopClient easyTravelShopClient;
+
+    @Autowired
+    private ConsultaTransferWS consultaWS;
+    
+    @Autowired
+    private SessaoWS sessaoWS;
+    
+    public WSReservarRS reservar(WSReservarRQ reservarRQ) throws ErrorException {
+        // Verifica Sessão iniciada com Fornecedor
+        if(reservarRQ.getIntegrador().getSessao() == null) {
+            reservarRQ.getIntegrador().setSessao(sessaoWS.abreSessao(reservarRQ.getIntegrador()));
+        }
+        
+        BookingRS bookingRetorno = null;
+        WSReservaServico rServico = null;
+        try {
+//        String dsParametro = null;
+            rServico = reservarRQ.getReserva().getReservaServicoList().stream()
+                .filter(reservaServico -> reservaServico.getServico() != null)
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
+        
+            if (rServico.getServico().isStTransfer()) {
+                try {
+//                    WSIngresso ingresso = (WSIngresso) servico;
+//                    dsParametro = ingresso.getDsParametro();
+//                    String[] chaveActivity = dsParametro.split("#");
+
+                    BookingRQ booking = UtilsWS.montarReservar(reservarRQ.getIntegrador(), rServico.getServico()); //new BookingRQ();
+                    // ID referente a pesquisa realizada (Disponibilidade)
+//                    booking.setSearchId(chaveActivity[5]);
+
+                    // ID do Ticket referente ao tipo de ingresso
+//                    Activity action = new Activity();
+//                    action.setServiceId(chaveActivity[2]);
+//                    booking.setActivities(Arrays.asList(action));
 //
-//    @Autowired
-//    private ConsultaTransferWS consultaTransferWS;
-//
-//    @Autowired
-//    private Gson gson;
-//
-//    public WSReservarRS reservar(WSReservarRQ reservarRQ) throws ErrorException {
-//
-//        BookingRQ bookingRQ = montaRequest(reservarRQ);
-//        BookingRS bookingRS = easyTravelShopClient.bookingRQ(reservarRQ.getIntegrador(), bookingRQ);
-//
-//        WSReservarRS reservarRS = montaResponse(reservarRQ.getIntegrador(), bookingRS, reservarRQ.getReserva());
-//
-//        return reservarRS;
-//    }
-//
-//    private BookingRQ montaRequest(WSReservarRQ reservarRQ) throws ErrorException {
-//
-//        WSReservaNome rn = null;
-//        if (reservarRQ.getReserva().getReservaServicoList().get(0).getServico() instanceof WSPacoteServico) {
-//            WSPacoteServico pacoteServico = (WSPacoteServico) reservarRQ.getReserva().getReservaServicoList().get(0).getServico();
-//            rn = pacoteServico.getReservaNomeList().get(0);
-//        } else {
-//            throw new ErrorException(reservarRQ.getIntegrador(), ReservaWS.class, "montaRequest", WSMensagemErroEnum.SDI, "Sem informações de reserva nome", WSIntegracaoStatusEnum.NEGADO, null, false);
-//        }
-//
-//        WSContato contato = reservarRQ.getReserva().getContato();
-//
-//        PaxType paxType = null;
-//
-//        Holder holder = null;
-//        if (rn != null) {
-//            if (rn.getPaxTipo().isChd()) {
-//                paxType = PaxType.CHILD;
-//            } else if (rn.getPaxTipo().isInf()) {
-//                paxType = PaxType.INFANT;
-//            } else {
-//                paxType = PaxType.ADULT;
-//            }
-//
-//            holder = new Holder(null,
-//                    rn.getNmNome(),
-//                    rn.getNmSobrenome(),
-//                    contato.getEmail(),
-//                    contato.getTelefone().getNrTelefone(),
-//                    null,
-//                    null);
-//        }
-//        String idReservaNoInfo = reservarRQ.getReserva().getId();
-//        // Arrays.asList(new Transfer(token, new Detail("123", "123")))
-//        List<Transfer> transferList = new ArrayList();
-//
-//        String dsRemark = null;
-//
-//        if (reservarRQ.getReserva().getReservaServicoList().get(0).getServico() instanceof WSPacoteServico) {
-//            WSPacoteServico pacoteServico = (WSPacoteServico) reservarRQ.getReserva().getReservaServicoList().get(0).getServico();
-//
-//            //leitura de parametro da pesquisa
-//            Gson gson = new Gson();
-//            ParDispo parDispo = gson.fromJson(pacoteServico.getDsParametro(), ParDispo.class);
-//
-//            for (WSServico s : pacoteServico.getServicoList()) {
-//                if (s instanceof WSTransfer) {
-//                    WSTransfer transfer = (WSTransfer) s;
-//                    Detail detail = null;
-//                    String token = null;
-//                    //dados de voo info
-//                    if (transfer.getTransferInfo() != null) {
-//                        DirectionTypeEnum directionTypeEnum = null;
-//                        //buscando direcao do detalhe do transporte
-//                        try {//busca pela chave do conector
-//                            //le os parametros da pesquisa
-//
-//                            String dsDirecaoSplit[] = null;
-//                            for (Par p : parDispo.getParDispo()) {
-//                                //compara se o retorno da api é referente ao parametro escolhido
-//                                if (transfer.getTransferInOut().name().equals(p.getTt())) {
-//                                    dsDirecaoSplit = p.getCt().split("\\|");
-//                                    token = p.getCt();
-//                                }
+//                    // Lista todos os pax da reserva
+//                    if(!Utils.isListNothing(servico.getReservaNomeList())){
+//                        List<Passenger> passengers = new ArrayList();
+//                        servico.getReservaNomeList().stream().map(pax -> {
+//                            Passenger passenger = new Passenger();
+//                            passenger.setFirstName(pax.getNmNome());
+//                            passenger.setLastName(pax.getNmSobrenome());
+//                            passenger.setBirthDate(Utils.formatData(pax.getDtNascimento(), "yyyy-MM-dd'T'HH:mm:ss"));
+//                            passenger.setGender(new Person(pax.getSexo().isMasculino() ? "M" : "F"));
+//                            if(pax.getDocumento() != null){
+//                                passenger.setDocument(Arrays.asList(new Document(new DocumentType(TipoDocumentoEnum.valueOf(pax.getDocumento().getDocumentoTipo().getNmTipo()).getId()), 
+//                                                                                              pax.getDocumento().getNrDocumento().replace(".", "").replace("-", "")))); 
 //                            }
-//
-//                            //segue o fluxo com o parametro montado
-//                            String direcaoTransferencia = dsDirecaoSplit[0];
-//                            if (direcaoTransferencia.equals("ARRIVAL")) {
-//                                directionTypeEnum = DirectionTypeEnum.ARRIVAL;
-//                                //armazena as informações de horario para chegada do passageiro
-//                                if (dsRemark != null) {
-//                                    dsRemark += " " + "ARRIVAL: " + Utils.formatData(transfer.getTransferInfo().getDtTransporte(), "yyyy-MM-dd HH:mm:ss");
-//                                } else {
-//                                    dsRemark = "ARRIVAL: " + Utils.formatData(transfer.getTransferInfo().getDtTransporte(), "yyyy-MM-dd HH:mm:ss");
-//                                }
-//                            } else if (direcaoTransferencia.equals("DEPARTURE")) {
-//                                directionTypeEnum = DirectionTypeEnum.DEPARTURE;
-//                                if (dsRemark != null) {
-//                                    dsRemark += " " + "DEPARTURE: " + Utils.formatData(transfer.getTransferInfo().getDtTransporte(), "yyyy-MM-dd HH:mm:ss");
-//                                } else {
-//                                    dsRemark = "DEPARTURE: " + Utils.formatData(transfer.getTransferInfo().getDtTransporte(), "yyyy-MM-dd HH:mm:ss");
-//                                }
-//                            } else {
-//                                if (transfer.getTransferInOut().equals(WSTransferInOutEnum.IN)) {
-//                                    if (pacoteServico.getServicoList().size() == 1) { //se for transfer trecho sempre a direcao é arrival
-//                                        directionTypeEnum = DirectionTypeEnum.ARRIVAL;
-//                                    } else {
-//                                        directionTypeEnum = DirectionTypeEnum.DEPARTURE;
-//                                    }
-//                                } else {
-//                                    directionTypeEnum = DirectionTypeEnum.ARRIVAL;
-//                                }
-//                            }
-//                        } catch (Exception ex) {
-//                            if (transfer.getTransferInOut().equals(WSTransferInOutEnum.IN)) {
-//                                if (pacoteServico.getServicoList().size() == 1) { //se for transfer trecho sempre a direcao é arrival
-//                                    directionTypeEnum = DirectionTypeEnum.ARRIVAL;
-//                                } else {
-//                                    directionTypeEnum = DirectionTypeEnum.DEPARTURE;
-//                                }
-//                            } else {
-//                                directionTypeEnum = DirectionTypeEnum.ARRIVAL;
-//                            }
-//                        }
-//                        TransferDetailTypeEnum tranfDetailTypeEnum;
-//                        if (transfer.getTransferTipo().isPORTO_AEROPORTO() || transfer.getTransferTipo().isPORTO_ESTACAO() || transfer.getTransferTipo().isPORTO_HOTEL() || transfer.getTransferTipo().isPORTO_PORTO() || transfer.getTransferTipo().isHOTEL_PORTO()) {
-//                            tranfDetailTypeEnum = TransferDetailTypeEnum.CRUISE;
-//                        } else if (transfer.getTransferTipo().isESTACAO_AEROPORTO() || transfer.getTransferTipo().isESTACAO_ESTACAO() || transfer.getTransferTipo().isESTACAO_HOTEL() || transfer.getTransferTipo().isESTACAO_PORTO() || transfer.getTransferTipo().isHOTEL_ESTACAO()) {
-//                            tranfDetailTypeEnum = TransferDetailTypeEnum.TRAIN;
-//                        } else {
-//                            tranfDetailTypeEnum = TransferDetailTypeEnum.FLIGHT;
-//                        }
-//
-//                        //se for hotel by hotel passa null para o conector
-//                        if (transfer.getTransferTipo().isHOTEL_HOTEL()) {
-//                            detail = null;
-//                        } else {
-//                            detail = new Detail(tranfDetailTypeEnum, directionTypeEnum, transfer.getTransferInfo().getNrTransporte(), transfer.getTransferInfo().getNmTransporte());
-//                        }
-//                    } else {
-//                        throw new ErrorException(reservarRQ.getIntegrador(), ReservaTransferWS.class, "montaRequest", WSMensagemErroEnum.SDI, "Informações de transfer info invalidas", WSIntegracaoStatusEnum.NEGADO, null, false);
+//                            passenger.setMainPassenger(pax.isStPrincipal());
+//                            
+//                            return passenger;
+//                            
+//                        }).forEachOrdered(passenger -> {
+//                            passengers.add(passenger);
+//                        });
+//                        booking.setPassengers(passengers);
 //                    }
-//
-//                    if (detail != null) {
-//                        transferList.add(new Transfer(token, Arrays.asList(detail)));
-//                    } else {
-//                        transferList.add(new Transfer(token, null));
-//                    }
-//                } else {
-//                    throw new ErrorException(reservarRQ.getIntegrador(), ReservaTransferWS.class, "montaRequest", WSMensagemErroEnum.SDI, "Erro ao ler WSTransfer", WSIntegracaoStatusEnum.NEGADO, null, false);
-//                }
+//                  
+//                    // ID da sessão
+//                    booking.setTokenId(reservarRQ.getIntegrador().getSessao().getCdChave());
+
+                    bookingRetorno = easyTravelShopClient.reservarAtividade(reservarRQ.getIntegrador(), booking);
+                    
+                    // verifica o retorno do fornecedor
+                    UtilsWS.verificarRetorno(reservarRQ.getIntegrador(), bookingRetorno);
+                    
+                } catch(Exception ex){
+                    throw new ErrorException(reservarRQ.getIntegrador(), ReservaWS.class, "reservar", WSMensagemErroEnum.SRE, 
+                            "Erro ao criar requisição para o envio da Reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                }
+            } else {
+                throw new ErrorException(reservarRQ.getIntegrador(), ReservaWS.class, "reservar", WSMensagemErroEnum.SRE, 
+                        "Erro ao ler os dados da Reserva (ReservaServiço)", WSIntegracaoStatusEnum.NEGADO, null, false);
+            }
+            
+//            try {
+//                // Busca do código da Reserva (Fornecedor) e do código para pagamento faturado
+//                File fileId = new File();
+//                fileId.setId(bookingRetorno.getFile().getId());
+//                fileId.setPayments(Arrays.asList(new PaymentPlan(new PaymentMethod(TipoPagamentoEnum.FATURADO.getId())))); // envio cod p/ pagamento faturado
+//                
+//                ConfirmRQ confirm = new ConfirmRQ();
+//                confirm.setFile(fileId);
+//                confirm.setTokenId(reservarRQ.getIntegrador().getSessao().getCdChave());
+//                
+//                confirmRetorno = easyTravelShopClient.confirmarAtividade(reservarRQ.getIntegrador(), confirm);
+//                UtilsWS.verificarRetorno(reservarRQ.getIntegrador(), confirmRetorno);
+//                
+//            } catch(Exception ex){
+//                throw new ErrorException(reservarRQ.getIntegrador(), ReservaWS.class, "reservar", WSMensagemErroEnum.SRE, 
+//                        "Erro ao criar requisição para o envio da Confirmação da Reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
 //            }
-//        } else {
-//            throw new ErrorException(reservarRQ.getIntegrador(), ReservaTransferWS.class, "montaRequest", WSMensagemErroEnum.SDI, "Erro ao ler PacoteDeServico", WSIntegracaoStatusEnum.NEGADO, null, false);
-//        }
-//
-//        BookingRQ bookingRQ = new BookingRQ("pt",
-//                holder,
-//                transferList,
-//                idReservaNoInfo,
-//                dsRemark,
-//                "Testando a reserva");
-//
-//        return bookingRQ;
-//    }
-//
-//
-//    private WSReservarRS montaResponse(WSIntegrador integrador, BookingRS bookingRS, WSReserva reservaRQ) throws ErrorException {
-//        WSReserva reserva = null;
-//        if (bookingRS != null && bookingRS.getBookings() != null && !bookingRS.getBookings().isEmpty()) {
-//            if (bookingRS.getBookings().get(0).getReference() != null) {
-//                String cdLocalizador = bookingRS.getBookings().get(0).getReference();
-//                integrador.setCdLocalizador(cdLocalizador);
-//                reservaRQ.getReservaServicoList().get(0).setNrLocalizador(cdLocalizador);
-//                reserva = consultaTransferWS.consultar(new WSReservaRQ(integrador, reservaRQ), false);
-//            } else {
-//                throw new ErrorException(integrador, ReservaWS.class, "montaResponse", WSMensagemErroEnum.SDI, "Erro ao ler nrLocalizador", WSIntegracaoStatusEnum.NEGADO, null, false);
-//            }
-//        } else {
-//            throw new ErrorException(integrador, ReservaWS.class, "montaResponse", WSMensagemErroEnum.SDI, "Erro ao ler reserva", WSIntegracaoStatusEnum.NEGADO, null, false);
-//        }
-//        return new WSReservarRS(reserva, integrador, WSIntegracaoStatusEnum.OK);
-//    }
+            
+        } catch(ErrorException error) {
+            throw error;
+        } catch(Exception ex){
+            throw new ErrorException(reservarRQ.getIntegrador(), ReservaWS.class, "reservar", WSMensagemErroEnum.SRE, 
+                    "Erro ao criar requisição para o envio da Reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        
+        // Inserindo o ID da reserva (Fornecedor) no Integrador e na ReservaServico
+        reservarRQ.getIntegrador().setCdLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
+        
+        WSReservaServico wsReservaServico = new WSReservaServico(String.valueOf(bookingRetorno.getFile().getId()));
+        wsReservaServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
+        
+        WSReservaRQ reservaRQ = new WSReservaRQ(reservarRQ.getIntegrador(), 
+                                                new WSReserva(wsReservaServico));
+
+        //realizando consultar pós confirmação
+        WSReserva reserva = consultaWS.realizarConsulta(reservaRQ, false);
+        
+        return  new WSReservarRS(reserva, reservarRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
+    }
 }
 

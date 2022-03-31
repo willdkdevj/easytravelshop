@@ -10,20 +10,15 @@ import br.com.infotera.common.WSIntegrador;
 import br.com.infotera.common.WSTarifa;
 import br.com.infotera.common.enumerator.*;
 import br.com.infotera.common.media.WSMedia;
-import br.com.infotera.common.politica.WSPolitica;
 import br.com.infotera.common.servico.*;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeTransferRQ;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeTransferRS;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
 import br.com.infotera.easytravel.model.ActivitySearch;
-import br.com.infotera.easytravel.model.ENUM.TipoTransferEnum;
 import br.com.infotera.easytravel.model.RQRS.SearchRQ;
 import br.com.infotera.easytravel.model.RQRS.SearchRS;
 import br.com.infotera.easytravel.model.Transfer;
-import br.com.infotera.easytravel.model.DatesRateGet;
-import br.com.infotera.easytravel.model.Inclusion;
-import br.com.infotera.easytravel.model.TransferType;
 import br.com.infotera.easytravel.service.EstaticoWS;
 import br.com.infotera.easytravel.service.SessaoWS;
 import br.com.infotera.easytravel.service.ticket.DisponibilidadeWS;
@@ -31,6 +26,7 @@ import br.com.infotera.easytravel.util.UtilsWS;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author William Dias
@@ -64,7 +60,7 @@ public class DisponibilidadeTransferWS {
         SearchRS search = easyTravelShopClient.buscarAtividades(disponibilidadeTransferRQ.getIntegrador(), searchRQ);
         
         // Validar regras de idade passageiros (Pax)
-//        UtilsWS.validarResponse(disponibilidadeTransferRQ, search);
+        UtilsWS.validarResponse(disponibilidadeTransferRQ, search);
         
         // Monta o retorno obtido pelo fornecedor 
         List<WSTransferPesquisa> transferPesquisaList = montarPesquisa(disponibilidadeTransferRQ, search);
@@ -75,7 +71,19 @@ public class DisponibilidadeTransferWS {
     private List<WSTransferPesquisa> montarPesquisa(WSDisponibilidadeTransferRQ dispoRQ, SearchRS search) throws ErrorException {
         // Verificar trecho ida e volta (Tratar tipo de trajeto)
         Boolean isTransferTrecho = dispoRQ.getTransferList().size() == 1;
-        List<Transfer> transfersList = verificarTransfers(dispoRQ.getIntegrador(), search, isTransferTrecho);
+
+        // Monta a lista de transfer até resolver a questão do filtro na disponibilidade
+//        List<Transfer> transfersList = verificarTransfers(dispoRQ.getIntegrador(), search, isTransferTrecho);
+        List<Transfer> transfersList = new ArrayList();
+        search.getActivities().stream().map(activity -> {
+            Transfer transfer = activity.getTransfers().stream()
+                                .filter(transferActivity -> transferActivity != null)
+                                .findFirst()
+                                .orElseThrow(RuntimeException::new);
+            return transfer;
+        }).forEachOrdered(transfer -> {
+            transfersList.add(transfer);
+        });
         
         List<WSTransferPesquisa> transferPesquisaList = new ArrayList();
         try {
@@ -102,7 +110,7 @@ public class DisponibilidadeTransferWS {
                 }
                 
                 // Foto do veiculo
-                List<WSMedia> mediaList = UtilsWS.montarMidias(dispoRQ.getIntegrador(), transfer);
+                List<WSMedia> mediaList = UtilsWS.montarMidias(dispoRQ.getIntegrador(), transfer.getImages());
             
                 // tarifa
                 WSTarifa tarifa = UtilsWS.retornarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate().get(0), dispoRQ.getReservaNomeList());//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
@@ -198,11 +206,5 @@ public class DisponibilidadeTransferWS {
         
         return transferList;
     }
-    
-    
-    /*
-     *
-     */
-    
     
 }

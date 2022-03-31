@@ -51,51 +51,20 @@ public class ReservaWS {
             reservarRQ.getIntegrador().setSessao(sessaoWS.abreSessao(reservarRQ.getIntegrador()));
         }
         
-        String dsParametro = null;
         BookingRS bookingRetorno = null;
-        WSServico servico = reservarRQ.getReserva().getReservaServicoList().get(0).getServico();
+        WSReservaServico rServico = null;
         try {
-            if (servico.getIsStIngresso()) {
+            // Verificar a existência de serviço (Ingresso)
+            rServico = reservarRQ.getReserva().getReservaServicoList().stream()
+                    .filter(reservaServico -> reservaServico.getServico() != null)
+                    .findFirst()
+                    .orElseThrow(RuntimeException::new);
+        
+            if (rServico.getServico().getIsStIngresso()) {
                 try {
-                    WSIngresso ingresso = (WSIngresso) servico;
-                    dsParametro = ingresso.getDsParametro();
-                    String[] chaveActivity = dsParametro.split("\\|#\\|");
-
-                    BookingRQ booking = new BookingRQ();
-                    // ID referente a pesquisa realizada (Disponibilidade)
-                    booking.setSearchId(chaveActivity[4]);
-
-                    // ID do Ticket referente ao tipo de ingresso
-                    Activity action = new Activity();
-                    action.setServiceId(chaveActivity[1]);
-                    booking.setActivities(Arrays.asList(action));
-
-                    // Lista todos os pax da reserva
-                    if(!Utils.isListNothing(servico.getReservaNomeList())){
-                        List<Passenger> passengers = new ArrayList();
-                        servico.getReservaNomeList().stream().map(pax -> {
-                            Passenger passenger = new Passenger();
-                            passenger.setFirstName(pax.getNmNome());
-                            passenger.setLastName(pax.getNmSobrenome());
-                            passenger.setBirthDate(Utils.formatData(pax.getDtNascimento(), "yyyy-MM-dd'T'HH:mm:ss"));
-                            passenger.setGender(new Person(pax.getSexo().isMasculino() ? "M" : "F"));
-                            if(pax.getDocumento() != null){
-                                passenger.setDocument(Arrays.asList(new Document(new DocumentType(TipoDocumentoEnum.valueOf(pax.getDocumento().getDocumentoTipo().getNmTipo()).getId()), 
-                                                                                              pax.getDocumento().getNrDocumento().replace(".", "").replace("-", "")))); 
-                            }
-                            passenger.setMainPassenger(pax.isStPrincipal());
-                            
-                            return passenger;
-                            
-                        }).forEachOrdered(passenger -> {
-                            passengers.add(passenger);
-                        });
-                        booking.setPassengers(passengers);
-                    }
-                  
-                    // ID da sessão
-                    booking.setTokenId(reservarRQ.getIntegrador().getSessao().getCdChave());
-
+                    // Montar RQ para Ingresso (Ticket)
+                    BookingRQ booking = UtilsWS.montarReservar(reservarRQ.getIntegrador(), rServico.getServico());
+                    // Realiza chamada ao Fornecedor
                     bookingRetorno = easyTravelShopClient.reservarAtividade(reservarRQ.getIntegrador(), booking);
                     
                     // verifica o retorno do fornecedor
@@ -139,7 +108,7 @@ public class ReservaWS {
         reservarRQ.getIntegrador().setCdLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
         
         WSReservaServico wsReservaServico = new WSReservaServico(String.valueOf(bookingRetorno.getFile().getId()));
-        wsReservaServico.setDsParametro(dsParametro); // passagem do parâmetro para chamadas posteriores
+        wsReservaServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
         
         WSReservaRQ reservaRQ = new WSReservaRQ(reservarRQ.getIntegrador(), 
                                                 new WSReserva(wsReservaServico));

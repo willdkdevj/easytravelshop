@@ -14,7 +14,6 @@ import br.com.infotera.easytravel.model.RQRS.CancelRQ;
 import br.com.infotera.easytravel.model.RQRS.CancelRS;
 import br.com.infotera.easytravel.service.SessaoWS;
 import br.com.infotera.easytravel.service.ticket.CancelarWS;
-import br.com.infotera.easytravel.service.ticket.ConsultaWS;
 import br.com.infotera.easytravel.service.ticket.PreCancelarWS;
 import br.com.infotera.easytravel.util.UtilsWS;
 import java.util.logging.Level;
@@ -64,15 +63,15 @@ public class PreCancelarTransferWS {
                 
                 // caso não esteja cancelara realiza a chamada ao fornecedor para realiza-la
                 if (!rsConsulta.getReservaStatus().equals(WSReservaStatusEnum.CANCELADO)) {
-                    CancelRS cancelReturn = null; 
 
-                    CancelRQ cancel = new CancelRQ();
-                    cancel.setFileId(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador()));
-                    cancel.setCancellationReasonId(TipoCancelamentoEnum.OUTROS.getId());
-                    cancel.setCancellationObservation("RESERVA CANCELADA VIA INTEGRAÇÃO COM API (INFOTERA)");
-                    cancel.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
+                    CancelRQ cancel = UtilsWS.montarCancelar(reservaRQ.getIntegrador(), servico.getNrLocalizador());
+//                            new CancelRQ();
+//                    cancel.setFileId(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador()));
+//                    cancel.setCancellationReasonId(TipoCancelamentoEnum.OUTROS.getId());
+//                    cancel.setCancellationObservation("RESERVA CANCELADA VIA INTEGRAÇÃO COM API (INFOTERA)");
+//                    cancel.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
 
-                    cancelReturn = easyTravelShopClient.cancelarAtividade(reservaRQ.getIntegrador(), cancel);
+                    CancelRS cancelReturn = easyTravelShopClient.cancelarAtividade(reservaRQ.getIntegrador(), cancel);
 
                     // Se retorno for falso será lançada uma excessão com o detalhe do erro reportado pelo fornecedor
                     UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), cancelReturn);

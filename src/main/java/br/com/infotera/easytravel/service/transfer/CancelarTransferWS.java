@@ -64,11 +64,12 @@ public class CancelarTransferWS {
                 if (!rsConsulta.getReservaStatus().equals(WSReservaStatusEnum.CANCELADO)) {
                     CancelRS cancelReturn = null; 
 
-                    CancelRQ cancel = new CancelRQ();
-                    cancel.setFileId(TipoCancelamentoEnum.OUTROS.getId());
-                    cancel.getCancellationReasonId();
-                    cancel.setCancellationObservation("RESERVA CANCELADA VIA INTEGRAÇÃO COM API (INFOTERA)");
-                    cancel.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
+                    CancelRQ cancel = UtilsWS.montarCancelar(reservaRQ.getIntegrador(), reservaServico.getNrLocalizador());
+//                            new CancelRQ();
+//                    cancel.setFileId(TipoCancelamentoEnum.OUTROS.getId());
+//                    cancel.getCancellationReasonId();
+//                    cancel.setCancellationObservation("RESERVA CANCELADA VIA INTEGRAÇÃO COM API (INFOTERA)");
+//                    cancel.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
 
                     cancelReturn = easyTravelShopClient.cancelarAtividade(reservaRQ.getIntegrador(), cancel);
 
