@@ -206,7 +206,24 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 - O token criado no serviço de Login é utilizado em todos as demais serviços, o qual tem seu tempo de expiração de 10 (dez) horas atualmente. Caso ocorra problemas com expiração, verfique o *response* da requisição de **Login**;
 - Será mapeadas os códigos das localidades registradas pela ETS a fim de atrela-las com as do Infotravel, onde periodicamente o time de Integração terá que validar e atualizar esta base a fim de mante-la pareada, desta forma, evitando problemas de não localização de atividades do fornecedor;
 - Foi informado que não é necessário realizar a chamada o método **Confirm**, pois o fornecedor (MikeTec - Evandro Kulm) alega que ao realizar a reserva o insumo é automaticamente *Confirmado*;
+- A API constituem de três serviços que possuem ***objetos distintos*** (*WSDisponibilidadeIngressoRQ, WSDisponibilidadeServicoRQ, WSDisponibilidadeTransferRQ*) para tratar a disponibilidade das atividades, desta forma, são segmentados os serviços a fim de melhor organização e facilidade de manutenção. Para isso, foram criado métodos auxiliares a fim de serem invocados pelos diferentes serviços, pois a **Disponibilidade** (*Search*) do fornecedor pode devolver os três serviços em uma mesma response. Mas este response apresenta objetos similares mas com parâmetros e valores diferentes sendo necessário realizar tratativas em cada caso. A seguir segue a relação dos métodos [public] [static] utilizados na classe ***UtilsWS***:
+	- MontarSearch - Realiza a passagem de parâmetros especificos para a chamada individualizada do serviço;
+	- ValidarResponse - Verifica a *Regra de Negócio* referente aos passageiros (pax) se existe atividades para os paxes informados;
+	- MontarSearchTarifar - A chamada para pesquisar uma atividade específica utiliza parâmetros obtidos do **DsParametro**, montado na pesquisa (Disponibilidade), a fim de retornar somente a atividade desejada para obter o valor para a Tarifa;
+	- VerificarRetorno - No response do fornecedor para a chamada de seus métodos existem parâmetros que determinam se existem informações sobre a atividade presente em sua base, caso não exista a informação requisitada, é retornado um valor (boolean) a fim de abortar a operação. Este método avalia a resposta do fornecedor a fim de prosseguir com o processo de reserva.
+	- MontarDescritivo - Constroí o descritivo da atividade retornada pelo fornecedor;
+	- MontarPoliticasDeCancelamento - Constroí a lista de políticas de cancelamento (List<WSPoliticaCancelamento>) para a atividade (Desde que retornado);
+	- MontarMidias - Constroí a lista de mídias da atividade (List<WSMedia>) a fim de apresentar no Infotravel;
+	- RetornarTarifa - Verifica os dados obtidos pelo fornecedor para a atividade específica e monta o objeto *WSTarifa* para o Infotravel;
+	- ObrigatoriedadeDocAtividades - Avalia no retorno da disponibilidade (*Search*) da atividade, se a mesma, exige a obrigatoriedade de documento para o PAX a fim de ser setada na pré-reserva (WSPreReservar);
+	- VerificarStatusReserva - Verifica o response do consultar (*Get*) o estado da atividade [Status] no fornecedor a fim de espelha-la no Infotravel;
+	- MontarVoucher - Monta a requisição para obter as informações de voucher para a atividade no fornecedor;
+	- MontarPoliticasVoucher - Constroí a lista de políticas de voucher (List<WSPoliticaVoucher>) para a atividade (Desde que retornado);
+	- MontarReservaNomeList - Constroí a lista de Passageiros (List<WSReservaNome>) a fim de obter as informações do pax retornada pelo fornecedor;
+	- MontarServicoListTransfer - Constroí um tipo especifico de objeto para o serviço Transfer a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
+	- MontarServicoInfoList - Constroí um tipo de lista especifica de objetos para os serviços (Ingresso e Passeio) a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
 - O parâmetro utilizado (DsParametro) são passado valores a fim de serem utilizados no processo do **TarifarWS** (*Reativar - Orçamento*) as seguintes informações:
+	- DadosModalidade - Informação do Código (COD) da Modalida e Valor do Total da diária (vlNeto) separado pelo caracter [~], onde no Infotravel será refatorado; 
 	- ActivityID - Identificação da atividade (ingresso, passeio, transfer) a ser utilizado na requisição de pesquisa (*Search*);
 	- ServiceRateID - TAG única de identificação da atividade a ser utilizada na requisição de reserva (*DoBooking*);
 	- Data Inicio - Data de início da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
