@@ -89,7 +89,7 @@ Nas versões atuais do *Spring* é recomendado utilizar retornos do tipo **HttpE
 
 > **NOTA:** *As credenciais presentes nesta documentação refere-se as credenciais de homologação (usuário/senha). Para utilização dos recursos da API, tanto Produção quanto Homologação, é necessário a passagem do token após autenticação (token.tokenId) a todos os demais serviços, observando o período de vigência do mesmo que atualmente tem a duração de 10 horas.*
 
-**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API-Documentation-V3.pdf)
+**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API DocumentationV3_2.pdf)
 
 ### Ambientes
 Para acesso aos ambientes (*Homologação/Produção*) da MikeTec se faz necessário a criação de uma conta pelo suporte técnico, na qual estes ambientes são totalmente distintos um do outro, pois seus endpoints são diferentes. Desta forma, a criação de uma não implica na criação da outra, sendo necessário solicitar uma conta especifica para o ambiente a ser utilizado.
@@ -203,9 +203,15 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 | 128 | Reprovado na Autorização |
 
 ## Observações Importantes
-- O token criado no serviço de Login é utilizado em todos demais serviços, o qual tem seu tempo de expiração de 10 (dez) horas atualmente. Caso ocorra problemas com expiração, verfique o response da requisição de login;
-- Foi recomendado a utilização de uma carga estática das localizações (cidades), mas foi observado que os IATAs dos aeroportos são poucos, sendo necessário realizar a consulta por nome da cidade, mas o Infotravel não retorna atualmente o nome da cidade (nmLocal) e sim o código, onde será necessário mapear os código do Miketec no banco de dados ou o Infotravel devolver o parâmetro nmLocal.
-- Foi informado que não é necessário realizar a chamada o método Confirm, pois o fornecedor (MikeTec - Evandro) alega que ao realizar a reserva o insumo é automaticamente *Confirmado*.
+- O token criado no serviço de Login é utilizado em todos as demais serviços, o qual tem seu tempo de expiração de 10 (dez) horas atualmente. Caso ocorra problemas com expiração, verfique o *response* da requisição de **Login**;
+- Será mapeadas os códigos das localidades registradas pela ETS a fim de atrela-las com as do Infotravel, onde periodicamente o time de Integração terá que validar e atualizar esta base a fim de mante-la pareada, desta forma, evitando problemas de não localização de atividades do fornecedor;
+- Foi informado que não é necessário realizar a chamada o método **Confirm**, pois o fornecedor (MikeTec - Evandro Kulm) alega que ao realizar a reserva o insumo é automaticamente *Confirmado*;
+- O parâmetro utilizado (DsParametro) são passado valores a fim de serem utilizados no processo do **TarifarWS** (*Reativar - Orçamento*) as seguintes informações:
+	- ActivityID - Identificação da atividade (ingresso, passeio, transfer) a ser utilizado na requisição de pesquisa (*Search*);
+	- ServiceRateID - TAG única de identificação da atividade a ser utilizada na requisição de reserva (*DoBooking*);
+	- Data Inicio - Data de início da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
+	- Data Fim - Data de termino da atividade a fim de ser passada como parâmetro na requisição de pesquisa (*Search*) no ***TarifarWS***;
+	- SearchID - TAG única gerada a partir da pesquisa a fim de ser passada como parâmetro na requisição de reserva (*DoBooking*);
 
 ## Suporte Técnico
 O contato para suporte disponível é através de endereço eletrônico [suporte@miketec.com.br](suporte@miketec.com.br), na qual não é apontado prazos para SLA e horários para atendimento.
