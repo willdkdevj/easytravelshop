@@ -1,7 +1,7 @@
 # EasyTravelShop API 
 > API consiste em uma ponte ao fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer.
 
-**Para navegar até as observações mais relevantes desta API vá ao tópico Observações Importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes) (:octocat:)
+**Para navegar até as observações mais relevantes desta API vá ao tópico Observações Importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes)   :octocat:
 
 [![Spring Badge](https://img.shields.io/badge/-Spring-brightgreen?style=flat-square&logo=Spring&logoColor=white&link=https://spring.io/)](https://spring.io/)
 [![Maven Badge](https://img.shields.io/badge/-Maven-000?style=flat-square&logo=Apache-Maven&logoColor=white&link=https://maven.apache.org/)](https://maven.apache.org/)
@@ -92,7 +92,7 @@ Nas versões atuais do *Spring* é recomendado utilizar retornos do tipo **HttpE
 
 > **NOTA:** *As credenciais presentes nesta documentação refere-se as credenciais de homologação (usuário/senha). Para utilização dos recursos da API, tanto Produção quanto Homologação, é necessário a passagem do token após autenticação (token.tokenId) a todos os demais serviços, observando o período de vigência do mesmo que atualmente tem a duração de 10 horas.*
 
-**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API-DocumentationV3_2.pdf)
+**Documentação Oficial da API:** [MikeTec Support v3.2](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API-DocumentationV3_2.pdf)
 
 ### Ambientes
 Para acesso aos ambientes (*Homologação/Produção*) da MikeTec se faz necessário a criação de uma conta pelo suporte técnico, na qual estes ambientes são totalmente distintos um do outro, pois seus endpoints são diferentes. Desta forma, a criação de uma não implica na criação da outra, sendo necessário solicitar uma conta especifica para o ambiente a ser utilizado.
