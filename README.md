@@ -1,6 +1,7 @@
 # EasyTravelShop API 
 > API consiste em uma ponte ao fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer.
-**Para navegar até as informações mais importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes)
+
+**Para navegar até as observações mais relevantes desta API vá ao tópico Observações Importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes)
 
 [![Spring Badge](https://img.shields.io/badge/-Spring-brightgreen?style=flat-square&logo=Spring&logoColor=white&link=https://spring.io/)](https://spring.io/)
 [![Maven Badge](https://img.shields.io/badge/-Maven-000?style=flat-square&logo=Apache-Maven&logoColor=white&link=https://maven.apache.org/)](https://maven.apache.org/)
@@ -90,7 +91,7 @@ Nas versões atuais do *Spring* é recomendado utilizar retornos do tipo **HttpE
 
 > **NOTA:** *As credenciais presentes nesta documentação refere-se as credenciais de homologação (usuário/senha). Para utilização dos recursos da API, tanto Produção quanto Homologação, é necessário a passagem do token após autenticação (token.tokenId) a todos os demais serviços, observando o período de vigência do mesmo que atualmente tem a duração de 10 horas.*
 
-**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API DocumentationV3_2.pdf)
+**Documentação Oficial da API:** [MikeTec Support](https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API-DocumentationV3_2.pdf)
 
 ### Ambientes
 Para acesso aos ambientes (*Homologação/Produção*) da MikeTec se faz necessário a criação de uma conta pelo suporte técnico, na qual estes ambientes são totalmente distintos um do outro, pois seus endpoints são diferentes. Desta forma, a criação de uma não implica na criação da outra, sendo necessário solicitar uma conta especifica para o ambiente a ser utilizado.
@@ -121,7 +122,7 @@ Para permitir a serialização/deserialização de datas foi necessário impleme
     }
 ```
 
-Dependendo a chamada realizada é aplicado formatos distintos para o parâmetro, referente ao valor Data (Date), já os demais seguem o mesmo valor em todas as chamadas aos métodos do fornecedor.
+Dependendo a chamada realizada é aplicado formatos distintos para o parâmetro, referente ao valor Data (*Date*), já os demais seguem o mesmo valor em todas as chamadas aos métodos do fornecedor.
 A tabela abaixo apresenta os parâmetros e seus respectivos valores, como tipo, obrigatoriedade e exemplo de uso.
 
 |  Nome   |    Tipo    |   Tamanho   | Obrigatório | Descrição                                      |
@@ -130,12 +131,11 @@ A tabela abaixo apresenta os parâmetros e seus respectivos valores, como tipo, 
 |   cpf   |   String   |    (11)	 |     Sim     | CPF do Cliente*. Exemplo: “11122233344”        |
 |cellphone|	  String   |    (11)	 |     Sim	   | Número do Celular com DDD do Cliente*. Exemplo: "21988889999" |
 |  email  |   String   |             |     Sim	   | E-mail do Cliente*. Exemplo: “email@email.com.br” |
-|   ip    |   String   |             |     Sim     | IP atual do Cliente*. Exemplo: “187.65.95.12” |
 |  cep	  |   String   |    (8)      |     Sim     | CEP do Cliente*. Exemplo: “95000625” |
 
 
 ### As Funcionalidades do WebService
-Toda a chamada ao webservice se faz necessário de se autenticar a fim de ser autorizado a trafegar informações entre os *webservices*, desta forma, é passado em toda requisição (*request*) o autorizador (Authorization Token) do tipo *Usuário e Senha* ao chamar o método **Login**, a fim de obter uma TAG (*Token*) que validará as chamadas aos métodos na qual tem um prazo de expiração de 10 (dez) horas. Caso este tempo ocorrá, ou caso seja fechada a sessão, será necessário repetir o processo com o objetivo de obter o token novamente.
+Toda a chamada ao webservice se faz necessário de se autenticar a fim de ser autorizado a trafegar informações entre os *webservices*, desta forma, é passado em toda requisição (*request*) o autorizador (*Authorization Token*) do tipo *Usuário e Senha* ao chamar o método **Login**, a fim de obter uma TAG (*Token*) que validará as chamadas aos métodos na qual tem um prazo de expiração de 10 (dez) horas. Caso este tempo ocorrá, ou caso seja fechada a sessão, será necessário repetir o processo com o objetivo de obter o token novamente.
 
 A funcionalidade de Localização (***LocationSearch***) tem a função de obter o código da localidade que o passageiro deseja pesquisar por atividades, onde é possível realizar a consulta através dos seguintes parâmetros;
 - Nome (Search) - É possível associar a pesquisa ao nome da localidade, podendo passar como minúsculo, maiúsculo ou utilizando o padrão *Camel Case*;
@@ -145,24 +145,27 @@ A funcionalidade de Localização (***LocationSearch***) tem a função de obter
 
 > Nota 2: Para a consulta utilizando o parâmetro nome é possível utilizar o parâmetro adicional LocationTypeId a fim de especificar o seu tipo (Cidade, Pais, Continente, Planeta);
 
-Exemplo de requisição com passagem de parâmetro Nome (Search) utilizando o parâmetro para identificação (LocationTypeId) para identificar que é referente ao Aeroporto[6]
-```json
-{
-	"tokenId": "d2d06cf9-ba03-43ed-9c37-8f9a82135fb5",
-	"Search": "porto seguro",
-	"LocationTypeId": [6]
-}
-```
 
-Exemplo de requisição com passagem de parâmetro código (LocationId) no objeto LocationSearch
 ```json
-{
-	"tokenId": "d2d06cf9-ba03-43ed-9c37-8f9a82135fb5",
-	"LocationSearch": {
-		"LocationId" : 286194
+	{
+		"tokenId": "d2d06cf9-ba03-43ed-9c37-8f9a82135fb5",
+		"Search": "porto seguro",
+		"LocationTypeId": [6]
 	}
-}
 ```
+> ***Exemplo***: Exemplo de requisição com passagem de parâmetro Nome (Search) utilizando o parâmetro para identificação (LocationTypeId) para identificar que é referente ao Aeroporto[6]
+
+
+```json
+	{
+		"tokenId": "d2d06cf9-ba03-43ed-9c37-8f9a82135fb5",
+		"LocationSearch": {
+			"LocationId" : 286194
+		}
+	}
+```
+> ***Exemplo***: Exemplo de requisição com passagem de parâmetro código (LocationId) no objeto LocationSearch
+
 
 A funcionalidade de Reservar (***DoBooking***) permite efetuar a compra da atividade selecionada, denominada também como Book ou Compra, os parâmetros necessários são:
 - *SearchId:* Código referente à IDENTIFICAÇÃO da pesquisa (Search) da atividades.
