@@ -31,6 +31,7 @@ import br.com.infotera.common.servico.WSPacoteServico;
 import br.com.infotera.common.servico.WSServico;
 import br.com.infotera.common.servico.WSServicoInfo;
 import br.com.infotera.common.servico.WSServicoInfoItem;
+import br.com.infotera.common.servico.WSServicoOutro;
 import br.com.infotera.common.servico.WSTransfer;
 import br.com.infotera.common.servico.WSTransferInfo;
 import br.com.infotera.common.servico.WSVeiculoTransfer;
@@ -64,6 +65,7 @@ import br.com.infotera.easytravel.model.RQRS.BookingRQ;
 import br.com.infotera.easytravel.model.RQRS.BookingRS;
 import br.com.infotera.easytravel.model.RQRS.CancelRQ;
 import br.com.infotera.easytravel.model.RQRS.CancelRS;
+import br.com.infotera.easytravel.model.RQRS.ConsultarGetRQ;
 import br.com.infotera.easytravel.model.RQRS.VoucherRS;
 import br.com.infotera.easytravel.model.RQRS.ConsultarGetRS;
 import br.com.infotera.easytravel.model.RQRS.SearchRQ;
@@ -244,10 +246,24 @@ public class UtilsWS {
                     WSDisponibilidadeServicoRQ disponibilidadeServicoRQ = (WSDisponibilidadeServicoRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeServicoRQ.getIntegrador();
 
+                    // Verifica a partir do ReervaNome a idade selecionada para busca de passeios
+                    disponibilidadeServicoRQ.getReservaNomeList().forEach( paxDispo -> {
+                        searchResponse.getActivities().forEach(action -> {
+                            action.getTours().forEach(tour -> {
+                                tour.getDatesRate().forEach(datesRate -> {
+                                    // Verifica a partir do DatesRateGet >> PassengerRate se existe ingresso com a sugestão de pax (idade)
+                                    datesRate.getPassengersRate().stream()
+                                                .filter(pax -> paxDispo.getQtIdade() >= pax.getStartAge() && paxDispo.getQtIdade() <= pax.getEndAge())
+                                                .findFirst()
+                                                .orElseThrow(RuntimeException::new);
+                                });
+                            });
+                        });
+                    });
                     
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "validarResponse", WSMensagemErroEnum.GENMETHOD, 
-                            "Erro ao montar requisição de pesquisa para Passeios", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                            "Não foi encontrado Passeios para os tipos de passageiros", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
 
             } else if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeTransferRQ) {
@@ -330,11 +346,21 @@ public class UtilsWS {
                         
                         searchRQ = new SearchRQ();
                         searchRQ.setSearchTransfer(true);
+                    } else if(reserva.getServico().getIsStServicoOutro()) {
+                        WSServicoOutro servicoPasseio = (WSServicoOutro) reserva.getServico();
+                        reservaNomeList = servicoPasseio.getReservaNomeList();
+                        
+//                        WSServico passeio = (WSServico) servicoPasseio.getServicoList().stream().filter(servicoOut -> servicoOut != null).findFirst().orElseThrow(RuntimeException::new);
+                        // Trata dsParametro para montar requisição a fim de Re-Tarifar
+                        dsParamTarifar = servicoPasseio.getDsParametro().split("#");
+                        
+                        searchRQ = new SearchRQ();
+                        searchRQ.setSearchTour(true);
                     }
                         
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.GENMETHOD, 
-                            "Erro ao montar requisição de pesquisa para Tranfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                            "Erro ao montar requisição de pesquisa para Tranfer/Tour", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
 
             }
@@ -905,6 +931,19 @@ public class UtilsWS {
         return reservaStatus;
     }
     
+    public static ConsultarGetRQ montarConsulta(WSIntegrador integrador, Integer localizador) throws ErrorException {
+        ConsultarGetRQ consultaRQ = null;
+        try {
+            consultaRQ = new ConsultarGetRQ();
+            consultaRQ.setFile(new br.com.infotera.easytravel.model.File(localizador));
+            consultaRQ.setTokenId(integrador.getSessao().getCdChave());
+        } catch (Exception ex) {
+            throw new ErrorException(integrador, UtilsWS.class, "montarConsulta", WSMensagemErroEnum.GENMETHOD, 
+                    "Erro ao montar a requisição de consulta", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }                     
+                        
+        return consultaRQ;    
+    }
     public static VoucherRQ montarVoucher(WSIntegrador integrador, br.com.infotera.easytravel.model.File file) throws ErrorException{
         VoucherRQ voucher = null;
         try {
@@ -961,9 +1000,11 @@ public class UtilsWS {
                         politicaVoucherList.add(new WSPoliticaVoucher("Destino: ", response.getLocationTo()));
                         politicaVoucherList.add(new WSPoliticaVoucher("Modalidade", response.getActivityName()));
                         politicaVoucherList.add(new WSPoliticaVoucher("Descrição", response.getActivityDescription()));
-                        politicaVoucherList.add(new WSPoliticaVoucher("Data de inicio: ", Utils.formatData(response.getActivityDate(), "yyyy-MM-dd'T'HH:mm:ss")));
-                        politicaVoucherList.add(new WSPoliticaVoucher("Data de chegada: ", Utils.formatData(response.getActivityEndDate(), "yyyy-MM-dd'T'HH:mm:ss")));
-                        politicaVoucherList.add(new WSPoliticaVoucher("Duração: ", response.getActivityDuration()));
+                        politicaVoucherList.add(new WSPoliticaVoucher("Data de inicio: ", response.getActivityDate()));
+                        politicaVoucherList.add(new WSPoliticaVoucher("Data de chegada: ", response.getActivityEndDate()));
+                        if(response.getActivityDuration() != null) {
+                            politicaVoucherList.add(new WSPoliticaVoucher("Duração: ", response.getActivityDuration()));
+                        }
 
                         // Inclusos
                         if(!Utils.isListNothing(response.getIncludes())){
@@ -995,7 +1036,9 @@ public class UtilsWS {
                         
                         // Contato para emergência
                         if(response.getEmergencyName() != null && !response.getEmergencyName().equals("")){
-                            politicaVoucherList.add(new WSPoliticaVoucher("Emergência Contato: ", response.getActivityObservation()));
+                            politicaVoucherList.add(new WSPoliticaVoucher("Emergência Contato: ", response.getEmergencyName()));
+                            politicaVoucherList.add(new WSPoliticaVoucher("Telefone p/ Contato (Emergência): ", response.getEmergencyPhone()));
+                            politicaVoucherList.add(new WSPoliticaVoucher("Telefone p/ Contato (24 hrs): ", response.getPhone24Hours()));
                         }
 
                         // Verifica se a descrição é diferente da observação
@@ -1168,11 +1211,12 @@ public class UtilsWS {
                                                                 .findFirst()
                                                                 .orElseThrow(RuntimeException::new);
                 
-                dsParametro = pacoteServico.getDsParametro();
+                dsParametro = transfer.getDsParametro();
                 chaveActivity = dsParametro.split("#");
                 
-            } else {
-                dsParametro = servico.getDsParametro();
+            } else if(servico.getIsStServicoOutro()) {
+                WSServicoOutro servicoPasseio = (WSServicoOutro) servico;
+                dsParametro = servicoPasseio.getDsParametro();
                 chaveActivity = dsParametro.split("#");
             }
             

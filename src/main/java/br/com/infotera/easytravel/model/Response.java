@@ -17,7 +17,7 @@ public class Response extends Integration {
     private Integer fileId;
     private Integer bookingId;
     private Integer filePackageId;
-    private Date bookingDate;
+    private String bookingDate;
     private String code;
     private String qrCode;
     private String agencyName;
@@ -31,8 +31,8 @@ public class Response extends Integration {
     private String activityDescription;
     private String activityObservation;
     private String activityDuration;
-    private Date activityDate;
-    private Date activityEndDate;
+    private String activityDate;
+    private String activityEndDate;
     private List<String> includes;
     private List<String> notIncludes;
     private List<String> whatToKnow;
@@ -43,7 +43,7 @@ public class Response extends Integration {
     public Response() {
     }
 
-    public Response(String companyPhoto, Integer fileId, Integer bookingId, Integer filePackageId, Date bookingDate, String code, String qrCode, String agencyName, String agentName, List<Passenger> passengers, String locationTo, String cancellationPolicy, List<CancellationPolicy> cancellationPolicies, String activityName, String activityType, String activityDescription, String activityObservation, String activityDuration, Date activityDate, Date activityEndDate, List<String> includes, List<String> notIncludes, List<String> whatToKnow, String emergencyName, String emergencyPhone, String phone24Hours) {
+    public Response(String companyPhoto, Integer fileId, Integer bookingId, Integer filePackageId, String bookingDate, String code, String qrCode, String agencyName, String agentName, List<Passenger> passengers, String locationTo, String cancellationPolicy, List<CancellationPolicy> cancellationPolicies, String activityName, String activityType, String activityDescription, String activityObservation, String activityDuration, String activityDate, String activityEndDate, List<String> includes, List<String> notIncludes, List<String> whatToKnow, String emergencyName, String emergencyPhone, String phone24Hours) {
         this.companyPhoto = companyPhoto;
         this.fileId = fileId;
         this.bookingId = bookingId;
@@ -72,7 +72,7 @@ public class Response extends Integration {
         this.phone24Hours = phone24Hours;
     }
 
-    public Response(String companyPhoto, Integer fileId, Integer bookingId, Integer filePackageId, Date bookingDate, String code, String qrCode, String agencyName, String agentName, List<Passenger> passengers, String locationTo, String cancellationPolicy, List<CancellationPolicy> cancellationPolicies, String activityName, String activityType, String activityDescription, String activityObservation, String activityDuration, Date activityDate, Date activityEndDate, List<String> includes, List<String> notIncludes, List<String> whatToKnow, String emergencyName, String emergencyPhone, String phone24Hours, Integer id, String insertDate, String updateDate, Integer updatePersonId) {
+    public Response(String companyPhoto, Integer fileId, Integer bookingId, Integer filePackageId, String bookingDate, String code, String qrCode, String agencyName, String agentName, List<Passenger> passengers, String locationTo, String cancellationPolicy, List<CancellationPolicy> cancellationPolicies, String activityName, String activityType, String activityDescription, String activityObservation, String activityDuration, String activityDate, String activityEndDate, List<String> includes, List<String> notIncludes, List<String> whatToKnow, String emergencyName, String emergencyPhone, String phone24Hours, Integer id, String insertDate, String updateDate, Integer updatePersonId) {
         super(id, insertDate, updateDate, updatePersonId);
         this.companyPhoto = companyPhoto;
         this.fileId = fileId;
@@ -134,11 +134,11 @@ public class Response extends Integration {
         this.filePackageId = filePackageId;
     }
 
-    public Date getBookingDate() {
+    public String getBookingDate() {
         return bookingDate;
     }
 
-    public void setBookingDate(Date bookingDate) {
+    public void setBookingDate(String bookingDate) {
         this.bookingDate = bookingDate;
     }
 
@@ -246,19 +246,19 @@ public class Response extends Integration {
         this.activityDuration = activityDuration;
     }
 
-    public Date getActivityDate() {
+    public String getActivityDate() {
         return activityDate;
     }
 
-    public void setActivityDate(Date activityDate) {
+    public void setActivityDate(String activityDate) {
         this.activityDate = activityDate;
     }
 
-    public Date getActivityEndDate() {
+    public String getActivityEndDate() {
         return activityEndDate;
     }
 
-    public void setActivityEndDate(Date activityEndDate) {
+    public void setActivityEndDate(String activityEndDate) {
         this.activityEndDate = activityEndDate;
     }
 

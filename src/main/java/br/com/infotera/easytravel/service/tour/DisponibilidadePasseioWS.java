@@ -10,12 +10,13 @@ import br.com.infotera.common.enumerator.WSIntegracaoStatusEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
 import br.com.infotera.common.enumerator.WSServicoTipoEnum;
 import br.com.infotera.common.media.WSMedia;
+import br.com.infotera.common.servico.WSServico;
+import br.com.infotera.common.servico.WSServicoOutro;
 import br.com.infotera.common.servico.WSServicoPesquisa;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeServicoRQ;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeServicoRS;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
-import br.com.infotera.easytravel.model.Activity;
 import br.com.infotera.easytravel.model.ActivitySearch;
 import br.com.infotera.easytravel.model.RQRS.SearchRQ;
 import br.com.infotera.easytravel.model.RQRS.SearchRS;
@@ -24,6 +25,7 @@ import br.com.infotera.easytravel.service.EstaticoWS;
 import br.com.infotera.easytravel.service.SessaoWS;
 import br.com.infotera.easytravel.util.UtilsWS;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,9 +37,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class DisponibilidadePasseioWS {
 
-    @Autowired
+     @Autowired
     private EasyTravelShopClient easyTravelShopClient;
-    
+
     @Autowired
     private SessaoWS sessaoWS;
     
@@ -46,7 +48,7 @@ public class DisponibilidadePasseioWS {
     
     @Autowired
     private UtilsWS utilsWS;
-    
+
     public WSDisponibilidadeServicoRS disponibilidade(WSDisponibilidadeServicoRQ disponibilidadeServicoRQ) throws ErrorException {
         // Verifica Sessão iniciada com Fornecedor
         if(disponibilidadeServicoRQ.getIntegrador().getSessao() == null) {
@@ -62,56 +64,94 @@ public class DisponibilidadePasseioWS {
         // Obtém o retorno a disponibilidade de Ingressos no Fornecedor
         SearchRS search = easyTravelShopClient.buscarAtividades(disponibilidadeServicoRQ.getIntegrador(), searchRQ);
         
+        // Se retorno for falso será lançada uma excessão com o detalhe do erro reportado pelo fornecedor
+        UtilsWS.verificarRetorno(disponibilidadeServicoRQ.getIntegrador(), search);
+        
+        // Validar regras de idade passageiros (Pax)
+        UtilsWS.validarResponse(disponibilidadeServicoRQ, search);
+        
         // Monta o retorno obtido pelo fornecedor 
-        List<WSServicoPesquisa> ingressoPesquisaList = montarServicoPesquisa(disponibilidadeServicoRQ, search);
+        List<WSServicoPesquisa> servicoPesquisaList = montarServicoPesquisa(disponibilidadeServicoRQ, search);
         
-        return new WSDisponibilidadeServicoRS(ingressoPesquisaList, disponibilidadeServicoRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
+        return new WSDisponibilidadeServicoRS(servicoPesquisaList, disponibilidadeServicoRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
     }
-    
+
     private List<WSServicoPesquisa> montarServicoPesquisa(WSDisponibilidadeServicoRQ dispRQ, SearchRS search) throws ErrorException {
-        WSTarifa tarifaRate = null;
         List<WSMedia> mediaList = null;
-        
-        WSServicoPesquisa passeioPesquisa = null;
-        List<WSServicoPesquisa> passeioPesquisaList = null;
-        if (!Utils.isListNothing(search.getActivities())) {
-            passeioPesquisaList = new ArrayList<>();
-            for (ActivitySearch activity : search.getActivities()) {
-                //caracteristicas do ingresso - utilizado para o processo de homologação, estas informações vão no detalhe da atividade
-                if (!Utils.isListNothing(activity.getTours())) {
-                    int sqPesquisa = 0;
-                    String dsServico = "";
-                     // lista de passeios
-                    for(Tour tour : activity.getTours()){
-                        // Monta o descritivo do ingresso/passeio 
-                        dsServico = utilsWS.montaDescritivo(dispRQ.getIntegrador(), tour);
+        List<WSServicoPesquisa> servicoPesquisaList = null;
+        try {
+            if (!Utils.isListNothing(search.getActivities())) {
+                
+                WSServico servico = null;
+                WSServicoTipoEnum servicoTipoEnum = null;
+                int sqPesquisa = 0;
+                for (ActivitySearch activity : search.getActivities()) {
 
-                        //modalidades
-//                        ingressoModalidadeList = Arrays.asList(new WSIngressoModalidade(ticket.getActivityId(),
-//                                                    ticket.getName(),
-//                                                    UtilsWS.retornarTarifa(dispRQ.getIntegrador(), ticket, dispRQ.getReservaNomeList()))); //utilsWS.montaIngressoModalidade(dispRQ.getIntegrador(), dispRQ.getReservaNomeList(), ticket);
-                        // Mídias (Imagens)
-                        mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), tour.getImages());
+                    try { 
+                        //caracteristicas do ingresso - utilizado para o processo de homologação, estas informações vão no detalhe da atividade
+                        if (!Utils.isListNothing(activity.getTours())) {
+                            
+                            servicoTipoEnum = WSServicoTipoEnum.PASSEIO;
+                            servicoPesquisaList = new ArrayList<>();
+                            // lista de ingressos
+                            for(Tour tour : activity.getTours()){
 
-                        // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
-                        String dsParamTarifar = dispRQ.getDestino().getNmLocal() + "|#|" + Utils.formatData(dispRQ.getDtPartida(), "yyyy-MM-dd") + "|#|" + Utils.formatData(dispRQ.getDtRetorno(), "yyyy-MM-dd");
+                                //Data de hora da coleta dos paxes
+                                Date dtServicoFim;
+                                Date dtServicoInicio;
+                                try {
+                                    dtServicoInicio = tour.getDatesRate().get(0).getServiceDate();
+                                    dtServicoFim = dtServicoInicio;
+                                } catch (Exception ex) {
+                                    throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
+                                            "Erro ao identificar as datas para o serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
+                                }
+                                
+                                // Monta o descritivo do passeio 
+                                String dsServico = utilsWS.montaDescritivo(dispRQ.getIntegrador(), tour);
 
-                        // Criada instância do objeto Ingresso
-                        sqPesquisa++;
-                        passeioPesquisa = new WSServicoPesquisa(sqPesquisa, dispRQ.getIntegrador(), 
-                                                                dispRQ.getReservaNomeList(), 
-                                                                WSServicoTipoEnum.PASSEIO, 
-                                                                null);
-                        passeioPesquisa.setNmServicoTipo(tour.getActivityId() + " " + tour.getName());
-                        passeioPesquisaList.add(passeioPesquisa);
+                                // Mídias (Imagens)
+                                mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), tour.getImages());
+
+                                // tarifa
+                                WSTarifa tarifa = UtilsWS.retornarTarifa(dispRQ.getIntegrador(), tour.getDatesRate().get(0), dispRQ.getReservaNomeList());//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
+
+                                // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
+                                String dsParamTarifar = UtilsWS.montarParametro(dispRQ.getIntegrador(), tour, dispRQ.getDtPartida(), dispRQ.getDtRetorno(), search.getSearchId());
+
+                                
+                                // Criada instância do objeto Passeio
+                                servico = new WSServicoOutro();
+                                servico.setServicoTipo(servicoTipoEnum);
+                                servico.setCdServico(tour.getActivityId());
+                                servico.setDsServico(dsServico);
+                                servico.setNmServico(tour.getName());
+                                servico.setTarifa(tarifa);
+                                servico.setMediaList(mediaList);
+                                servico.setDsParametro(dsParamTarifar);
+                                servico.setDtServico(dtServicoInicio);
+//                                
+                            }
+                        } else {
+                            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);
+                        }
+                    } catch (Exception ex) {
+                        throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, "Erro ao montar Ingresso", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
-                } else {
-                    throw new ErrorException(dispRQ.getIntegrador(), br.com.infotera.easytravel.service.tour.DisponibilidadePasseioWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);
+                    
+                    sqPesquisa++;
+                    WSServicoPesquisa servicoPesquisa = new WSServicoPesquisa(sqPesquisa, dispRQ.getIntegrador(), dispRQ.getReservaNomeList(), servicoTipoEnum, servico);
+
+                    servicoPesquisaList.add(servicoPesquisa);
                 }
             }
-        }  
+        } catch(ErrorException error) {
+            throw error;
+        } catch(Exception ex) {
+            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao obter as Atividades do Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
         
-        return passeioPesquisaList;
+        return servicoPesquisaList;
     }
 
 }

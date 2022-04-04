@@ -21,12 +21,10 @@ import br.com.infotera.easytravel.model.RQRS.SearchRS;
 import br.com.infotera.easytravel.model.Transfer;
 import br.com.infotera.easytravel.service.EstaticoWS;
 import br.com.infotera.easytravel.service.SessaoWS;
-import br.com.infotera.easytravel.service.ticket.DisponibilidadeWS;
 import br.com.infotera.easytravel.util.UtilsWS;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author William Dias
@@ -88,67 +86,68 @@ public class DisponibilidadeTransferWS {
         List<WSTransferPesquisa> transferPesquisaList = new ArrayList();
         try {
             int sqServico = 0;
-            for(Transfer transfer : transfersList) {
-                WSServicoTipoEnum servicoTipoEnum = null;
-                try {
-                    //descobre se é só ida ou ida e volta
-                    servicoTipoEnum = transfer.isTransferIn() && transfer.isTransferOut() ? WSServicoTipoEnum.TRANSFER : WSServicoTipoEnum.TRANSFER_TRECHO;
-                } catch (Exception ex) {
-                    throw new ErrorException (dispoRQ.getIntegrador(), TarifarTransferWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
-                            "Erro ao identificar o tipo de serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
-                }
-                
-                //Data de hora da coleta dos paxes
-                Date dtServicoFim;
-                Date dtServicoInicio;
-                try {
-                    dtServicoInicio = transfer.getDatesRate().get(0).getServiceDate();
-                    dtServicoFim = transfer.isTransferIn() && transfer.isTransferOut() ? transfer.getDatesRate().get(transfer.getDatesRate().size() -1).getServiceDate() : dtServicoInicio;
-                } catch (Exception ex) {
-                    throw new ErrorException (dispoRQ.getIntegrador(), TarifarTransferWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
-                            "Erro ao identificar as datas para o serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
-                }
-                
-                // Foto do veiculo
-                List<WSMedia> mediaList = UtilsWS.montarMidias(dispoRQ.getIntegrador(), transfer.getImages());
-            
-                // tarifa
-                WSTarifa tarifa = UtilsWS.retornarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate().get(0), dispoRQ.getReservaNomeList());//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
+            if(!Utils.isListNothing(transfersList)) {
+                for(Transfer transfer : transfersList) {
+                    WSServicoTipoEnum servicoTipoEnum = null;
+                    try {
+                        //descobre se é só ida ou ida e volta
+                        servicoTipoEnum = transfer.isTransferIn() && transfer.isTransferOut() ? WSServicoTipoEnum.TRANSFER : WSServicoTipoEnum.TRANSFER_TRECHO;
+                    } catch (Exception ex) {
+                        throw new ErrorException (dispoRQ.getIntegrador(), DisponibilidadeTransferWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
+                                "Erro ao identificar o tipo de serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
+                    }
 
-                // Monta o descritivo do transfer
-                String dsTransfer = UtilsWS.montaDescritivo(dispoRQ.getIntegrador(), transfer);                
-                
-                // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
-                String dsParametro = UtilsWS.montarParametro(dispoRQ.getIntegrador(), transfer, dtServicoInicio, dtServicoFim, search.getSearchId());
-        
-                // Lista Serviços
-                List<WSServico> servicoList = UtilsWS.montarServicoListTransfer(dispoRQ.getIntegrador(), transfer, tarifa, mediaList, sqServico, dsParametro, dsTransfer, dtServicoInicio, dtServicoFim, servicoTipoEnum);
-                
-                // Pacote Servico
-                WSPacoteServico pacoteServico = new WSPacoteServico();
-                pacoteServico.setCdServico(transfer.getActivityId());
-                pacoteServico.setNmServico(transfer.getName());
-                pacoteServico.setDsServico(dsTransfer);
-                pacoteServico.setReservaNomeList(dispoRQ.getReservaNomeList());
-                pacoteServico.setTarifa(tarifa);
-                pacoteServico.setDtServico(dtServicoInicio);
-                pacoteServico.setMediaList(mediaList);
-                pacoteServico.setServicoList(servicoList);
-                pacoteServico.setServicoTipo(servicoTipoEnum);
-                pacoteServico.setDsParametro(dsParametro);
+                    //Data de hora da coleta dos paxes
+                    Date dtServicoFim;
+                    Date dtServicoInicio;
+                    try {
+                        dtServicoInicio = transfer.getDatesRate().get(0).getServiceDate();
+                        dtServicoFim = transfer.isTransferIn() && transfer.isTransferOut() ? transfer.getDatesRate().get(transfer.getDatesRate().size() -1).getServiceDate() : dtServicoInicio;
+                    } catch (Exception ex) {
+                        throw new ErrorException (dispoRQ.getIntegrador(), DisponibilidadeTransferWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
+                                "Erro ao identificar as datas para o serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
+                    }
 
-                // Lista TransferPesquisa
-                transferPesquisaList.add(new WSTransferPesquisa(sqServico++,
-                        dispoRQ.getIntegrador(),
-                        dispoRQ.getReservaNomeList(),
-                        servicoTipoEnum,
-                        pacoteServico));
+                    // Foto do veiculo
+                    List<WSMedia> mediaList = UtilsWS.montarMidias(dispoRQ.getIntegrador(), transfer.getImages());
+
+                    // tarifa
+                    WSTarifa tarifa = UtilsWS.retornarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate().get(0), dispoRQ.getReservaNomeList());//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
+
+                    // Monta o descritivo do transfer
+                    String dsTransfer = UtilsWS.montaDescritivo(dispoRQ.getIntegrador(), transfer);                
+
+                    // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
+                    String dsParametro = UtilsWS.montarParametro(dispoRQ.getIntegrador(), transfer, dtServicoInicio, dtServicoFim, search.getSearchId());
+
+                    // Lista Serviços
+                    List<WSServico> servicoList = UtilsWS.montarServicoListTransfer(dispoRQ.getIntegrador(), transfer, tarifa, mediaList, sqServico, dsParametro, dsTransfer, dtServicoInicio, dtServicoFim, servicoTipoEnum);
+
+                    // Pacote Servico
+                    WSPacoteServico pacoteServico = new WSPacoteServico();
+                    pacoteServico.setCdServico(transfer.getActivityId());
+                    pacoteServico.setNmServico(transfer.getName());
+                    pacoteServico.setDsServico(dsTransfer);
+                    pacoteServico.setReservaNomeList(dispoRQ.getReservaNomeList());
+                    pacoteServico.setTarifa(tarifa);
+                    pacoteServico.setDtServico(dtServicoInicio);
+                    pacoteServico.setMediaList(mediaList);
+                    pacoteServico.setServicoList(servicoList);
+                    pacoteServico.setServicoTipo(servicoTipoEnum);
+                    pacoteServico.setDsParametro(dsParametro);
+
+                    // Lista TransferPesquisa
+                    transferPesquisaList.add(new WSTransferPesquisa(sqServico++,
+                            dispoRQ.getIntegrador(),
+                            dispoRQ.getReservaNomeList(),
+                            servicoTipoEnum,
+                            pacoteServico));
+                }
             }
-            
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException (dispoRQ.getIntegrador(), DisponibilidadeWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
+            throw new ErrorException (dispoRQ.getIntegrador(), DisponibilidadeTransferWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
                     "Erro ao obter os dados do Transfer (Fornecedor)", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
         
@@ -171,7 +170,7 @@ public class DisponibilidadeTransferWS {
                        }
                     }
                 } catch (Exception ex) {
-                    throw new ErrorException (integrador, DisponibilidadeWS.class, "verificarTransferTrecho", WSMensagemErroEnum.SDI, 
+                    throw new ErrorException (integrador, DisponibilidadeTransferWS.class, "verificarTransferTrecho", WSMensagemErroEnum.SDI, 
                             "Erro ao retornar Transfer - Trecho só ida", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }    
             } else {
@@ -186,21 +185,21 @@ public class DisponibilidadeTransferWS {
                        }
                     }
                 } catch (Exception ex) {
-                    throw new ErrorException (integrador, DisponibilidadeWS.class, "verificarTransferIdaVolta", WSMensagemErroEnum.SDI, 
+                    throw new ErrorException (integrador, DisponibilidadeTransferWS.class, "verificarTransferIdaVolta", WSMensagemErroEnum.SDI, 
                             "Erro ao retornar Transfer - Trecho de ida e volta", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
             }
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException (integrador, DisponibilidadeWS.class, "verificarTransferTrecho", WSMensagemErroEnum.SDI, 
+            throw new ErrorException (integrador, DisponibilidadeTransferWS.class, "verificarTransferTrecho", WSMensagemErroEnum.SDI, 
                     "Erro ao obter a lista de transfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
         if(Utils.isListNothing(transferList)){
             integrador.setDsMensagem("Não foi retornado transfers");
             integrador.setIntegracaoStatus(WSIntegracaoStatusEnum.NEGADO);
-            throw new ErrorException(integrador, EasyTravelShopClient.class, "verificarTransfers", WSMensagemErroEnum.SDI, 
+            throw new ErrorException(integrador, DisponibilidadeTransferWS.class, "verificarTransfers", WSMensagemErroEnum.SDI, 
                     "Erro ao montar lista com os transfers disponíveis", WSIntegracaoStatusEnum.NEGADO, null, false);
         }
         

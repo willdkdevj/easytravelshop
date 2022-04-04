@@ -145,7 +145,7 @@ public class TarifarTransferWS {
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException (tarifarServicoRQ.getIntegrador(), TarifarTransferWS.class, "montarPesquisa", WSMensagemErroEnum.STA, 
+            throw new ErrorException (tarifarServicoRQ.getIntegrador(), TarifarTransferWS.class, "montarReserva", WSMensagemErroEnum.STA, 
                     "Erro ao montar o Transfer (PacoteServico)", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
         

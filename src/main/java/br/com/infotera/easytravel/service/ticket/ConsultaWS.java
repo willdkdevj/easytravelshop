@@ -67,9 +67,10 @@ public class ConsultaWS {
         
         try {
             // Montando requisição para consulta
-            ConsultarGetRQ consultaRQ = new ConsultarGetRQ();
-            consultaRQ.setFile(new File(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador())));
-            consultaRQ.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
+            ConsultarGetRQ consultaRQ = UtilsWS.montarConsulta(reservaRQ.getIntegrador(), 
+                                                               Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador()));
+//            consultaRQ.setFile(new File(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador())));
+//            consultaRQ.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
             
             consulta = easyTravelShopClient.consultarReserva(reservaRQ.getIntegrador(), consultaRQ);
             
