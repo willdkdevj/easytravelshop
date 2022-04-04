@@ -43,12 +43,8 @@ public class ApiControllerTransfer {
     private Gson gson;
     @Autowired
     private CancelarTransferWS cancelarTransferWS;
-//    @Autowired
-//    private ConfirmarTransferWS confirmarTransferWS;
     @Autowired
     private ConsultaTransferWS consultaTransferWS;
-//    @Autowired
-//    private DisponibilidadeTransferWS disponibilidadeTransferWS;
     @Autowired
     private PreCancelarTransferWS preCancelarTransferWS;
     @Autowired
@@ -118,25 +114,6 @@ public class ApiControllerTransfer {
 
         return gson.toJson(wsRS);
     }
-
-//    @RequestMapping(value = "/confirmar", method = RequestMethod.POST)
-//    public String confirmar(@RequestBody String jsonRQ) {
-//        WSReservaRS wsRS = null;
-//        WSReservaRQ wsRQ = gson.fromJson(jsonRQ, WSReservaRQ.class);
-//        wsRQ.getIntegrador().setDsMetodo("confirmar");
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//        try {
-//            wsRS = confirmarTransferWS.confirmaTransfer(wsRQ);
-//        } catch (ErrorException ex) {
-//            wsRS = new WSReservaRS(null, ex.getIntegrador());
-//        } catch (Exception ex) {
-//            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), WSTransfer.class, "confirmar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.INCONSISTENTE, ex).getIntegrador());
-//        } finally {
-//            LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ);
-//        }
-//
-//        return gson.toJson(wsRS);
-//    }
 
     @RequestMapping(value = "/consultar", method = RequestMethod.POST)
     public String consultar(@RequestBody String jsonRQ) {
