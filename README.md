@@ -1,10 +1,11 @@
 # EasyTravelShop API 
 > API consiste em uma ponte ao fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer.
 
-**Para navegar até as observações mais relevantes desta API vá ao tópico Observações Importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes)
+**Para navegar até as observações mais relevantes desta API vá ao tópico Observações Importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes) (:octocat:)
 
 [![Spring Badge](https://img.shields.io/badge/-Spring-brightgreen?style=flat-square&logo=Spring&logoColor=white&link=https://spring.io/)](https://spring.io/)
 [![Maven Badge](https://img.shields.io/badge/-Maven-000?style=flat-square&logo=Apache-Maven&logoColor=white&link=https://maven.apache.org/)](https://maven.apache.org/)
+[![Gson Badge](https://img.shields.io/badge/-Gson-informational?style=flat-square&logo=Google&logoColor=white&link=https://spring.io/)](https://sites.google.com/site/gson/)
 
 
 <img align="right" width="280" height="95" src="https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/logo_miketec.jpeg">
@@ -127,11 +128,8 @@ A tabela abaixo apresenta os parâmetros e seus respectivos valores, como tipo, 
 
 |  Nome   |    Tipo    |   Tamanho   | Obrigatório | Descrição                                      |
 |:-------:|:----------:|:-----------:|:-----------:|:----------------------------------------------:|
-|  data   |    Date    |    (24)     |     Sim     | Formato do tipo Data recebido em parâmetros nas classes |
-|   cpf   |   String   |    (11)	 |     Sim     | CPF do Cliente*. Exemplo: “11122233344”        |
-|cellphone|	  String   |    (11)	 |     Sim	   | Número do Celular com DDD do Cliente*. Exemplo: "21988889999" |
-|  email  |   String   |             |     Sim	   | E-mail do Cliente*. Exemplo: “email@email.com.br” |
-|  cep	  |   String   |    (8)      |     Sim     | CEP do Cliente*. Exemplo: “95000625” |
+|  Data   |    Date    |    (24)     |     Sim     | Formato do tipo Data recebido em parâmetros nas classes |
+|  CPF/RG  |   String   |    (11)	 |      *      | DOC do Cliente *. Exemplo: “11122233344” - Quando especificado na devolutiva do fornecedor       |
 
 
 ### As Funcionalidades do WebService
@@ -173,7 +171,14 @@ A funcionalidade de Reservar (***DoBooking***) permite efetuar a compra da ativi
 - *ServiceId:* Código referente à escolha do produto feito pela busca de atividades.
 - *Passengers:* Informar os dados de acordo com a quantidade de passageiros escolhidos na busca.
 - *DocumentType:* Os códigos de identificação dos documentos atrelado(s) ao(s) passageiro(s), observar para a Tabela 6.4.4 (na documentação da API), nas quais estão os códigos válidos e seus respectivos descritivos.
-
+- ***LocationPickup:*** Local para embarque do passageiro - *Obrigatório para Tour e Transfer*,
+- ***LocationDropoff:*** Local para desembarque do passageiro - *Obrigatório para Tour e Transfer*,
+- ***FlightNumberArrival:*** Número do transporte (vôo) do passageiro - *Obrigatório para Tour e Transfer*,
+- ***FlightNumberDeparture:*** Nome do transporte (vôo) do passageiro - *Obrigatório para Tour e Transfer*,
+- ***FlightHourDeparture:*** Horário do transporte (vôo) do passageiro - *Obrigatório para Tour e Transfer*,
+- ***FlightLocNumber:*** Número da passagem (vôo) do passageiro - *Obrigatório para Tour e Transfer*,
+- ***TransferOutDate:*** Data para realizar o transporte do passageiro - *Obrigatório para Tour e Transfer*,
+- ***StartingTime:*** Horário de chegada do transporte (vôo) do passageiro - *Obrigatório para Tour e Transfer*;
 
 A funcionalidade de Confirmação (***Confirm***) garante que a reserva da atividade foi contemplada para o cliente, os parâmetros necessários são:
 - *PaymentPlan.PaymentMethod:* Permite passar o parâmetro (id) a fim de especificar a razão para o cancelamento da reserva, observar para a Tabela 6.6.4 (na documentação da API), nas quais estão os códigos válidos e seus respectivos descritivos.
