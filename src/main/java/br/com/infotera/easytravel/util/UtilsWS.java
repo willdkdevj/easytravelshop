@@ -1198,6 +1198,7 @@ public class UtilsWS {
     public static List<WSServico> montarServicoListTransfer(WSIntegrador integrador, Transfer transfer, WSTarifa tarifa, List<WSMedia> mediaList, Integer sqServico, String dsParametro, String dsTransfer, Date dtServicoInicio, Date dtServicoFim, WSServicoTipoEnum servicoTipoEnum) throws ErrorException {
         List<WSServico> servicoList = null;
         
+        boolean isIdaVolta = transfer.isTransferIn() && transfer.isTransferOut();
         // tipo veiculo
         WSVeiculoTransferTipoEnum veiculoTransfer = verificarTipoTransfer(integrador, transfer.getTransferType());
 
@@ -1208,12 +1209,12 @@ public class UtilsWS {
         WSVeiculoTransfer veiculo = montarVeiculoTransfer(integrador, transfer, veiculoTransfer);
         
         // Transfer Info
-        WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer);        
+        WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer, isIdaVolta);        
         
         try {
             servicoList = new ArrayList();
             int idaVolta = 2;
-            if(transfer.isTransferIn() && transfer.isTransferOut()){
+            if(isIdaVolta){
                 for(int i = 0; i < idaVolta; i++){
                     WSTransfer transferIdaVolta = new WSTransfer();
                     transferIdaVolta.setSqServico(i);
@@ -1291,14 +1292,7 @@ public class UtilsWS {
             } else if(servico.getIsStPacoteServico()) {
                 // Inicia tratativa para Transfer
                 pacoteServico = (WSPacoteServico) servico;
-                
-                // realiza o parse para o objeto WSTransfer
-                transfer = (WSTransfer) pacoteServico.getServicoList().stream()
-                                                                .filter(servicoPct -> servicoPct != null)
-                                                                .findFirst()
-                                                                .orElseThrow(RuntimeException::new);
-                
-                dsParametro = transfer.getDsParametro();
+                dsParametro = pacoteServico.getDsParametro();
                 chaveActivity = dsParametro.split("#");
                 
             } else if(servico.getIsStServicoOutro()) {
@@ -1319,19 +1313,28 @@ public class UtilsWS {
 
                     // Caso seja Transfer é passado parâmetros de localidade do passageiro do seu desembarque
                     if(servico.getIsStPacoteServico()){
+                        // realiza o parse para o objeto WSTransfer
+                        transfer = (WSTransfer) pacoteServico.getServicoList().stream()
+                                                                .filter(servicoPct -> servicoPct != null)
+                                                                .findFirst()
+                                                                .orElseThrow(RuntimeException::new);
+                        
+                        // Obtem o WSTransferInfo para passagem de parâmetros de localização do passageiro
                         WSTransferInfo transferInfo = transfer.getTransferInfo();
+                        
                         String localOrigem = transferInfo.getNmOrigem();
                         String localDestino = transferInfo.getNmDestino();
                         String nmTransp = transferInfo.getNmTransporte();
                         String nrTransp = transferInfo.getNrTransporte();
                         String horaChegada = Utils.formatData(transferInfo.getDtTransporte(), "HH:mm");
+                        String horaSaida = Utils.formatData(transferInfo.getDtTransporte(), "HH:mm");
 
                         action.setLocationPickup(localOrigem);
                         action.setLocationDropoff(localDestino);
                         action.setFlightNumberArrival(nmTransp);
                         action.setFlightNumberDeparture(nmTransp);
                         action.setFlightHourArrival(horaChegada);
-                        action.setFlightHourDeparture(horaChegada);
+                        action.setFlightHourDeparture(horaSaida);
                         action.setFlightLocNumber(nrTransp);
                     }
                     booking.setActivities(Arrays.asList(action));
@@ -1487,14 +1490,16 @@ public class UtilsWS {
         return veiculo;
     }
 
-    private static WSTransferInfo montarTransferInfo(WSIntegrador integrador, Transfer transfer) throws ErrorException {
+    private static WSTransferInfo montarTransferInfo(WSIntegrador integrador, Transfer transfer, boolean isIdaVolta) throws ErrorException {
         WSTransferInfo info = null;
         
         try {
-            info = new WSTransferInfo();
-            info.setDtTransporte(transfer.getDatesRate().get(0).getServiceDate());
-            info.setNmOrigem(transfer.getName());
-            info.setStObrigatorio(true);
+//            if(isIdaVolta){
+                info = new WSTransferInfo();
+                info.setDtTransporte(transfer.getDatesRate().get(0).getServiceDate());
+//                info.setNmOrigem(transfer.getName());
+                info.setStObrigatorio(true);
+//            }
         } catch (Exception ex) {
             throw new ErrorException (integrador, UtilsWS.class, "montarTransferInfo", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar o TransferInfo", WSIntegracaoStatusEnum.NEGADO, ex, false);

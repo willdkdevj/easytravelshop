@@ -356,37 +356,41 @@ public class ConsultaTransferWS {
     private List<WSServicoInfo> montarServicoInfoList(WSIntegrador integrador, List<FileVoucher> fileVoucher) throws ErrorException {
         List<WSServicoInfo> servicoInfoList = null;
         try {
+            if(!Utils.isListNothing(fileVoucher)){
+                // Verificar se houve retorno das politicas na consulta (Get)
+                FileVoucher voucherFile = fileVoucher.stream().filter(voucher -> voucher != null).findFirst().orElseThrow(RuntimeException::new);
 
-            FileVoucher voucherFile = fileVoucher.stream().filter(voucher -> voucher != null).findFirst().orElseThrow(RuntimeException::new);
+                if(voucherFile != null) {
+                    List<String> listIncludes = !Utils.isListNothing(voucherFile.getIncludes()) ? voucherFile.getIncludes() : null;
+                    List<String> listNotIncludes = !Utils.isListNothing(voucherFile.getNotIncludes()) ? voucherFile.getNotIncludes() : null;
 
-            List<String> listIncludes = !Utils.isListNothing(voucherFile.getIncludes()) ? voucherFile.getIncludes() : null;
-            List<String> listNotIncludes = !Utils.isListNothing(voucherFile.getNotIncludes()) ? voucherFile.getNotIncludes() : null;
+                    if(listIncludes != null) {
+                        List<WSServicoInfoItem> servicoInfoItemList = new ArrayList();
+                        int ind = 0;
+                        for(String include : listIncludes){
+                            WSServicoInfoItem infoItem = new WSServicoInfoItem();
+                            infoItem.setDsItem(include);
+                            infoItem.setSqOrdem(ind++);
 
-            if(listIncludes != null) {
-                List<WSServicoInfoItem> servicoInfoItemList = new ArrayList();
-                int ind = 0;
-                for(String include : listIncludes){
-                    WSServicoInfoItem infoItem = new WSServicoInfoItem();
-                    infoItem.setDsItem(include);
-                    infoItem.setSqOrdem(ind++);
+                            servicoInfoItemList.add(infoItem);
+                        }
 
-                    servicoInfoItemList.add(infoItem);
-                }
+                        if(listNotIncludes != null) {
+                            ind = 0;
+                            for(String nInclude : listNotIncludes){
+                                WSServicoInfoItem infoItem = new WSServicoInfoItem();
+                                infoItem.setDsItem(nInclude);
+                                infoItem.setSqOrdem(ind++);
 
-                if(listNotIncludes != null) {
-                    ind = 0;
-                    for(String nInclude : listNotIncludes){
-                        WSServicoInfoItem infoItem = new WSServicoInfoItem();
-                        infoItem.setDsItem(nInclude);
-                        infoItem.setSqOrdem(ind++);
+                                servicoInfoItemList.add(infoItem);
+                            }
+                        }
 
-                        servicoInfoItemList.add(infoItem);
+                        if(!Utils.isListNothing(servicoInfoItemList)){
+                            servicoInfoList = new ArrayList();
+                            servicoInfoList.add(new WSServicoInfo("Detalhes Tranfer", servicoInfoItemList, 0));
+                        }
                     }
-                }
-
-                if(!Utils.isListNothing(servicoInfoItemList)){
-                    servicoInfoList = new ArrayList();
-                    servicoInfoList.add(new WSServicoInfo("Detalhes Tranfer", servicoInfoItemList, 0));
                 }
             }
         } catch (Exception ex) {
