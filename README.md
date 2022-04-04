@@ -1,11 +1,14 @@
-# EasyTravelShop API  :octocat:
+# EasyTravelShop API 
 > API consiste em uma ponte ao fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer.
 
 **Para navegar até as observações mais relevantes desta API vá ao tópico Observações Importantes** [CLIQUE AQUI](https://github.com/InfoteraTecnologia/easytravelshop#observa%C3%A7%C3%B5es-importantes)   
 
 [![Spring Badge](https://img.shields.io/badge/-Spring-brightgreen?style=flat-square&logo=Spring&logoColor=white&link=https://spring.io/)](https://spring.io/)
 [![Maven Badge](https://img.shields.io/badge/-Maven-000?style=flat-square&logo=Apache-Maven&logoColor=white&link=https://maven.apache.org/)](https://maven.apache.org/)
-[![Gson Badge](https://img.shields.io/badge/-Gson-informational?style=flat-square&logo=Google&logoColor=white&link=https://spring.io/)](https://sites.google.com/site/gson/)
+[![Gson Badge](https://img.shields.io/badge/-Gson-informational?style=flat-square&logo=Google&logoColor=white&link=https://spring.io/)](https://sites.google.com/site/
+gson/)
+
+:octocat:
 
 <img align="right" width="280" height="95" src="https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/logo_miketec.jpeg">
 
