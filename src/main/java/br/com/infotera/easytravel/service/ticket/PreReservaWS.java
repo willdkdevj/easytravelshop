@@ -88,7 +88,7 @@ public class PreReservaWS {
                     UtilsWS.verificarRetorno(preReservarRQ.getIntegrador(), retornoIngresso);
                     
                 } else {
-                    throw new ErrorException(preReservarRQ.getIntegrador(), PreReservaWS.class, "preReservar", WSMensagemErroEnum.SPR, 
+                    throw new ErrorException(preReservarRQ.getIntegrador(), PreReservaWS.class, "verificarIngresso", WSMensagemErroEnum.SPR, 
                             "Erro ao montar requisição para verificar ingresso", WSIntegracaoStatusEnum.NEGADO, null, false);
                 }
                 
@@ -96,7 +96,7 @@ public class PreReservaWS {
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(preReservarRQ.getIntegrador(), PreReservaWS.class, "preReservar", WSMensagemErroEnum.SPR, 
+            throw new ErrorException(preReservarRQ.getIntegrador(), PreReservaWS.class, "verificarIngresso", WSMensagemErroEnum.SPR, 
                     "Erro ao obter dados de reserva de serviço", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         return retornoIngresso;
@@ -132,7 +132,7 @@ public class PreReservaWS {
                                     for(Ticket ticket : activity.getTickets()){
 
                                         // Monta o descritivo do ingresso/passeio 
-                                        dsServico = UtilsWS.montaDescritivo(preReservarRQ.getIntegrador(), ticket);
+                                        dsServico = UtilsWS.montarDescritivo(preReservarRQ.getIntegrador(), ticket);
 
                                         // Mídias (Imagens)
                                         mediaList = UtilsWS.montarMidias(preReservarRQ.getIntegrador(), ticket.getImages());

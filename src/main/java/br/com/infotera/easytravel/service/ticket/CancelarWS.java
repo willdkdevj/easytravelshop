@@ -14,7 +14,6 @@ import br.com.infotera.common.enumerator.WSReservaStatusEnum;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservaRS;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
-import br.com.infotera.easytravel.model.ENUM.TipoCancelamentoEnum;
 import br.com.infotera.easytravel.model.RQRS.CancelRQ;
 import br.com.infotera.easytravel.model.RQRS.CancelRS;
 import br.com.infotera.easytravel.service.SessaoWS;
@@ -77,7 +76,7 @@ public class CancelarWS {
             throw error;
         } catch (Exception ex) {
             throw new ErrorException(reservaRQ.getIntegrador(), CancelarWS.class, "cancelar", WSMensagemErroEnum.SCA, 
-                    "Erro ao obter informações da reserva para o procedimento de cancelamento", WSIntegracaoStatusEnum.INCONSISTENTE, ex, false);
+                    "Erro ao obter informações da reserva para o procedimento de cancelamento", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
 
         return rsConsulta;

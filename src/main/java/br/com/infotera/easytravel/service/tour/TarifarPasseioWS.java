@@ -107,7 +107,7 @@ public class TarifarPasseioWS {
                         WSTarifa tarifa = UtilsWS.retornarTarifa(tarifarServicoRQ.getIntegrador(), tour.getDatesRate().get(0), reservaNomeList);//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
 
                         // Monta o descritivo do passeio (tour)
-                        String dsTour = UtilsWS.montaDescritivo(tarifarServicoRQ.getIntegrador(), tour);                
+                        String dsTour = UtilsWS.montarDescritivo(tarifarServicoRQ.getIntegrador(), tour);                
 
                         // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
                         String dsParametro = UtilsWS.montarParametro(tarifarServicoRQ.getIntegrador(), tour, dtServicoInicio, dtServicoFim, search.getSearchId());

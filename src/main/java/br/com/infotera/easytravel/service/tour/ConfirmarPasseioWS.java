@@ -1,6 +1,5 @@
 package br.com.infotera.easytravel.service.tour;
 
-import br.com.infotera.easytravel.service.transfer.*;
 import br.com.infotera.common.ErrorException;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservaRS;

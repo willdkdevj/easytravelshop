@@ -94,7 +94,7 @@ public class DisponibilidadeWS {
                             for(Ticket ticket : activity.getTickets()){
 
                                 // Monta o descritivo do ingresso/passeio 
-                                dsServico = utilsWS.montaDescritivo(dispRQ.getIntegrador(), ticket);
+                                dsServico = utilsWS.montarDescritivo(dispRQ.getIntegrador(), ticket);
 
                                 // Mídias (Imagens)
                                 mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), ticket.getImages());

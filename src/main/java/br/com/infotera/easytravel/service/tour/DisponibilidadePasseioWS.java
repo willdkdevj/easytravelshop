@@ -108,7 +108,7 @@ public class DisponibilidadePasseioWS {
                                 }
                                 
                                 // Monta o descritivo do passeio 
-                                String dsServico = utilsWS.montaDescritivo(dispRQ.getIntegrador(), tour);
+                                String dsServico = utilsWS.montarDescritivo(dispRQ.getIntegrador(), tour);
 
                                 // Mídias (Imagens)
                                 mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), tour.getImages());

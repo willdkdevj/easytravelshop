@@ -1,6 +1,5 @@
 package br.com.infotera.easytravel.service.tour;
 
-import br.com.infotera.easytravel.service.transfer.*;
 import br.com.infotera.common.ErrorException;
 import br.com.infotera.common.WSIntegrador;
 import br.com.infotera.common.WSReserva;
@@ -12,30 +11,18 @@ import br.com.infotera.common.enumerator.WSMensagemErroEnum;
 import br.com.infotera.common.enumerator.WSPagtoFornecedorTipoEnum;
 import br.com.infotera.common.enumerator.WSReservaStatusEnum;
 import br.com.infotera.common.enumerator.WSServicoTipoEnum;
-import br.com.infotera.common.enumerator.WSTransferInOutEnum;
-import br.com.infotera.common.enumerator.WSVeiculoTransferTipoEnum;
 import br.com.infotera.common.media.WSMedia;
 import br.com.infotera.common.politica.WSPolitica;
-import br.com.infotera.common.politica.WSPoliticaVoucher;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservaRS;
-import br.com.infotera.common.servico.WSPacoteServico;
 import br.com.infotera.common.servico.WSServico;
-import br.com.infotera.common.servico.WSServicoInfo;
-import br.com.infotera.common.servico.WSServicoInfoItem;
 import br.com.infotera.common.servico.WSServicoOutro;
-import br.com.infotera.common.servico.WSTransfer;
-import br.com.infotera.common.servico.WSTransferInfo;
-import br.com.infotera.common.servico.WSVeiculoTransfer;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
 import br.com.infotera.easytravel.model.Booking;
-import br.com.infotera.easytravel.model.BookingDetailService;
 import br.com.infotera.easytravel.model.CancellationPolicy;
 import br.com.infotera.easytravel.model.DatesRateGet;
-import br.com.infotera.easytravel.model.ENUM.TipoTransferEnum;
 import br.com.infotera.easytravel.model.File;
-import br.com.infotera.easytravel.model.FileVoucher;
 import br.com.infotera.easytravel.model.RQRS.ConsultarGetRQ;
 import br.com.infotera.easytravel.model.RQRS.ConsultarGetRS;
 import br.com.infotera.easytravel.model.RQRS.VoucherRQ;
@@ -53,7 +40,6 @@ import org.springframework.stereotype.Service;
 /**
  * @author William Dias
  */
-
 @Service
 public class ConsultaPasseioWS {
 
@@ -82,8 +68,6 @@ public class ConsultaPasseioWS {
         try {
             // Montando requisição para consulta
             ConsultarGetRQ consultaRQ = UtilsWS.montarConsulta(reservaRQ.getIntegrador(), Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador()));
-//            consultaRQ.setFile(new File(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador())));
-//            consultaRQ.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
             
             consulta = easyTravelShopClient.consultarReserva(reservaRQ.getIntegrador(), consultaRQ);
             
@@ -170,8 +154,12 @@ public class ConsultaPasseioWS {
                     UtilsWS.verificarRetorno(integrador, voucher);
 
                     // Monta politicas de voucher
-                    politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
-
+                    if(voucher != null) {
+                        politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
+                    } else if(!Utils.isListNothing(file.getFileVoucher())){
+                        politicaList = UtilsWS.montarPoliticasVoucherGet(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
+                    }
+                    
                     // Obtem as politicas de cancelamento
 //                    politicaList = new ArrayList<>();
                     List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
@@ -180,6 +168,9 @@ public class ConsultaPasseioWS {
                         List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(integrador, sgMoeda, vlTarifa, rateGet, false);
                         // atualiza lista de politicas
                         if(!Utils.isListNothing(politicasCancelamento)){
+                            if(Utils.isListNothing(politicaList)) {
+                                politicaList = new ArrayList<>();
+                            }
                             politicaList.addAll(politicasCancelamento);
                         }
                     }
@@ -202,7 +193,7 @@ public class ConsultaPasseioWS {
                             }
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, UtilsWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (integrador, ConsultaPasseioWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a tarifa", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
                     
@@ -210,14 +201,14 @@ public class ConsultaPasseioWS {
             } catch (ErrorException error) {
                 throw error;
             } catch (Exception ex) {
-                throw new ErrorException(integrador, ConsultaWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                throw new ErrorException(integrador, ConsultaPasseioWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                         "Erro ao montar a reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
             
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(integrador, ConsultaPasseioWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                     "Erro ao ler informações de politicas", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -225,7 +216,7 @@ public class ConsultaPasseioWS {
         WSServico servicoPasseio = new WSServicoOutro();
         servicoPasseio.setCdServico(cdTour);
         servicoPasseio.setNmServico(nmTour);
-        servicoPasseio.setDsServico(dsParametro);
+        servicoPasseio.setDsServico(dsTour);
         servicoPasseio.setReservaNomeList(reservaNomeList);
         servicoPasseio.setTarifa(tarifa);
         servicoPasseio.setDtServico(dtInicial);
@@ -245,94 +236,5 @@ public class ConsultaPasseioWS {
         return reserva;
     }
     
-    private List<WSPolitica> montarPoliticasVoucher(WSIntegrador integrador, Integer nrLocalizador, Integer fileId, List<FileVoucher> voucherList) throws ErrorException {
-        List<WSPolitica> politicaList = null;
-        VoucherRQ voucherRQ = null;
-        try {
-            if(nrLocalizador != null){
-                voucherRQ = new VoucherRQ();
-                voucherRQ.setFileId(nrLocalizador);
-                voucherRQ.setBookingId(fileId);
-                voucherRQ.setTokenId(integrador.getSessao().getCdChave());
-            }
-        } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.SCO, 
-                    "Erro ao montar a requisição (Voucher)", WSIntegracaoStatusEnum.NEGADO, ex, false);
-        }                  
-        
-        try {
-            // Verifica se na consulta (Get) é devolvida as politicas de voucher
-            FileVoucher response = voucherList.stream()
-                .filter(voucherFile -> voucherFile != null)
-                .findFirst()
-                .orElseThrow(RuntimeException::new);
-            
-            if(response != null){
-                //politicas de voucher
-                List<WSPoliticaVoucher> politicaVoucherList = new ArrayList();
-                //logotipo da empresa (ETS)
-                if (response.getBookingDate() != null) {
-                    politicaVoucherList.add(new WSPoliticaVoucher("Logotipo", response.getCompanyPhoto()));
-                }
-
-                //data de criação da reserva
-                if (response.getBookingDate() != null) {
-                    politicaVoucherList.add(new WSPoliticaVoucher("Data de criação", String.valueOf(response.getBookingDate())));
-                }
-
-                //responsavel pela reserva
-                if (response.getAgencyName() != null && !response.getAgencyName().equals("")) {
-                    politicaVoucherList.add(new WSPoliticaVoucher("Responsavel pela reserva: ", response.getAgencyName()));
-                }
-
-                // Código do Voucher
-                if (response.getCode()!= null && !response.getCode().equals("")) {
-                    politicaVoucherList.add(new WSPoliticaVoucher("Cod Voucher: ", response.getCode()));
-                }
-
-                // QR Code
-                if (response.getQrCode()!= null && !response.getQrCode().equals("")) {
-                    politicaVoucherList.add(new WSPoliticaVoucher("QR Code: ", response.getQrCode()));
-                }
-
-                // Nome da modalidade no voucher
-                politicaVoucherList.add(new WSPoliticaVoucher("Destino: ", response.getLocationTo()));
-                politicaVoucherList.add(new WSPoliticaVoucher("Modalidade", response.getActivityName()));
-                politicaVoucherList.add(new WSPoliticaVoucher("Descrição", response.getActivityDescription()));
-                politicaVoucherList.add(new WSPoliticaVoucher("Data de inicio: ", Utils.formatData(response.getActivityDate(), "yyyy-MM-dd'T'HH:mm:ss")));
-                politicaVoucherList.add(new WSPoliticaVoucher("Data de chegada: ", Utils.formatData(response.getActivityEndDate(), "yyyy-MM-dd'T'HH:mm:ss")));
-
-                // Inclusos
-                if(!Utils.isListNothing(response.getIncludes())){
-                    response.getIncludes().forEach(inclusion -> {
-                        politicaVoucherList.add(new WSPoliticaVoucher("Incluso: ", inclusion));
-                    });
-                }
-
-                // Não inclusos
-                if(!Utils.isListNothing(response.getNotIncludes())){
-                    response.getNotIncludes().forEach(noInclusion -> {
-                        politicaVoucherList.add(new WSPoliticaVoucher("Não Incluso: ", noInclusion));
-                    });
-                }
-
-                // Contato para emergência
-                if(response.getEmergencyName() != null && !response.getEmergencyName().equals("")){
-                    politicaVoucherList.add(new WSPoliticaVoucher("Emergência Contato: ", response.getEmergencyName()));
-                    politicaVoucherList.add(new WSPoliticaVoucher("Telefone para Contato: ", response.getEmergencyPhone()));
-                    politicaVoucherList.add(new WSPoliticaVoucher("Telefone 24hrs: ", response.getPhone24Hours()));
-                }
-
-                if(!Utils.isListNothing(politicaVoucherList)){
-                    politicaList = new ArrayList();
-                    politicaList.addAll(politicaVoucherList);
-                }
-            }
-        } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.SCO, 
-                    "Erro ao montar as politicas de voucher", WSIntegracaoStatusEnum.NEGADO, ex, false);
-        }
-        
-        return politicaList;
-    }
+    
 }

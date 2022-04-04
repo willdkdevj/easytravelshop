@@ -65,7 +65,6 @@ public class CancelarPasseioWS {
                     CancelRQ cancel = UtilsWS.montarCancelar(reservaRQ.getIntegrador(), reservaServico.getNrLocalizador());
                     // Realiza chamada ao fornecedor
                     cancelReturn = easyTravelShopClient.cancelarAtividade(reservaRQ.getIntegrador(), cancel);
-
                     // Se retorno for falso será lançada uma excessão com o detalhe do erro reportado pelo fornecedor
                     UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), cancelReturn);
                 } 

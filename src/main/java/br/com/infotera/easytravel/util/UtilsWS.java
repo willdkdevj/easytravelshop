@@ -54,6 +54,7 @@ import br.com.infotera.easytravel.model.ENUM.TipoCancelamentoEnum;
 import br.com.infotera.easytravel.model.ENUM.TipoDocumentoEnum;
 import br.com.infotera.easytravel.model.ENUM.TipoTransferEnum;
 import br.com.infotera.easytravel.model.Error;
+import br.com.infotera.easytravel.model.FileVoucher;
 import br.com.infotera.easytravel.model.Image;
 import br.com.infotera.easytravel.model.Inclusion;
 import br.com.infotera.easytravel.model.Insumo;
@@ -78,6 +79,7 @@ import br.com.infotera.easytravel.model.Transfer;
 import br.com.infotera.easytravel.model.TransferType;
 import br.com.infotera.easytravel.service.ticket.ConsultaWS;
 import br.com.infotera.easytravel.service.ticket.ReservaWS;
+import br.com.infotera.easytravel.service.tour.ConsultaPasseioWS;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -397,7 +399,7 @@ public class UtilsWS {
         return searchRQ;    
     }
     
-    public static String montaDescritivo(WSIntegrador integrador, Insumo insumo) throws ErrorException {
+    public static String montarDescritivo(WSIntegrador integrador, Insumo insumo) throws ErrorException {
         String dsServico = null;
         String dsServicoIncluso = "";
         
@@ -944,6 +946,7 @@ public class UtilsWS {
                         
         return consultaRQ;    
     }
+    
     public static VoucherRQ montarVoucher(WSIntegrador integrador, br.com.infotera.easytravel.model.File file) throws ErrorException{
         VoucherRQ voucher = null;
         try {
@@ -1063,6 +1066,85 @@ public class UtilsWS {
         return politicaList;
     }
 
+    public static List<WSPolitica> montarPoliticasVoucherGet(WSIntegrador integrador, Integer nrLocalizador, Integer fileId, List<FileVoucher> voucherList) throws ErrorException {
+        List<WSPolitica> politicaList = null;
+        
+        try {
+            // Verifica se na consulta (Get) é devolvida as politicas de voucher
+            FileVoucher response = voucherList.stream()
+                .filter(voucherFile -> voucherFile != null)
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
+            
+            if(response != null){
+                //politicas de voucher
+                List<WSPoliticaVoucher> politicaVoucherList = new ArrayList();
+                //logotipo da empresa (ETS)
+                if (response.getBookingDate() != null) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Logotipo", response.getCompanyPhoto()));
+                }
+
+                //data de criação da reserva
+                if (response.getBookingDate() != null) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Data de criação", String.valueOf(response.getBookingDate())));
+                }
+
+                //responsavel pela reserva
+                if (response.getAgencyName() != null && !response.getAgencyName().equals("")) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Responsavel pela reserva: ", response.getAgencyName()));
+                }
+
+                // Código do Voucher
+                if (response.getCode()!= null && !response.getCode().equals("")) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Cod Voucher: ", response.getCode()));
+                }
+
+                // QR Code
+                if (response.getQrCode()!= null && !response.getQrCode().equals("")) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("QR Code: ", response.getQrCode()));
+                }
+
+                // Nome da modalidade no voucher
+                politicaVoucherList.add(new WSPoliticaVoucher("Destino: ", response.getLocationTo()));
+                politicaVoucherList.add(new WSPoliticaVoucher("Modalidade", response.getActivityName()));
+                politicaVoucherList.add(new WSPoliticaVoucher("Descrição", response.getActivityDescription()));
+                politicaVoucherList.add(new WSPoliticaVoucher("Data de inicio: ", Utils.formatData(response.getActivityDate(), "yyyy-MM-dd'T'HH:mm:ss")));
+                politicaVoucherList.add(new WSPoliticaVoucher("Data de chegada: ", Utils.formatData(response.getActivityEndDate(), "yyyy-MM-dd'T'HH:mm:ss")));
+
+                // Inclusos
+                if(!Utils.isListNothing(response.getIncludes())){
+                    response.getIncludes().forEach(inclusion -> {
+                        politicaVoucherList.add(new WSPoliticaVoucher("Incluso: ", inclusion));
+                    });
+                }
+
+                // Não inclusos
+                if(!Utils.isListNothing(response.getNotIncludes())){
+                    response.getNotIncludes().forEach(noInclusion -> {
+                        politicaVoucherList.add(new WSPoliticaVoucher("Não Incluso: ", noInclusion));
+                    });
+                }
+
+                // Contato para emergência
+                if(response.getEmergencyName() != null && !response.getEmergencyName().equals("")){
+                    politicaVoucherList.add(new WSPoliticaVoucher("Emergência Contato: ", response.getEmergencyName()));
+                    politicaVoucherList.add(new WSPoliticaVoucher("Telefone para Contato: ", response.getEmergencyPhone()));
+                    politicaVoucherList.add(new WSPoliticaVoucher("Telefone 24hrs: ", response.getPhone24Hours()));
+                }
+
+                if(!Utils.isListNothing(politicaVoucherList)){
+                    politicaList = new ArrayList();
+                    politicaList.addAll(politicaVoucherList);
+                }
+            }
+        } catch (Exception ex) {
+            throw new ErrorException(integrador, UtilsWS.class, "montarPoliticasVoucherGet", WSMensagemErroEnum.GENMETHOD, 
+                    "Erro ao montar as politicas de voucher (Get)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        
+        return politicaList;
+    }
+    
     public static List<WSReservaNome> montarReservaNomeList(WSIntegrador integrador, List<Passenger> passengers) throws ErrorException {
         List<WSReservaNome> reservaNomeList = null;
         
@@ -1195,18 +1277,23 @@ public class UtilsWS {
             String dsParametro = null;
             String[] chaveActivity = null;
             
+            WSIngresso ingresso = null;
+            WSPacoteServico pacoteServico = null;
+            WSTransfer transfer = null;
+            WSServicoOutro servicoPasseio = null;
+                    
             if (servico.getIsStIngresso()) {
                 // realiza o parse para o objeto WSIngresso
-                WSIngresso ingresso = (WSIngresso) servico;
+                ingresso = (WSIngresso) servico;
                 dsParametro = ingresso.getDsParametro();
                 chaveActivity = dsParametro.split("#");
                 
             } else if(servico.getIsStPacoteServico()) {
                 // Inicia tratativa para Transfer
-                WSPacoteServico pacoteServico = (WSPacoteServico) servico;
+                pacoteServico = (WSPacoteServico) servico;
                 
                 // realiza o parse para o objeto WSTransfer
-                WSTransfer transfer = (WSTransfer) pacoteServico.getServicoList().stream()
+                transfer = (WSTransfer) pacoteServico.getServicoList().stream()
                                                                 .filter(servicoPct -> servicoPct != null)
                                                                 .findFirst()
                                                                 .orElseThrow(RuntimeException::new);
@@ -1215,44 +1302,72 @@ public class UtilsWS {
                 chaveActivity = dsParametro.split("#");
                 
             } else if(servico.getIsStServicoOutro()) {
-                WSServicoOutro servicoPasseio = (WSServicoOutro) servico;
+                servicoPasseio = (WSServicoOutro) servico;
                 dsParametro = servicoPasseio.getDsParametro();
                 chaveActivity = dsParametro.split("#");
             }
             
             if(chaveActivity.length > 1){
-                booking = new BookingRQ();
-                // ID referente a pesquisa realizada (Disponibilidade)
-                booking.setSearchId(chaveActivity[5]);
+                try {
+                    booking = new BookingRQ();
+                    // ID referente a pesquisa realizada (Disponibilidade)
+                    booking.setSearchId(chaveActivity[5]);
 
-                // ID do Ticket referente ao tipo de ingresso
-                Activity action = new Activity();
-                action.setServiceId(chaveActivity[2]);
-                booking.setActivities(Arrays.asList(action));
+                    // ID do Ticket referente ao tipo de ingresso
+                    Activity action = new Activity();
+                    action.setServiceId(chaveActivity[2]);
 
+                    // Caso seja Transfer é passado parâmetros de localidade do passageiro do seu desembarque
+                    if(servico.getIsStPacoteServico()){
+                        WSTransferInfo transferInfo = transfer.getTransferInfo();
+                        String localOrigem = transferInfo.getNmOrigem();
+                        String localDestino = transferInfo.getNmDestino();
+                        String nmTransp = transferInfo.getNmTransporte();
+                        String nrTransp = transferInfo.getNrTransporte();
+                        String horaChegada = Utils.formatData(transferInfo.getDtTransporte(), "HH:mm");
+
+                        action.setLocationPickup(localOrigem);
+                        action.setLocationDropoff(localDestino);
+                        action.setFlightNumberArrival(nmTransp);
+                        action.setFlightNumberDeparture(nmTransp);
+                        action.setFlightHourArrival(horaChegada);
+                        action.setFlightHourDeparture(horaChegada);
+                        action.setFlightLocNumber(nrTransp);
+                    }
+                    booking.setActivities(Arrays.asList(action));
+                } catch (Exception ex) {
+                    throw new ErrorException (integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
+                            "Erro ao montar o DoBooking a partir dos dados de atividade (Activity)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                }   
+                
                 // Lista todos os pax da reserva
-                if(!Utils.isListNothing(servico.getReservaNomeList())){
-                    List<Passenger> passengers = new ArrayList();
-                    servico.getReservaNomeList().stream().map(pax -> {
-                        Passenger passenger = new Passenger();
-                        passenger.setFirstName(pax.getNmNome());
-                        passenger.setLastName(pax.getNmSobrenome());
-                        passenger.setBirthDate(Utils.formatData(pax.getDtNascimento(), "yyyy-MM-dd'T'HH:mm:ss"));
-                        passenger.setGender(new Person(pax.getSexo().isMasculino() ? "M" : "F"));
-                        if(pax.getDocumento() != null){
-                            passenger.setDocument(Arrays.asList(new Document(new DocumentType(TipoDocumentoEnum.valueOf(pax.getDocumento().getDocumentoTipo().getNmTipo()).getId()), 
-                                                                                          pax.getDocumento().getNrDocumento().replace(".", "").replace("-", "")))); 
-                        }
-                        passenger.setMainPassenger(pax.isStPrincipal());
+                try {
+                    if(!Utils.isListNothing(servico.getReservaNomeList())){
+                        List<Passenger> passengers = new ArrayList();
+                        servico.getReservaNomeList().stream().map(pax -> {
+                            Passenger passenger = new Passenger();
+                            passenger.setFirstName(pax.getNmNome());
+                            passenger.setLastName(pax.getNmSobrenome());
+                            passenger.setBirthDate(Utils.formatData(pax.getDtNascimento(), "yyyy-MM-dd'T'HH:mm:ss"));
+                            passenger.setGender(new Person(pax.getSexo().isMasculino() ? "M" : "F"));
+                            if(pax.getDocumento() != null){
+                                passenger.setDocument(Arrays.asList(new Document(new DocumentType(TipoDocumentoEnum.valueOf(pax.getDocumento().getDocumentoTipo().getNmTipo()).getId()), 
+                                                                                              pax.getDocumento().getNrDocumento().replace(".", "").replace("-", "")))); 
+                            }
+                            passenger.setMainPassenger(pax.isStPrincipal());
 
-                        return passenger;
+                            return passenger;
 
-                    }).forEachOrdered(passenger -> {
-                        passengers.add(passenger);
-                    });
-                    booking.setPassengers(passengers);
+                        }).forEachOrdered(passenger -> {
+                            passengers.add(passenger);
+                        });
+                        booking.setPassengers(passengers);
+                    }
+                } catch (Exception ex) {
+                    throw new ErrorException (integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
+                            "Erro ao montar o DoBooking a partir dos dados do passageiro (Passenger)", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
-
+                
                 // ID da sessão
                 booking.setTokenId(integrador.getSessao().getCdChave());
             } else {
@@ -1268,6 +1383,24 @@ public class UtilsWS {
         
         return booking;
     }
+    
+//    private static List<Activity> montarInfoAdd(WSIntegrador integrador, List<Activity> activityInsumoList, Insumo insumo) throws ErrorException{
+//        List<Activity> activityList = null;
+//        try {
+//            Activity action = new Activity();
+//            action.setLocationPickup(insumo.get);
+//            action.setLocationDropoff(dsParametro);
+//            action.setFlightNumberArrival(dsParametro);
+//            action.setFlightNumberDeparture(dsParametro);
+//            action.setFlightHourArrival(dsParametro);
+//            action.setFlightHourDeparture(dsParametro);
+//            action.setFlightLocNumber(dsParametro);
+//        } catch (Exception ex) {
+//            throw new ErrorException (integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
+//                    "Erro ao montar o DoBooking", WSIntegracaoStatusEnum.NEGADO, ex, false);
+//        }  
+//        return activityList;
+//    }
     
     public static CancelRQ montarCancelar(WSIntegrador integrador, String nrLocalizador) throws ErrorException{
         CancelRQ cancel = null;

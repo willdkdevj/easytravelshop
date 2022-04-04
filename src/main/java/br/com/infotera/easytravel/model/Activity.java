@@ -15,7 +15,7 @@ import java.util.List;
 public class Activity {
     
     private String activityId;
-    
+   
     private ServiceType serviceType;
     
     private String activityType;
@@ -56,6 +56,27 @@ public class Activity {
     
     @SerializedName("ServiceId")
     private String serviceId;
+    
+    @SerializedName("LocationPickup")
+    private String locationPickup;
+    
+    @SerializedName("LocationDropoff")
+    private String locationDropoff;
+    
+    @SerializedName("FlightNumberArrival")
+    private String flightNumberArrival;
+    
+    @SerializedName("FlightNumberDeparture")
+    private String flightNumberDeparture;
+    
+    @SerializedName("FlightHourArrival")
+    private String flightHourArrival;
+    
+    @SerializedName("FlightHourDeparture")
+    private String flightHourDeparture;
+    
+    @SerializedName("FlightLocNumber")
+    private String flightLocNumber;
     
     private boolean combo;
 
@@ -260,6 +281,62 @@ public class Activity {
 
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public String getLocationPickup() {
+        return locationPickup;
+    }
+
+    public void setLocationPickup(String locationPickup) {
+        this.locationPickup = locationPickup;
+    }
+
+    public String getLocationDropoff() {
+        return locationDropoff;
+    }
+
+    public void setLocationDropoff(String locationDropoff) {
+        this.locationDropoff = locationDropoff;
+    }
+
+    public String getFlightNumberArrival() {
+        return flightNumberArrival;
+    }
+
+    public void setFlightNumberArrival(String flightNumberArrival) {
+        this.flightNumberArrival = flightNumberArrival;
+    }
+
+    public String getFlightNumberDeparture() {
+        return flightNumberDeparture;
+    }
+
+    public void setFlightNumberDeparture(String flightNumberDeparture) {
+        this.flightNumberDeparture = flightNumberDeparture;
+    }
+
+    public String getFlightHourArrival() {
+        return flightHourArrival;
+    }
+
+    public void setFlightHourArrival(String flightHourArrival) {
+        this.flightHourArrival = flightHourArrival;
+    }
+
+    public String getFlightHourDeparture() {
+        return flightHourDeparture;
+    }
+
+    public void setFlightHourDeparture(String flightHourDeparture) {
+        this.flightHourDeparture = flightHourDeparture;
+    }
+
+    public String getFlightLocNumber() {
+        return flightLocNumber;
+    }
+
+    public void setFlightLocNumber(String flightLocNumber) {
+        this.flightLocNumber = flightLocNumber;
     }
         
 }

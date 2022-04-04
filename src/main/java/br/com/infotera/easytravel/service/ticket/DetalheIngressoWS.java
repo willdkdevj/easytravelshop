@@ -170,14 +170,14 @@ public class DetalheIngressoWS {
                     utilizacaoDatasList.add(ingressoUtilizacaoData);
                     
                 } catch(Exception ex) {
-                    throw new ErrorException(integrador, UtilsWS.class, "retornarTarifa", WSMensagemErroEnum.GENMETHOD, 
+                    throw new ErrorException(integrador, DetalheIngressoWS.class, "montaDataUtilizacaoList", WSMensagemErroEnum.SDE, 
                             "Erro ao obter os dados da Tarifa (PriceRate)", WSIntegracaoStatusEnum.NEGADO, null, false);
                 }
             }
         } catch(ErrorException error) {
             throw error;
         } catch(Exception ex) {
-            throw new ErrorException(integrador, UtilsWS.class, "retornarTarifa", WSMensagemErroEnum.GENMETHOD, 
+            throw new ErrorException(integrador, DetalheIngressoWS.class, "montaDataUtilizacaoList", WSMensagemErroEnum.SDE, 
                     "Erro ao processar a Tarifa (PriceRate)", WSIntegracaoStatusEnum.NEGADO, null, false);
         }
         

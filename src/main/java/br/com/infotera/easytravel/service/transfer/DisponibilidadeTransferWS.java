@@ -115,7 +115,7 @@ public class DisponibilidadeTransferWS {
                     WSTarifa tarifa = UtilsWS.retornarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate().get(0), dispoRQ.getReservaNomeList());//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
 
                     // Monta o descritivo do transfer
-                    String dsTransfer = UtilsWS.montaDescritivo(dispoRQ.getIntegrador(), transfer);                
+                    String dsTransfer = UtilsWS.montarDescritivo(dispoRQ.getIntegrador(), transfer);                
 
                     // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
                     String dsParametro = UtilsWS.montarParametro(dispoRQ.getIntegrador(), transfer, dtServicoInicio, dtServicoFim, search.getSearchId());

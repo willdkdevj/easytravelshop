@@ -10,7 +10,6 @@ import br.com.infotera.common.*;
 import br.com.infotera.common.enumerator.*;
 import br.com.infotera.common.media.WSMedia;
 import br.com.infotera.common.politica.WSPolitica;
-import br.com.infotera.common.politica.WSPoliticaVoucher;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservaRS;
 import br.com.infotera.common.servico.WSIngresso;
@@ -78,7 +77,7 @@ public class ConsultaWS {
             UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), consulta);
             
         } catch (Exception ex) {
-            throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "consultar", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "realizarConsulta", WSMensagemErroEnum.SCO, 
                     "Erro ao realizar consulta", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
 
@@ -135,9 +134,6 @@ public class ConsultaWS {
                                 
                         // Obtem link para mídia
                         mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage()));
-//                        if(book.getImage() != null){
-//                            mediaList = Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
-//                        }
                         
                         // Montar a lista de Pax
                         reservaNomeList = UtilsWS.montarReservaNomeList(integrador, book.getPassenger());
@@ -145,11 +141,16 @@ public class ConsultaWS {
                         // Buscar politicas de Voucher
                         VoucherRQ voucherRQ = UtilsWS.montarVoucher(integrador, file);
                         VoucherRS voucher = easyTravelShopClient.consultarVoucher(integrador, voucherRQ);
-//                        // verifica o status da consulta
+                      
+                        // verifica o status da consulta
                         UtilsWS.verificarRetorno(integrador, voucher);
                         
                         // Monta politicas de voucher
-                        politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
+                        if(voucher != null) {
+                            politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
+                        } else if(!Utils.isListNothing(file.getFileVoucher())){
+                            politicaList = UtilsWS.montarPoliticasVoucherGet(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
+                        }
                         
                         // Obtem as politicas de cancelamento
                         List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
@@ -157,7 +158,9 @@ public class ConsultaWS {
                             DatesRateGet rateGet = new DatesRateGet(cancellationPolicy);
                             List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(integrador, sgMoeda, vlTarifa, rateGet, false);
                             if(!Utils.isListNothing(politicasCancelamento)){
-                                politicaList = new ArrayList<>();
+                                if(Utils.isListNothing(politicaList)) {
+                                    politicaList = new ArrayList<>();
+                                }
                                 politicaList.addAll(politicasCancelamento);
                             }
                         }
