@@ -119,27 +119,24 @@ public class UtilsWS {
         Date startDate = null;
         Date endDate = null;
         
+        List<Integer> listIdadePax = null;
+        List<WSReservaNome> reservaNomeList = null;
         try {
              
             if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeIngressoRQ){
                 try {
                     WSDisponibilidadeIngressoRQ disponibilidadeIngressoRQ = (WSDisponibilidadeIngressoRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeIngressoRQ.getIntegrador();
-
+                    reservaNomeList = disponibilidadeIngressoRQ.getReservaNomeList();
+                    
                     startDate = disponibilidadeIngressoRQ.getDtInicio();
                     endDate = disponibilidadeIngressoRQ.getDtFim();
-
-                    List<Integer> listIdadePax = new ArrayList<>();
-                    disponibilidadeIngressoRQ.getReservaNomeList().stream().map(pax -> {
-                        Integer idade = pax.getQtIdade();
-                        return idade;
-                    }).forEachOrdered(idade -> {
-                        listIdadePax.add(idade);
-                    });
+                    
+                    listIdadePax = idadePaxList(integrador, reservaNomeList);
 
                     searchRQ = new SearchRQ();
-                    searchRQ.setPassengersAge(listIdadePax);
                     searchRQ.setSearchTicket(true);
+                    
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Ingressos", WSIntegracaoStatusEnum.NEGADO, ex, false);
@@ -148,21 +145,17 @@ public class UtilsWS {
                 try {
                     WSDisponibilidadeServicoRQ disponibilidadeServicoRQ = (WSDisponibilidadeServicoRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeServicoRQ.getIntegrador();
-
+                    reservaNomeList = disponibilidadeServicoRQ.getReservaNomeList();
+                    
                     startDate = disponibilidadeServicoRQ.getDtPartida();
                     endDate = disponibilidadeServicoRQ.getDtRetorno();
                     
-                    List<Integer> listIdadePax = new ArrayList<>();
-                    disponibilidadeServicoRQ.getReservaNomeList().stream().map(pax -> {
-                        Integer idade = pax.getQtIdade();
-                        return idade;
-                    }).forEachOrdered(idade -> {
-                        listIdadePax.add(idade);
-                    });
-
+                    
+                    listIdadePax = idadePaxList(integrador, reservaNomeList);
+                    
                     searchRQ = new SearchRQ();
-                    searchRQ.setPassengersAge(listIdadePax);
                     searchRQ.setSearchTour(true);
+                    
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Passeios", WSIntegracaoStatusEnum.NEGADO, ex, false);
@@ -172,6 +165,7 @@ public class UtilsWS {
                 try {
                     WSDisponibilidadeTransferRQ disponibilidadeTransferRQ = (WSDisponibilidadeTransferRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeTransferRQ.getIntegrador();
+                    reservaNomeList = disponibilidadeTransferRQ.getReservaNomeList();
                     
                     if(disponibilidadeTransferRQ.getTransferList().size() > 1) {
                         for(WSTransfer transfer : disponibilidadeTransferRQ.getTransferList()) {
@@ -186,25 +180,19 @@ public class UtilsWS {
                         startDate = trecho.getDtServico();
                         endDate = startDate;
                     }
-
-                    List<Integer> listIdadePax = new ArrayList<>();
-                    disponibilidadeTransferRQ.getReservaNomeList().stream().map(pax -> {
-                        Integer idade = pax.getQtIdade();
-                        return idade;
-                    }).forEachOrdered(idade -> {
-                        listIdadePax.add(idade);
-                    });
-
+                    
+                    listIdadePax = idadePaxList(integrador, reservaNomeList);
+                    
                     searchRQ = new SearchRQ();
-                    searchRQ.setPassengersAge(listIdadePax);
                     searchRQ.setSearchTransfer(true);
+                    
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Tranfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
-
             }
-
+            
+            searchRQ.setPassengersAge(listIdadePax);
             searchRQ.setLocationTo(new Location(locationId));
             searchRQ.setStartDate(startDate);
             searchRQ.setEndDate(endDate);
@@ -213,7 +201,7 @@ public class UtilsWS {
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, UtilsWS.class, "pesquisarSearch", WSMensagemErroEnum.GENMETHOD, 
+            throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar requisição de pesquisa para o Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -258,7 +246,7 @@ public class UtilsWS {
 
                     
                 } catch (Exception ex) {
-                    throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
+                    throw new ErrorException(integrador, UtilsWS.class, "validarResponse", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Passeios", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
 
@@ -269,7 +257,7 @@ public class UtilsWS {
                     
                     
                 } catch (Exception ex) {
-                    throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
+                    throw new ErrorException(integrador, UtilsWS.class, "validarResponse", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Tranfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
 
@@ -278,7 +266,7 @@ public class UtilsWS {
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, UtilsWS.class, "pesquisarSearch", WSMensagemErroEnum.GENMETHOD, 
+            throw new ErrorException(integrador, UtilsWS.class, "validarResponse", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar requisição de pesquisa para o Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -293,105 +281,90 @@ public class UtilsWS {
         
         String[] dsParamTarifar = null;
         String cdActivity = null;
+        
+        List<WSReservaNome> reservaNomeList = null;
+        List<Integer> listIdadePax = null;
         try {
-             
             if(disponibilidadeInfotravelRQ instanceof WSDetalheIngressoRQ){
                 try {
                     WSDetalheIngressoRQ disponibilidadeIngressoRQ = (WSDetalheIngressoRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeIngressoRQ.getIntegrador();
                     WSIngresso ticket = disponibilidadeIngressoRQ.getIngressoDetalhe().getIngresso();
-//                    WSDisponibilidadeIngressoRQ dispParam = null;
         
-                    try {
-                        // Trata dsParametro para montar requisição a fim de Re-Tarifar
-                        dsParamTarifar = ticket.getDsParametro().split("#");
-                        if(dsParamTarifar != null){
-                            cdActivity = dsParamTarifar[1];
-                            startDate = Utils.toDate(dsParamTarifar[3], "yyyy-MM-dd");
-                            endDate = Utils.toDate(dsParamTarifar[4], "yyyy-MM-dd");
-                        }
-
-                    } catch (Exception ex) {
-                        throw new ErrorException(disponibilidadeIngressoRQ.getIntegrador(), UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.SDE, 
-                                "Erro ao obter os parâmetros do Ingresso (DsParametro)", WSIntegracaoStatusEnum.NEGADO, ex, false);
-                    }
-
-                    List<Integer> listIdadePax = new ArrayList<>();
-                    ticket.getReservaNomeList().stream().map(pax -> {
-                        Integer idade = pax.getQtIdade();
-                        return idade;
-                    }).forEachOrdered(idade -> {
-                        listIdadePax.add(idade);
-                    });
-
+                    // Trata dsParametro para montar requisição a fim de Re-Tarifar
+                    dsParamTarifar = ticket.getDsParametro().split("#");
+                    reservaNomeList = ticket.getReservaNomeList();
+                        
                     searchRQ = new SearchRQ();
-                    searchRQ.setPassengersAge(listIdadePax);
                     searchRQ.setSearchTicket(true);
+                    
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.GENMETHOD, 
-                            "Erro ao montar requisição de pesquisa para Ingresso (TarifarWS)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                            "Erro ao montar requisição de pesquisa para Ingresso", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
             } else if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeServicoRQ) {
                 try {
                     WSDisponibilidadeServicoRQ disponibilidadeServicoRQ = (WSDisponibilidadeServicoRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeServicoRQ.getIntegrador();
 
-                    List<Integer> listIdadePax = new ArrayList<>();
-                    disponibilidadeServicoRQ.getReservaNomeList().stream().map(pax -> {
-                        Integer idade = pax.getQtIdade();
-                        return idade;
-                    }).forEachOrdered(idade -> {
-                        listIdadePax.add(idade);
-                    });
-
-                    searchRQ = new SearchRQ();
-                    searchRQ.setPassengersAge(listIdadePax);
+                    
                 } catch (Exception ex) {
-                    throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
+                    throw new ErrorException(integrador, UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Passeios", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
 
             } else if(disponibilidadeInfotravelRQ instanceof WSTarifarServicoRQ) {
                 try {
-                    WSReservaServico reserva = ((WSTarifarServicoRQ) disponibilidadeInfotravelRQ).getReservaServico();
-
-                    List<Integer> listIdadePax = new ArrayList<>();
-                    reserva.getServico().getReservaNomeList().forEach(pax -> {
-                        Integer idade = pax.getQtIdade();
-                        listIdadePax.add(idade);
-                    });
+                    WSTarifarServicoRQ tarifarServicoRQ = (WSTarifarServicoRQ) disponibilidadeInfotravelRQ;
+                    integrador = tarifarServicoRQ.getIntegrador();
+                    WSReservaServico reserva = tarifarServicoRQ.getReservaServico();
 
                     //validando objeto retornado pelo infotravel
                     if (reserva.getServico().getIsStTransfer() || reserva.getServico().getIsStPacoteServico()) {
                         WSPacoteServico pacoteServico = (WSPacoteServico) reserva.getServico();
-
-                        for(WSServico servico : pacoteServico.getServicoList()) {
-                            WSTransfer transfer = (WSTransfer) reserva.getServico();
-                            String[] chaveActivity = transfer.getDsParametro().split("#");
-                            cdActivity = chaveActivity[1];
-                            startDate = Utils.toDate(dsParamTarifar[3], "yyyy-MM-dd");
-                            endDate = Utils.toDate(dsParamTarifar[4], "yyyy-MM-dd");
-                        }
+                        reservaNomeList = pacoteServico.getReservaNomeList();
+                        
+                        WSTransfer transfer = (WSTransfer) pacoteServico.getServicoList().stream().filter(servicoPct -> servicoPct != null).findFirst().orElseThrow(RuntimeException::new);
+                        // Trata dsParametro para montar requisição a fim de Re-Tarifar
+                        dsParamTarifar = transfer.getDsParametro().split("#");
                         
                         searchRQ = new SearchRQ();
-                        searchRQ.setPassengersAge(listIdadePax);
                         searchRQ.setSearchTransfer(true);
                     }
+                        
                 } catch (Exception ex) {
-                    throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
+                    throw new ErrorException(integrador, UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Tranfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
 
             }
-            searchRQ.setActivityIds(Arrays.asList(cdActivity));
-            searchRQ.setStartDate(startDate);
-            searchRQ.setEndDate(endDate);
-            searchRQ.setTokenId(integrador.getSessao().getCdChave());
-
+            try {
+                // Trata dsParametro para montar requisição a fim de Re-Tarifar
+                if(dsParamTarifar != null){
+                    cdActivity = dsParamTarifar[1];
+                    startDate = Utils.toDate(dsParamTarifar[3], "yyyy-MM-dd");
+                    endDate = Utils.toDate(dsParamTarifar[4], "yyyy-MM-dd");
+                }
+                
+                // obtendo a idade os paxes para envio da requisição
+                listIdadePax = idadePaxList(integrador, reservaNomeList);
+                
+                searchRQ.setActivityIds(Arrays.asList(cdActivity));
+                searchRQ.setStartDate(startDate);
+                searchRQ.setEndDate(endDate);
+                searchRQ.setTokenId(integrador.getSessao().getCdChave());
+                searchRQ.setPassengersAge(listIdadePax);
+                
+            } catch (ErrorException error) {
+                throw error;
+            } catch (Exception ex) {
+                throw new ErrorException(integrador, UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.SDE, 
+                        "Erro ao obter os parâmetros (DsParametro)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+            }
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, UtilsWS.class, "pesquisarSearch", WSMensagemErroEnum.GENMETHOD, 
+            throw new ErrorException(integrador, UtilsWS.class, "montarSearchTarifar", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar requisição de pesquisa para o Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -487,10 +460,9 @@ public class UtilsWS {
         List<CancellationSearch> cancellationSearch = null;
 
         try {
-            try {
-                if(objDatesRate instanceof DatesRateGet){
-                    DatesRateGet rate = (DatesRateGet) objDatesRate;
-                    
+            if(objDatesRate instanceof DatesRateGet){
+                DatesRateGet rate = (DatesRateGet) objDatesRate;
+                try {
                     if(!Utils.isListNothing(rate.getCancellationPolicies())){
                         cancellationGet = new ArrayList();
                         cancellationGet.addAll(rate.getCancellationPolicies());
@@ -540,76 +512,77 @@ public class UtilsWS {
                             politicaList.addAll(politicCancelList);
                         }
                     }
-                }
-            } catch (Exception ex) {
-                throw new ErrorException(integrador, UtilsWS.class, "montaPoliticaCancelamento", 
+                } catch (Exception ex) {
+                    throw new ErrorException(integrador, UtilsWS.class, "montaPoliticaCancelamento", 
                         WSMensagemErroEnum.GENMETHOD, "Erro ao ler informações de politicas de cancelamento (ConsultaWS)", WSIntegracaoStatusEnum.NEGADO, ex);
-            }
-        
-            try {
-                if(objDatesRate instanceof DatesRateSearch) {
+                }
+            } else if(objDatesRate instanceof DatesRateSearch) {
                     DatesRateSearch rate = (DatesRateSearch) objDatesRate;
-                    // Data do serviço
-                    Date dtServico = rate.getServiceDate();
-                    
-                    if(!Utils.isListNothing(rate.getCancellationPolicies())){
-                        cancellationSearch = new ArrayList();
-                        cancellationSearch.addAll(rate.getCancellationPolicies());
+                    try {
+                        // Data do serviço
+                        Date dtServico = rate.getServiceDate();
 
-                        List<WSPolitica>  politicCancelList = new ArrayList<>();
-                        for(CancellationSearch cancel : cancellationSearch){
-                            WSPoliticaCancelamento cancelamento = null;
-                            
-                            // Percentual a ser cobrado em caso de multa
-                            Double vlPercentual = cancel.getValue();
-                            
-                            // Calculo do valor da multa
-                            Double vlCancelamento = Utils.calculaPercentual(vlTarifa, vlPercentual); //dividir((Utils.multiplicar(vlPercentual, vlTarifa)), 100.0);
-                            
-                            // Data mínima para cancelamento menos quatro (4) dias
-                            Date dtMinCancelamento = Utils.addDias(dtServico, -3);
+                        if(!Utils.isListNothing(rate.getCancellationPolicies())){
+                            cancellationSearch = new ArrayList();
+                            cancellationSearch.addAll(rate.getCancellationPolicies());
 
-                            // Descrição da política de cancelamento
-                            String dsPoliticaCancelamento = "Em caso de cancelamento depois das " + Utils.formatData(dtMinCancelamento, "HH:mm")
-                                    + " do dia " + Utils.formatData(dtMinCancelamento, "dd/MM/yyyy")
-                                    + " será aplicado uma multa de " + moeda + " " + vlCancelamento + ". \n"
-                                    + "Esta data e hora calculam-se em base no horário local do pais de destino.";
+                            List<WSPolitica>  politicCancelList = new ArrayList<>();
+                            for(CancellationSearch cancel : cancellationSearch){
+                                WSPoliticaCancelamento cancelamento = null;
 
-                            if (vlCancelamento != 0.0) {
-                                cancelamento = new WSPoliticaCancelamento("Politica Cancelamento",
-                                        dsPoliticaCancelamento + "<br>",
-                                        moeda,
-                                        vlCancelamento,
-                                        vlPercentual,
-                                        null,
-                                        false,
-                                        dtMinCancelamento,
-                                        null,
-                                        isNaoReembolsavel);
+                                // Percentual a ser cobrado em caso de multa
+                                Double vlPercentual = cancel.getValue();
 
-                                politicCancelList.add(cancelamento);
+                                // Calculo do valor da multa
+                                Double vlCancelamento = Utils.calculaPercentual(vlTarifa, vlPercentual); //dividir((Utils.multiplicar(vlPercentual, vlTarifa)), 100.0);
+
+                                // Data mínima para cancelamento menos quatro (4) dias
+                                Date dtMinCancelamento = Utils.addDias(dtServico, -3);
+
+                                // Descrição da política de cancelamento
+                                String dsPoliticaCancelamento = "Em caso de cancelamento depois das " + Utils.formatData(dtMinCancelamento, "HH:mm")
+                                        + " do dia " + Utils.formatData(dtMinCancelamento, "dd/MM/yyyy")
+                                        + " será aplicado uma multa de " + moeda + " " + vlCancelamento + ". \n"
+                                        + "Esta data e hora calculam-se em base no horário local do pais de destino.";
+
+                                if (vlCancelamento != 0.0) {
+                                    cancelamento = new WSPoliticaCancelamento("Politica Cancelamento",
+                                            dsPoliticaCancelamento + "<br>",
+                                            moeda,
+                                            vlCancelamento,
+                                            vlPercentual,
+                                            null,
+                                            false,
+                                            dtMinCancelamento,
+                                            null,
+                                            isNaoReembolsavel);
+
+                                    politicCancelList.add(cancelamento);
+                                }
+                            } 
+
+                            //ordenando lista de politica de cancelamento por data min de cancelamento
+                            politicCancelList.sort((p1, p2) -> {
+                                return p1.getPoliticaCancelamento().getDtMinCancelamento().compareTo(p2.getPoliticaCancelamento().getDtMinCancelamento());
+                            });
+
+                            if(!Utils.isListNothing(politicCancelList)){
+                                politicaList = new ArrayList<>();
+                                politicaList.addAll(politicCancelList);
                             }
-                        } 
-
-                        //ordenando lista de politica de cancelamento por data min de cancelamento
-                        politicCancelList.sort((p1, p2) -> {
-                            return p1.getPoliticaCancelamento().getDtMinCancelamento().compareTo(p2.getPoliticaCancelamento().getDtMinCancelamento());
-                        });
-
-                        if(!Utils.isListNothing(politicCancelList)){
-                            politicaList = new ArrayList<>();
-                            politicaList.addAll(politicCancelList);
                         }
+                    } catch (Exception ex) {
+                        throw new ErrorException(integrador, UtilsWS.class, "montaPoliticaCancelamento", 
+                                WSMensagemErroEnum.GENMETHOD, "Erro ao ler informações de politicas de cancelamento (Search)", WSIntegracaoStatusEnum.NEGADO, ex);
                     }
                 }
+            
+            } catch (ErrorException error) {
+                throw error;
             } catch (Exception ex) {
                 throw new ErrorException(integrador, UtilsWS.class, "montaPoliticaCancelamento", 
-                        WSMensagemErroEnum.GENMETHOD, "Erro ao ler informações de politicas de cancelamento (Search)", WSIntegracaoStatusEnum.NEGADO, ex);
+                        WSMensagemErroEnum.GENMETHOD, "Erro ao obter as politicas de cancelamento", WSIntegracaoStatusEnum.NEGADO, ex);
             }
-        } catch (Exception ex) {
-            throw new ErrorException(integrador, UtilsWS.class, "montaPoliticaCancelamento", 
-                    WSMensagemErroEnum.GENMETHOD, "Erro ao obter as politicas de cancelamento", WSIntegracaoStatusEnum.NEGADO, ex);
-        }
             
         return politicaList;
     }
@@ -731,84 +704,7 @@ public class UtilsWS {
 
             // Montar politica de cancelamento conforme o retorno da tarifa
             politicaCancelamentoList = montarPoliticasDeCancelamento(integrador, moeda, vlTarifa, rate, false);
-                
-            
-//                String tpPax = null;
-//                tarifaNomeList = new ArrayList<>();
-//                for(WSReservaNome nome : reservaNomeList) {
-//                    PassengersRate passenger = rate.getPassengersRate().stream()
-//                        .filter(pax -> (nome.getQtIdade() >= pax.getStartAge() && nome.getQtIdade() <= pax.getEndAge()))
-//                        .findFirst()
-//                        .orElse(null);
-//
-//                    if(passenger != null) {
-//                        try {
-//                            // Tipo da Moeda
-//                            moeda = passenger.getPrice().getCurrency().getIso();
-//
-//                            // Valor por Pessoa pacote (Ingresso)
-//                            vlPessoaNeto = passenger.getPrice().getPriceTotal();
-//
-//                            // Identificação do pax
-//                            String verificaPax = Utils.tiraAcento(passenger.getName().toLowerCase());
-//                            if(verificaPax.contains("adult")){
-//                                tpPax = "ADULTO";
-//                            } else if(verificaPax.contains("crianc") || verificaPax.contains("child")){
-//                                tpPax = "CRIANCA";
-//                            } else if(verificaPax.contains("melh")){
-//                                tpPax = "MELHOR IDADE";
-//                            }
-//
-//                        } catch(Exception ex) {
-//                            throw new ErrorException(integrador, UtilsWS.class, "retornarTarifa", WSMensagemErroEnum.GENMETHOD, 
-//                                    "Erro ao obter os dados da Tarifa (PriceRate)", WSIntegracaoStatusEnum.NEGADO, ex, false);
-//                        }
-//                    }
-//
-//                    if (tpPax.equals("ADULTO")) {
-//                        // Obtem o valor do Pax (ADULTO) e o acrescenta ao valor total para obter o valor da tarifa
-//                        WSTarifaNome tarifaNomeADT = new WSTarifaNome();
-//                        tarifaNomeADT.setPaxTipo(WSPaxTipoEnum.ADT);
-//                        tarifaNomeADT.setQtIdade(nome.getQtIdade());
-//                        tarifaNomeADT.setTarifa(new WSTarifa(moeda, vlPessoaNeto, null));
-//                        tarifaNomeADT.setDsTarifa(tpPax);
-//                        tarifaNomeList.add(tarifaNomeADT);
-//                    } else if (tpPax.equals("CRIANCA")) {
-//                        // Obtem o valor do Pax (CRIANCA)  e o acrescenta ao valor total para obter o valor da tarifa
-//                        WSTarifaNome tarifaNomeCHD = new WSTarifaNome();
-//                        tarifaNomeCHD.setPaxTipo(WSPaxTipoEnum.CHD);
-//                        tarifaNomeCHD.setQtIdade(nome.getQtIdade());
-//                        tarifaNomeCHD.setTarifa(new WSTarifa(moeda, vlPessoaNeto, null));
-//                        tarifaNomeCHD.setDsTarifa(tpPax);
-//                        tarifaNomeList.add(tarifaNomeCHD);
-//                    } else if(tpPax.equals("MELHOR IDADE")) {
-//                        // Obtem o valor do Pax (MELHOR IDADE) e o acrescenta ao valor total para obter o valor da tarifa
-//                        WSTarifaNome tarifaNomeSNR = new WSTarifaNome();
-//                        tarifaNomeSNR.setPaxTipo(WSPaxTipoEnum.SNR);
-//                        tarifaNomeSNR.setQtIdade(nome.getQtIdade());
-//                        tarifaNomeSNR.setTarifa(new WSTarifa(moeda, vlPessoaNeto, null));
-//                        tarifaNomeSNR.setDsTarifa(tpPax);
-//                        tarifaNomeList.add(tarifaNomeSNR);
-//                    }
-//
-//                }
-                
-                // Valor total do ingresso/passeio com base do valor obtido nos pax
-//                if(!Utils.isListNothing(tarifaNomeList)){
-//                    vlTarifa = tarifaNomeList.stream()
-//                            .filter(pax -> pax.getTarifa().getVlNeto() >  0.0)
-//                            .mapToDouble(pax -> pax.getTarifa().getVlNeto())
-//                            .sum();
-//                } else {
-//                    throw new ErrorException(integrador, UtilsWS.class, "retornarTarifa", WSMensagemErroEnum.GENMETHOD, 
-//                        "Erro ao obter a tarifa por passageiro (Montagem do TarifaNomeList)", WSIntegracaoStatusEnum.NEGADO, null, false);
-//                }
-//                
-//                // Montar politica de cancelamento conforme o retorno da tarifa
-//                politicaCancelamentoList = montarPoliticasDeCancelamento(integrador, moeda, vlTarifa, rate, false);
-                
-//            }
-            
+
             tarifa = new WSTarifa(moeda,
                     vlTarifa, //valor
                     vlPessoaNeto, //preço por pessoa = vlNeto, pois apresenta apenas preço por unidade
@@ -1003,7 +899,7 @@ public class UtilsWS {
                     reservaStatus = WSReservaStatusEnum.INCONSISTENTE;
             }
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montaReserva", WSMensagemErroEnum.SCO,
+            throw new ErrorException(integrador, ConsultaWS.class, "verificarStatusReserva", WSMensagemErroEnum.GENMETHOD,
                     "Erro ao obter o status da reserva no fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         return reservaStatus;
@@ -1023,22 +919,19 @@ public class UtilsWS {
                 voucher.setTokenId(integrador.getSessao().getCdChave());
             }
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montarVoucher", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(integrador, ConsultaWS.class, "montarVoucher", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao obter as politicas de voucher", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }                     
                         
         return voucher;
     }
     
-    public static List<WSPolitica> montarPoliticasVoucher(WSIntegrador integrador, br.com.infotera.easytravel.model.File file) throws ErrorException {
-        VoucherRS voucherRetorno = null;
-        Integer nrLocalizador = null;
-        Integer bookingId = null;
+    public static List<WSPolitica> montarPoliticasVoucher(WSIntegrador integrador, VoucherRS voucherRetorno) throws ErrorException {
         List<WSPolitica> politicaList = null;
         
         try {
             try {
-                if(!Utils.isListNothing(voucherRetorno.getResponse())){
+                if(voucherRetorno != null && !Utils.isListNothing(voucherRetorno.getResponse())){
                     //politicas de voucher
                     politicaList = new ArrayList();
                     
@@ -1114,13 +1007,13 @@ public class UtilsWS {
                     }).forEachOrdered(politicaList::addAll);
                 }    
             } catch (Exception ex) {
-                throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.SCO, 
+                throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.GENMETHOD, 
                         "Erro ao montar as politicas de voucher", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.GENMETHOD, 
                     "Erro na construção das politicas de voucher", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -1245,7 +1138,7 @@ public class UtilsWS {
                 });
             }
         } catch (Exception ex) {
-            throw new ErrorException (integrador, UtilsWS.class, "montarServicoList", WSMensagemErroEnum.GENMETHOD, 
+            throw new ErrorException (integrador, UtilsWS.class, "montarServicoListTransfer", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar o TransferInfo", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
                 
@@ -1260,13 +1153,24 @@ public class UtilsWS {
             String[] chaveActivity = null;
             
             if (servico.getIsStIngresso()) {
+                // realiza o parse para o objeto WSIngresso
                 WSIngresso ingresso = (WSIngresso) servico;
                 dsParametro = ingresso.getDsParametro();
                 chaveActivity = dsParametro.split("#");
-            } else if(servico.getIsStTransfer() || servico.getIsStPacoteServico()) {
-                WSTransfer transfer = (WSTransfer) servico;
-                dsParametro = transfer.getDsParametro();
+                
+            } else if(servico.getIsStPacoteServico()) {
+                // Inicia tratativa para Transfer
+                WSPacoteServico pacoteServico = (WSPacoteServico) servico;
+                
+                // realiza o parse para o objeto WSTransfer
+                WSTransfer transfer = (WSTransfer) pacoteServico.getServicoList().stream()
+                                                                .filter(servicoPct -> servicoPct != null)
+                                                                .findFirst()
+                                                                .orElseThrow(RuntimeException::new);
+                
+                dsParametro = pacoteServico.getDsParametro();
                 chaveActivity = dsParametro.split("#");
+                
             } else {
                 dsParametro = servico.getDsParametro();
                 chaveActivity = dsParametro.split("#");
@@ -1435,4 +1339,19 @@ public class UtilsWS {
         
     }
     
+    private static List<Integer> idadePaxList(WSIntegrador integrador, List<WSReservaNome> reservaNomeList) throws ErrorException{
+        List<Integer> nrIdadeList = new ArrayList();
+        try {
+            // Trata dsParametro para montar requisição a fim de Re-Tarifar
+            reservaNomeList.forEach(pax -> {
+                Integer idade = pax.getQtIdade();
+                nrIdadeList.add(idade);
+            });
+
+        } catch (Exception ex) {
+            throw new ErrorException(integrador, UtilsWS.class, "idadePaxList", WSMensagemErroEnum.GENMETHOD, 
+                    "Erro ao montar lista de idades dos passageiros", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        return nrIdadeList;
+    }
 }

@@ -54,7 +54,7 @@ public class ReservaTransferWS {
                 .findFirst()
                 .orElseThrow(RuntimeException::new);
         
-            if (rServico.getServico().isStTransfer()) {
+            if (rServico.getServico().getIsStTransfer() || rServico.getServico().getIsStPacoteServico()) {
                 try {
 //                    WSIngresso ingresso = (WSIngresso) servico;
 //                    dsParametro = ingresso.getDsParametro();

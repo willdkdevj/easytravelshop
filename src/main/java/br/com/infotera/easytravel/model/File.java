@@ -35,6 +35,7 @@ public class File extends Integration {
     public Person personAgent;
     public List<Booking> bookings;
     public List<Passenger> passengers;
+    public List<FileVoucher> fileVoucher;
     public Financial financial;
     public List<FollowUpExecution> followUpExecutions;
     public Double overPrice;
@@ -278,6 +279,14 @@ public class File extends Integration {
 
     public void setPayments(List<PaymentPlan> payments) {
         this.payments = payments;
+    }
+
+    public List<FileVoucher> getFileVoucher() {
+        return fileVoucher;
+    }
+
+    public void setFileVoucher(List<FileVoucher> fileVoucher) {
+        this.fileVoucher = fileVoucher;
     }
     
 }

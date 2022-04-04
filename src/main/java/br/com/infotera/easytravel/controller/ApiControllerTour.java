@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import org.springframework.boot.info.BuildProperties;
 
 @RestController
-//@RequestMapping(value = "/servico")
+@RequestMapping(value = "/servico")
 public class ApiControllerTour {
 
     private static Logger logger;
@@ -45,32 +45,32 @@ public class ApiControllerTour {
         }
     }
 
-//    @Autowired
-//    private Gson gson;
-//    @Autowired
-//    private CancelarWS cancelarWS;
-//    @Autowired
-//    private ConsultaWS consultaWS;
-//    @Autowired
-//    private DetalheIngressoWS detalheWS;
-//    @Autowired
-//    private PreCancelarWS preCancelarWS;
-//    @Autowired
-//    private PreReservaWS preReservaWS;
-//    @Autowired
-//    private RelatorioWS relatorioWS;
-//    @Autowired
-//    private ReservaWS reservaWS;
-//    @Autowired
-//    private TarifarWS tarifarWS;
-//    @Autowired
-//    private BuildProperties build;
-//
-//    @RequestMapping(value = "ola", method = RequestMethod.GET)
-//    public String helloWorld() {
-//        return "Hello World " + build.getName().toUpperCase() + " - Version: " + build.getVersion();
-//    }
-//
+    @Autowired
+    private Gson gson;
+    @Autowired
+    private CancelarWS cancelarWS;
+    @Autowired
+    private ConsultaWS consultaWS;
+    @Autowired
+    private DetalheIngressoWS detalheWS;
+    @Autowired
+    private PreCancelarWS preCancelarWS;
+    @Autowired
+    private PreReservaWS preReservaWS;
+    @Autowired
+    private RelatorioWS relatorioWS;
+    @Autowired
+    private ReservaWS reservaWS;
+    @Autowired
+    private TarifarWS tarifarWS;
+    @Autowired
+    private BuildProperties build;
+
+    @RequestMapping(value = "olaTransfer", method = RequestMethod.GET)
+    public String helloWorld() {
+        return "Hello World " + build.getName().toUpperCase() + " - Version: " + build.getVersion();
+    }
+
 //    @RequestMapping(value = "/tarifar", method = RequestMethod.POST)
 //    public String tarifar(@RequestBody String jsonRQ) {
 //        WSTarifarServicoRS wsRS = null;
@@ -173,7 +173,7 @@ public class ApiControllerTour {
 //        }
 //        return gson.toJson(wsRS);
 //    }
-//
+
 //    @RequestMapping(value = "/cancelar", method = RequestMethod.POST)
 //    public String cancelar(@RequestBody String jsonRQ) {
 //        WSReservaRS wsRS = null;

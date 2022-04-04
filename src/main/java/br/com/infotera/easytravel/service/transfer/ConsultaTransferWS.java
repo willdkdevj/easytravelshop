@@ -1,23 +1,16 @@
 package br.com.infotera.easytravel.service.transfer;
 
 import br.com.infotera.common.ErrorException;
-import br.com.infotera.common.WSDocumento;
 import br.com.infotera.common.WSIntegrador;
 import br.com.infotera.common.WSReserva;
 import br.com.infotera.common.WSReservaNome;
 import br.com.infotera.common.WSReservaServico;
 import br.com.infotera.common.WSTarifa;
-import br.com.infotera.common.WSTarifaAdicional;
-import br.com.infotera.common.enumerator.WSDocumentoTipoEnum;
 import br.com.infotera.common.enumerator.WSIntegracaoStatusEnum;
-import br.com.infotera.common.enumerator.WSMediaCategoriaEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
 import br.com.infotera.common.enumerator.WSPagtoFornecedorTipoEnum;
-import br.com.infotera.common.enumerator.WSPaxTipoEnum;
 import br.com.infotera.common.enumerator.WSReservaStatusEnum;
 import br.com.infotera.common.enumerator.WSServicoTipoEnum;
-import br.com.infotera.common.enumerator.WSSexoEnum;
-import br.com.infotera.common.enumerator.WSTarifaAdicionalTipoEnum;
 import br.com.infotera.common.enumerator.WSTransferInOutEnum;
 import br.com.infotera.common.enumerator.WSVeiculoTransferTipoEnum;
 import br.com.infotera.common.media.WSMedia;
@@ -25,19 +18,22 @@ import br.com.infotera.common.politica.WSPolitica;
 import br.com.infotera.common.politica.WSPoliticaVoucher;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservaRS;
-import br.com.infotera.common.servico.WSIngresso;
-import br.com.infotera.common.servico.WSIngressoModalidade;
-import br.com.infotera.common.servico.WSIngressoUtilizacaoData;
+import br.com.infotera.common.servico.WSPacoteServico;
 import br.com.infotera.common.servico.WSServico;
+import br.com.infotera.common.servico.WSServicoInfo;
+import br.com.infotera.common.servico.WSServicoInfoItem;
 import br.com.infotera.common.servico.WSTransfer;
+import br.com.infotera.common.servico.WSTransferInfo;
+import br.com.infotera.common.servico.WSVeiculoTransfer;
 import br.com.infotera.common.util.Utils;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
 import br.com.infotera.easytravel.model.Booking;
+import br.com.infotera.easytravel.model.BookingDetailService;
 import br.com.infotera.easytravel.model.CancellationPolicy;
 import br.com.infotera.easytravel.model.DatesRateGet;
 import br.com.infotera.easytravel.model.ENUM.TipoTransferEnum;
 import br.com.infotera.easytravel.model.File;
-import br.com.infotera.easytravel.model.Passenger;
+import br.com.infotera.easytravel.model.FileVoucher;
 import br.com.infotera.easytravel.model.RQRS.ConsultarGetRQ;
 import br.com.infotera.easytravel.model.RQRS.ConsultarGetRS;
 import br.com.infotera.easytravel.model.RQRS.VoucherRQ;
@@ -49,8 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -112,45 +106,46 @@ public class ConsultaTransferWS {
         String sgMoeda = null;
         String cdTransfer = null;
         String nmTransfer = null;
+        String dsTransfer = null;
 
         Date dtInicial = null;
         Date dtFinal = null;
             
-        
         List<WSPolitica> politicaList = null;
         List<WSMedia> mediaList = null;
-//        List<WSIngressoUtilizacaoData> utilizacaoDatasList = null;
+        List<WSServico> servicoList = null;
+        List<WSReservaNome> reservaNomeList = null;
         
         WSServicoTipoEnum servicoTipoEnum = null;
         
-        
         WSTarifa tarifa = null;
-        WSServico servico = null;
         WSIntegrador integrador = reservaRQ.getIntegrador();
         
         try {
             //localizador
             File file = consulta.getFiles().stream().filter(f -> f != null).findFirst().get();
             nrLocalizador = file.getBookings().stream().filter(book -> book != null).findFirst().get().getFileId();
-            servico = reservaRQ.getReserva().getReservaServicoList().stream()
-                    .filter(reservaServico -> reservaServico.getServico() != null)
-                    .findFirst()
-                    .orElseThrow(RuntimeException::new).getServico();
-            
+
             // Verificar o Status da Reserva
             reservaStatus = UtilsWS.verificarStatusReserva(file, reservaStatus, integrador);
             
             try {
                 for(Booking book : file.getBookings()) {
                     // Periodo de utilização dos serviços
-                    dtInicial = book.getStartDate();
-                    dtFinal = book.getEndDate();
-//                    utilizacaoDatasList = Arrays.asList(new WSIngressoUtilizacaoData(dtInicial, dtFinal));
+                    try {
+                        dtInicial = book.getStartDate();
+                        dtFinal = book.getEndDate();
 
-                    // informações sobre a modalidade
-                    cdTransfer = String.valueOf(book.getBookingDetailService().getId());
-                    nmTransfer = book.getBookingDetailService().getName();
-
+                        // informações sobre a modalidade
+                        cdTransfer = String.valueOf(book.getBookingDetailService().getId());
+                        nmTransfer = book.getBookingDetailService().getName();
+                        dsTransfer = book.getBookingDetailService().getDescription();
+                        
+                    } catch (Exception ex) {
+                        throw new ErrorException (integrador, TarifarTransferWS.class, "montarReserva", WSMensagemErroEnum.SCO, 
+                                "Erro ao obter os dados principais do Transfer " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
+                    } 
+                    
                     try {
                         //descobre se é só ida ou ida e volta
                         servicoTipoEnum = book.getBookingDetailService().isTransferIn() && book.getBookingDetailService().isTransferOut() ? WSServicoTipoEnum.TRANSFER : WSServicoTipoEnum.TRANSFER_TRECHO;
@@ -163,42 +158,40 @@ public class ConsultaTransferWS {
                     mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage())); //Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
 
                     // Montar a lista de Pax
-//                    List<WSReservaNome> reservaNomeList = UtilsWS.montarReservaNomeList(integrador, book.getPassenger());
+                    reservaNomeList = UtilsWS.montarReservaNomeList(integrador, book.getPassenger());
 
                     // Buscar politicas de Voucher
-//                        VoucherRQ voucherRQ = UtilsWS.montarVoucher(integrador, file);
-//                        VoucherRS voucher = easyTravelShopClient.consultarVoucher(integrador, voucherRQ);
-//                        // verifica o status da consulta
-//                        UtilsWS.verificarRetorno(integrador, voucher);
+//                    politicaList = montarPoliticasVoucher(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
+                    VoucherRQ voucherRQ = UtilsWS.montarVoucher(integrador, file);
+                    VoucherRS voucher = easyTravelShopClient.consultarVoucher(integrador, voucherRQ);
+                    
+                    // verifica o status da consulta
+                    UtilsWS.verificarRetorno(integrador, voucher);
 
                     // Monta politicas de voucher
-//                        politicaList = UtilsWS.montarPoliticasVoucher(integrador, file);
+                    politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
 
                     // Obtem as politicas de cancelamento
+//                    politicaList = new ArrayList<>();
                     List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
                     if(!Utils.isListNothing(cancellationPolicy)){
                         DatesRateGet rateGet = new DatesRateGet(cancellationPolicy);
                         List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(integrador, sgMoeda, vlTarifa, rateGet, false);
+                        // atualiza lista de politicas
                         if(!Utils.isListNothing(politicasCancelamento)){
-                            politicaList = new ArrayList<>();
                             politicaList.addAll(politicasCancelamento);
                         }
                     }
-
-//                    WSVeiculoTransferTipoEnum veiculoTransfer = null;
-//                    try {
-//                        if (book.getBookingDetailService().getActivityType().equals(TipoTransferEnum.PRIVADO.getTexto())) {
-//                            veiculoTransfer = WSVeiculoTransferTipoEnum.PRIVADO;
-//                        } else if (book.getBookingDetailService().getActivityType().equals(TipoTransferEnum.COMPARTILHADO.getTexto())) {
-//                            veiculoTransfer = WSVeiculoTransferTipoEnum.COMPARTILHADO;
-//                        } else {
-//                            veiculoTransfer = WSVeiculoTransferTipoEnum.REGULAR;
-//                        }
-//                    } catch (Exception ex) {
-//                        throw new ErrorException (integrador, UtilsWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
-//                                "Erro ao obter o tipo do transfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
-//                    }
-
+                    
+                    // verificação do tipo de veiculo (transfer)
+                    WSVeiculoTransfer veiculoTransfer = montarVeiculoTransfer(integrador, book.getBookingDetailService());
+                    
+                    // montagem do Transfer Info
+                    WSTransferInfo info = montarTransferInfo(integrador, book);
+                    
+                    // montagem da lista de informações sobre o servico (ServicoInfoList)
+                    List<WSServicoInfo> servicoInfoList = montarServicoInfoList(integrador, file.getFileVoucher());
+                    
                     try {
                         // Obtendo a sigla da moeda para montagem da tarifa
                         if(book.getCurrency() != null) {
@@ -208,6 +201,7 @@ public class ConsultaTransferWS {
 
                             tarifa = new WSTarifa();
                             tarifa.setSgMoeda(sgMoeda);
+                            tarifa.setSgMoedaNeto(sgMoeda);
                             tarifa.setVlNeto(vlTarifa);
                             tarifa.setPagtoFornecedor(WSPagtoFornecedorTipoEnum.FATURADO);
                             
@@ -221,9 +215,7 @@ public class ConsultaTransferWS {
                     }
 
                     // Lista Serviços
-                    List<WSServico> servicoList = null;
                     try { 
-                        WSTransfer transfer = (WSTransfer) servico;
                         servicoList = new ArrayList();
                         int idaVolta = 2;
                         if(book.getBookingDetailService().isTransferIn() && book.getBookingDetailService().isTransferOut()){
@@ -233,13 +225,13 @@ public class ConsultaTransferWS {
                                 transferIdaVolta.setTransferInOut(i == 0 ? WSTransferInOutEnum.IN : WSTransferInOutEnum.OUT);
                                 transferIdaVolta.setCdServico(cdTransfer);
                                 transferIdaVolta.setNmServico(nmTransfer);
-                                transferIdaVolta.setDsServico(transfer.getDsServico());
+                                transferIdaVolta.setDsServico(dsTransfer);
                                 transferIdaVolta.setTarifa(tarifa);
                                 transferIdaVolta.setDtServico(dtInicial);
-                                transferIdaVolta.setVeiculoTransfer(transfer.getVeiculoTransfer());
+                                transferIdaVolta.setVeiculoTransfer(veiculoTransfer);
                                 transferIdaVolta.setMediaList(mediaList);
-                                transferIdaVolta.setInfoList(transfer.getInfoList());
-                                transferIdaVolta.setTransferInfo(transfer.getTransferInfo());
+                                transferIdaVolta.setInfoList(servicoInfoList);
+                                transferIdaVolta.setTransferInfo(info);
                                 transferIdaVolta.setDsParametro(dsParametro);
                                 transferIdaVolta.setServicoTipo(servicoTipoEnum);
 
@@ -256,20 +248,20 @@ public class ConsultaTransferWS {
                             transferTrecho.setTransferInOut(WSTransferInOutEnum.IN);
                             transferTrecho.setCdServico(cdTransfer);
                             transferTrecho.setNmServico(nmTransfer);
-                            transferTrecho.setDsServico(transfer.getDsServico());
+                            transferTrecho.setDsServico(dsTransfer);
                             transferTrecho.setTarifa(tarifa);
                             transferTrecho.setDtServico(dtInicial);
-                            transferTrecho.setVeiculoTransfer(transfer.getVeiculoTransfer());
+                            transferTrecho.setVeiculoTransfer(veiculoTransfer);
                             transferTrecho.setMediaList(mediaList);
-                            transferTrecho.setInfoList(transfer.getInfoList());
-                            transferTrecho.setTransferInfo(transfer.getTransferInfo());
+                            transferTrecho.setInfoList(servicoInfoList);
+                            transferTrecho.setTransferInfo(info);
                             transferTrecho.setDsParametro(dsParametro);
                             transferTrecho.setServicoTipo(servicoTipoEnum);
 
                             servicoList.add(transferTrecho);
                         }
                         // ordernar por menor data
-                        if(!Utils.isListNothing(servicoList)){
+                        if(!Utils.isListNothing(servicoList) && servicoList.size() > 1){
                             servicoList.sort((s1, s2) -> {
                                 return s1.getDtServico().compareTo(s2.getDtServico());
                             });
@@ -283,7 +275,7 @@ public class ConsultaTransferWS {
                 throw error;
             } catch (Exception ex) {
                 throw new ErrorException(integrador, ConsultaWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
-                        "Erro ao montar as politicas da reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                        "Erro ao montar a reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
             
         } catch (ErrorException error) {
@@ -293,12 +285,23 @@ public class ConsultaTransferWS {
                     "Erro ao ler informações de politicas", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
+        // montagem do Pacote de Servico (Transfer)
+        WSPacoteServico pctServico = new WSPacoteServico();
+        pctServico.setCdServico(cdTransfer);
+        pctServico.setNmServico(nmTransfer);
+        pctServico.setDsServico(dsParametro);
+        pctServico.setReservaNomeList(reservaNomeList);
+        pctServico.setTarifa(tarifa);
+        pctServico.setDtServico(dtInicial);
+        pctServico.setServicoList(servicoList);
+        pctServico.setServicoTipo(servicoTipoEnum);
+        
         // reserva servico (servico-transfer)
         WSReservaServico reservaServico = new WSReservaServico();
         reservaServico.setIntegrador(integrador);
-        reservaServico.setServicoTipo(WSServicoTipoEnum.TRANSFER);
-        reservaServico.setServico(servico);
+        reservaServico.setServicoTipo(servicoTipoEnum);
         reservaServico.setNrLocalizador(String.valueOf(nrLocalizador));
+        reservaServico.setServico(pctServico);
         reservaServico.setReservaStatus(reservaStatus);
 
         WSReserva reserva = new WSReserva(reservaServico);
@@ -307,4 +310,174 @@ public class ConsultaTransferWS {
         return reserva;
     }
     
+    private WSVeiculoTransfer montarVeiculoTransfer(WSIntegrador integrador, BookingDetailService service) throws ErrorException {
+        WSVeiculoTransfer veiculo = null;
+        try {
+            veiculo = new WSVeiculoTransfer(service.getActivityType().equals(TipoTransferEnum.PRIVADO.getTexto()) ? WSVeiculoTransferTipoEnum.PRIVADO : WSVeiculoTransferTipoEnum.COMPARTILHADO, 
+                                            service.getActivityTypeName(), 
+                                            service.getActivityTypeName(), 
+                                            service.getMaxNumberBaggage() != null && service.getMaxNumberBaggage() > 0 ? service.getMaxNumberBaggage() : 0);
+        } catch (Exception ex) {
+            throw new ErrorException (integrador, UtilsWS.class, "montarVeiculoTransfer", WSMensagemErroEnum.SCO, 
+                    "Erro ao determinar o tipo de veiculo (WSVeiculoTransfer)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }  
+        return veiculo;
+    }
+
+    private WSTransferInfo montarTransferInfo(WSIntegrador integrador, Booking book) throws ErrorException {
+        WSTransferInfo info = null;
+        
+        String nmOrigem;
+        String nmDestino;
+        
+        try {
+            nmOrigem = book.getLocationFrom() != null && !book.getLocationFrom().getNameSearch().equals("") ? book.getLocationFrom().getNameSearch() : book.getLocationFrom() != null ? book.getLocationFrom().getName() : null;
+            nmDestino = book.getLocationTo() != null && !book.getLocationTo().getNameSearch().equals("") ? book.getLocationTo().getNameSearch() : book.getLocationTo() != null ? book.getLocationTo().getName() : null;
+                        
+            info = new WSTransferInfo();
+            info.setDtTransporte(book.getStartDate());
+            info.setNmOrigem(nmOrigem);
+            info.setNmDestino(nmDestino);
+            info.setStObrigatorio(true);
+            
+        } catch (Exception ex) {
+            throw new ErrorException (integrador, UtilsWS.class, "montarTransferInfo", WSMensagemErroEnum.SCO, 
+                    "Erro ao montar o TransferInfo", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        return info;
+    }    
+        
+    private List<WSServicoInfo> montarServicoInfoList(WSIntegrador integrador, List<FileVoucher> fileVoucher) throws ErrorException {
+        List<WSServicoInfo> servicoInfoList = null;
+        try {
+
+            FileVoucher voucherFile = fileVoucher.stream().filter(voucher -> voucher != null).findFirst().orElseThrow(RuntimeException::new);
+
+            List<String> listIncludes = !Utils.isListNothing(voucherFile.getIncludes()) ? voucherFile.getIncludes() : null;
+            List<String> listNotIncludes = !Utils.isListNothing(voucherFile.getNotIncludes()) ? voucherFile.getNotIncludes() : null;
+
+            if(listIncludes != null) {
+                List<WSServicoInfoItem> servicoInfoItemList = new ArrayList();
+                int ind = 0;
+                for(String include : listIncludes){
+                    WSServicoInfoItem infoItem = new WSServicoInfoItem();
+                    infoItem.setDsItem(include);
+                    infoItem.setSqOrdem(ind++);
+
+                    servicoInfoItemList.add(infoItem);
+                }
+
+                if(listNotIncludes != null) {
+                    ind = 0;
+                    for(String nInclude : listNotIncludes){
+                        WSServicoInfoItem infoItem = new WSServicoInfoItem();
+                        infoItem.setDsItem(nInclude);
+                        infoItem.setSqOrdem(ind++);
+
+                        servicoInfoItemList.add(infoItem);
+                    }
+                }
+
+                if(!Utils.isListNothing(servicoInfoItemList)){
+                    servicoInfoList = new ArrayList();
+                    servicoInfoList.add(new WSServicoInfo("Detalhes Tranfer", servicoInfoItemList, 0));
+                }
+            }
+        } catch (Exception ex) {
+            throw new ErrorException (integrador, UtilsWS.class, "montarServicoInfoList", WSMensagemErroEnum.SCO, 
+                    "Erro ao montar a lista de informações sobre o serviço", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        return servicoInfoList;
+    }
+
+    private List<WSPolitica> montarPoliticasVoucher(WSIntegrador integrador, Integer nrLocalizador, Integer fileId, List<FileVoucher> voucherList) throws ErrorException {
+        List<WSPolitica> politicaList = null;
+        VoucherRQ voucherRQ = null;
+        try {
+            if(nrLocalizador != null){
+                voucherRQ = new VoucherRQ();
+                voucherRQ.setFileId(nrLocalizador);
+                voucherRQ.setBookingId(fileId);
+                voucherRQ.setTokenId(integrador.getSessao().getCdChave());
+            }
+        } catch (Exception ex) {
+            throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.SCO, 
+                    "Erro ao montar a requisição (Voucher)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }                  
+        
+        try {
+            // Verifica se na consulta (Get) é devolvida as politicas de voucher
+            FileVoucher response = voucherList.stream()
+                .filter(voucherFile -> voucherFile != null)
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
+            
+            if(response != null){
+                //politicas de voucher
+                List<WSPoliticaVoucher> politicaVoucherList = new ArrayList();
+                //logotipo da empresa (ETS)
+                if (response.getBookingDate() != null) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Logotipo", response.getCompanyPhoto()));
+                }
+
+                //data de criação da reserva
+                if (response.getBookingDate() != null) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Data de criação", String.valueOf(response.getBookingDate())));
+                }
+
+                //responsavel pela reserva
+                if (response.getAgencyName() != null && !response.getAgencyName().equals("")) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Responsavel pela reserva: ", response.getAgencyName()));
+                }
+
+                // Código do Voucher
+                if (response.getCode()!= null && !response.getCode().equals("")) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("Cod Voucher: ", response.getCode()));
+                }
+
+                // QR Code
+                if (response.getQrCode()!= null && !response.getQrCode().equals("")) {
+                    politicaVoucherList.add(new WSPoliticaVoucher("QR Code: ", response.getQrCode()));
+                }
+
+                // Nome da modalidade no voucher
+                politicaVoucherList.add(new WSPoliticaVoucher("Destino: ", response.getLocationTo()));
+                politicaVoucherList.add(new WSPoliticaVoucher("Modalidade", response.getActivityName()));
+                politicaVoucherList.add(new WSPoliticaVoucher("Descrição", response.getActivityDescription()));
+                politicaVoucherList.add(new WSPoliticaVoucher("Data de inicio: ", Utils.formatData(response.getActivityDate(), "yyyy-MM-dd'T'HH:mm:ss")));
+                politicaVoucherList.add(new WSPoliticaVoucher("Data de chegada: ", Utils.formatData(response.getActivityEndDate(), "yyyy-MM-dd'T'HH:mm:ss")));
+
+                // Inclusos
+                if(!Utils.isListNothing(response.getIncludes())){
+                    response.getIncludes().forEach(inclusion -> {
+                        politicaVoucherList.add(new WSPoliticaVoucher("Incluso: ", inclusion));
+                    });
+                }
+
+                // Não inclusos
+                if(!Utils.isListNothing(response.getNotIncludes())){
+                    response.getNotIncludes().forEach(noInclusion -> {
+                        politicaVoucherList.add(new WSPoliticaVoucher("Não Incluso: ", noInclusion));
+                    });
+                }
+
+                // Contato para emergência
+                if(response.getEmergencyName() != null && !response.getEmergencyName().equals("")){
+                    politicaVoucherList.add(new WSPoliticaVoucher("Emergência Contato: ", response.getEmergencyName()));
+                    politicaVoucherList.add(new WSPoliticaVoucher("Telefone para Contato: ", response.getEmergencyPhone()));
+                    politicaVoucherList.add(new WSPoliticaVoucher("Telefone 24hrs: ", response.getPhone24Hours()));
+                }
+
+                if(!Utils.isListNothing(politicaVoucherList)){
+                    politicaList = new ArrayList();
+                    politicaList.addAll(politicaVoucherList);
+                }
+            }
+        } catch (Exception ex) {
+            throw new ErrorException(integrador, ConsultaWS.class, "montarPoliticasVoucher", WSMensagemErroEnum.SCO, 
+                    "Erro ao montar as politicas de voucher", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        
+        return politicaList;
+    }
 }

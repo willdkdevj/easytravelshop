@@ -73,7 +73,7 @@ public class DisponibilidadeControllerTour {
         
         Date dtNasc1 = Utils.toDate("1988-05-12", "yyyy-MM-dd");
 
-        List<WSServicoTipoEnum> tipoServicoList = Arrays.asList(WSServicoTipoEnum.TRANSFER);
+        List<WSServicoTipoEnum> tipoServicoList = Arrays.asList(WSServicoTipoEnum.PASSEIO);
         
         WSMotorLocal motorLocalIda = new WSMotorLocal(0, "Porto Seguro", "", "Porto Seguro", "BPS", "BA", "Brasil",0);
         WSMotorLocal motorLocalVolta = new WSMotorLocal(0, "Porto Seguro", "", "Porto Seguro", "BPS", "BA", "Brasil",0);

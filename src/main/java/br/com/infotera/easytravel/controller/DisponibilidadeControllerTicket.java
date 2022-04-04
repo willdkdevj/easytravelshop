@@ -65,6 +65,7 @@ public class DisponibilidadeControllerTicket {
         
         WSIntegrador integrador = new WSIntegrador(WSIntegradorEnum.HOTELBEDS, WSIntegracaoStatusEnum.OK);
         integrador.setDsCredencialList(dsCredencialList);
+        integrador.setDsMetodo("disponibilidade");
         integrador.setAmbiente(WSAmbienteEnum.HOMOLOGACAO);
         
         Date dtNasc1 = Utils.toDate("1988-05-12", "yyyy-MM-dd");
