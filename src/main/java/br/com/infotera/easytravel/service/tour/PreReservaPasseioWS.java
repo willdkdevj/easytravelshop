@@ -19,21 +19,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class PreReservaPasseioWS {
 
-    @Autowired
-    private TarifarPasseioWS tarifarWS;
-    
-    public WSPreReservarRS preReservar(WSPreReservarRQ reservaRQ) throws ErrorException {
-        WSReserva reserva = preReservarPasseio(reservaRQ);
-        return new WSPreReservarRS(reserva, reservaRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
-    }
-
-    public WSReserva preReservarPasseio(WSPreReservarRQ reservaRQ) throws ErrorException {
-        WSReserva reserva = null;
-        for(WSReservaServico reservaServico : reservaRQ.getReserva().getReservaServicoList()) {
-            WSTarifarServicoRS tarifar = tarifarWS.tarifar(new WSTarifarServicoRQ(reservaRQ.getIntegrador(), reservaServico));
-            reserva = new WSReserva(tarifar.getReservaServico());
-        }
-         
-        return new WSReserva(reserva.getReservaServicoList());
-    }
+//    @Autowired
+//    private TarifarPasseioWS tarifarWS;
+//    
+//    public WSPreReservarRS preReservar(WSPreReservarRQ reservaRQ) throws ErrorException {
+//        WSReserva reserva = preReservarPasseio(reservaRQ);
+//        return new WSPreReservarRS(reserva, reservaRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
+//    }
+//
+//    public WSReserva preReservarPasseio(WSPreReservarRQ reservaRQ) throws ErrorException {
+//        WSReserva reserva = null;
+//        for(WSReservaServico reservaServico : reservaRQ.getReserva().getReservaServicoList()) {
+//            WSTarifarServicoRS tarifar = tarifarWS.tarifar(new WSTarifarServicoRQ(reservaRQ.getIntegrador(), reservaServico));
+//            reserva = new WSReserva(tarifar.getReservaServico());
+//        }
+//         
+//        return new WSReserva(reserva.getReservaServicoList());
+//    }
 }

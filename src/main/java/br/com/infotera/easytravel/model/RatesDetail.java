@@ -4,8 +4,6 @@
  */
 package br.com.infotera.easytravel.model;
 
-import java.util.Date;
-
 /**
  *
  * @author William Dias

@@ -79,7 +79,6 @@ import br.com.infotera.easytravel.model.Transfer;
 import br.com.infotera.easytravel.model.TransferType;
 import br.com.infotera.easytravel.service.ticket.ConsultaWS;
 import br.com.infotera.easytravel.service.ticket.ReservaWS;
-import br.com.infotera.easytravel.service.tour.ConsultaPasseioWS;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -338,13 +337,21 @@ public class UtilsWS {
                     WSReservaServico reserva = tarifarServicoRQ.getReservaServico();
 
                     //validando objeto retornado pelo infotravel
-                    if (reserva.getServico().getIsStTransfer() || reserva.getServico().getIsStPacoteServico()) {
+                    if (reserva.getServico().getIsStIngresso()) {
+                        WSIngresso ingresso = (WSIngresso) reserva.getServico();
+                        reservaNomeList = ingresso.getReservaNomeList();
+                        
+                        // Trata dsParametro para montar requisição a fim de Re-Tarifar
+                        dsParamTarifar = ingresso.getDsParametro().split("#");
+                        
+                        searchRQ = new SearchRQ();
+                        searchRQ.setSearchTicket(true);
+                    } else if(reserva.getServico().getIsStTransfer() || reserva.getServico().getIsStPacoteServico()) {
                         WSPacoteServico pacoteServico = (WSPacoteServico) reserva.getServico();
                         reservaNomeList = pacoteServico.getReservaNomeList();
                         
-                        WSTransfer transfer = (WSTransfer) pacoteServico.getServicoList().stream().filter(servicoPct -> servicoPct != null).findFirst().orElseThrow(RuntimeException::new);
                         // Trata dsParametro para montar requisição a fim de Re-Tarifar
-                        dsParamTarifar = transfer.getDsParametro().split("#");
+                        dsParamTarifar = pacoteServico.getDsParametro().split("#");
                         
                         searchRQ = new SearchRQ();
                         searchRQ.setSearchTransfer(true);
@@ -352,7 +359,6 @@ public class UtilsWS {
                         WSServicoOutro servicoPasseio = (WSServicoOutro) reserva.getServico();
                         reservaNomeList = servicoPasseio.getReservaNomeList();
                         
-//                        WSServico passeio = (WSServico) servicoPasseio.getServicoList().stream().filter(servicoOut -> servicoOut != null).findFirst().orElseThrow(RuntimeException::new);
                         // Trata dsParametro para montar requisição a fim de Re-Tarifar
                         dsParamTarifar = servicoPasseio.getDsParametro().split("#");
                         
@@ -502,8 +508,8 @@ public class UtilsWS {
                             // Valor a ser cobrado pela multa
                             Double vlCancelamento = cancel.getPrice(); //dividir((Utils.multiplicar(vlPercentual, vlTarifa)), 100.0);
                             
-                            // Data mínima para cancelamento menos quatro (4) dias
-                            Date dtMinCancelamento = Utils.addDias(cancel.getStartDate(), -3);
+                            // Data mínima para cancelamento menos três (3) dias
+                            Date dtMinCancelamento = Utils.addDias(Utils.toDate(cancel.getStartDate(), "yyyy-MM-dd'T'HH:mm:ss"), -3);
                             
                             // Verifica se é retornado o valor para cobrança (Não reembolsável)
                             isNaoReembolsavel = cancel.isRefundable() != null && cancel.isRefundable() ? cancel.isRefundable() : isNaoReembolsavel;
@@ -1033,7 +1039,7 @@ public class UtilsWS {
                         // Politicas de Cancelamento
                         if(!Utils.isListNothing(response.getCancellationPolicies())){
                             response.getCancellationPolicies().forEach(cancelPolicy -> {
-                                politicaVoucherList.add(new WSPoliticaVoucher("Política de Cancelamento: ", "A partir de " + Utils.formatData(cancelPolicy.getStartDate(), "dd/MM/yyyy") + "será cobrada uma multa no valor de " + cancelPolicy.getCurrency().getSymbol() + " " + cancelPolicy.getPrice()));
+                                politicaVoucherList.add(new WSPoliticaVoucher("Política de Cancelamento: ", "A partir de " + Utils.formatData(Utils.toDate(cancelPolicy.getStartDate(), "yyyy-MM-dd'T'HH:mm:ss"), "dd/MM/yyyy") + "será cobrada uma multa no valor de " + cancelPolicy.getCurrency().getSymbol() + " " + cancelPolicy.getPrice()));
                             });
                         }
                         
@@ -1209,7 +1215,7 @@ public class UtilsWS {
         WSVeiculoTransfer veiculo = montarVeiculoTransfer(integrador, transfer, veiculoTransfer);
         
         // Transfer Info
-        WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer, isIdaVolta);        
+        WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer);        
         
         try {
             servicoList = new ArrayList();
@@ -1289,7 +1295,7 @@ public class UtilsWS {
                 dsParametro = ingresso.getDsParametro();
                 chaveActivity = dsParametro.split("#");
                 
-            } else if(servico.getIsStPacoteServico()) {
+            } else if(servico.getIsStPacoteServico() || servico.getIsStTransfer()) {
                 // Inicia tratativa para Transfer
                 pacoteServico = (WSPacoteServico) servico;
                 dsParametro = pacoteServico.getDsParametro();
@@ -1387,24 +1393,6 @@ public class UtilsWS {
         return booking;
     }
     
-//    private static List<Activity> montarInfoAdd(WSIntegrador integrador, List<Activity> activityInsumoList, Insumo insumo) throws ErrorException{
-//        List<Activity> activityList = null;
-//        try {
-//            Activity action = new Activity();
-//            action.setLocationPickup(insumo.get);
-//            action.setLocationDropoff(dsParametro);
-//            action.setFlightNumberArrival(dsParametro);
-//            action.setFlightNumberDeparture(dsParametro);
-//            action.setFlightHourArrival(dsParametro);
-//            action.setFlightHourDeparture(dsParametro);
-//            action.setFlightLocNumber(dsParametro);
-//        } catch (Exception ex) {
-//            throw new ErrorException (integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
-//                    "Erro ao montar o DoBooking", WSIntegracaoStatusEnum.NEGADO, ex, false);
-//        }  
-//        return activityList;
-//    }
-    
     public static CancelRQ montarCancelar(WSIntegrador integrador, String nrLocalizador) throws ErrorException{
         CancelRQ cancel = null;
         
@@ -1414,10 +1402,11 @@ public class UtilsWS {
             cancel.setCancellationReasonId(TipoCancelamentoEnum.OUTROS.getId());
             cancel.setCancellationObservation("RESERVA CANCELADA VIA INTEGRAÇÃO COM API (INFOTERA)");
             cancel.setTokenId(integrador.getSessao().getCdChave());
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             throw new ErrorException (integrador, UtilsWS.class, "montarCancelar", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar o CancelRQ", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
+        
         return cancel;
     }
     
@@ -1490,16 +1479,14 @@ public class UtilsWS {
         return veiculo;
     }
 
-    private static WSTransferInfo montarTransferInfo(WSIntegrador integrador, Transfer transfer, boolean isIdaVolta) throws ErrorException {
+    private static WSTransferInfo montarTransferInfo(WSIntegrador integrador, Transfer transfer) throws ErrorException {
         WSTransferInfo info = null;
         
         try {
-//            if(isIdaVolta){
-                info = new WSTransferInfo();
-                info.setDtTransporte(transfer.getDatesRate().get(0).getServiceDate());
+            info = new WSTransferInfo();
+            info.setDtTransporte(transfer.getDatesRate().get(0).getServiceDate());
 //                info.setNmOrigem(transfer.getName());
-                info.setStObrigatorio(true);
-//            }
+            info.setStObrigatorio(true);
         } catch (Exception ex) {
             throw new ErrorException (integrador, UtilsWS.class, "montarTransferInfo", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar o TransferInfo", WSIntegracaoStatusEnum.NEGADO, ex, false);
@@ -1513,6 +1500,10 @@ public class UtilsWS {
         if(!Utils.isListNothing(errors)){
             for(br.com.infotera.easytravel.model.Error error : errors) {
                 errorMsg += "COD - " + error.getErrorCode() + " " + error.getErrorMessage() + "\n";
+                if(error.getErrorMessage().toUpperCase().contains("SEM DISPONIBILIDADE")){
+                    throw new ErrorException(integrador, ReservaWS.class, "montarRetornoError", WSMensagemErroEnum.GENMETHOD, 
+                    msgMain + " " + "SEM DISPONIBILIDADE DA ATIVIDADE", WSIntegracaoStatusEnum.NEGADO, null, false);
+                }
             }
             
             throw new ErrorException(integrador, ReservaWS.class, "montarRetornoError", WSMensagemErroEnum.GENMETHOD, 

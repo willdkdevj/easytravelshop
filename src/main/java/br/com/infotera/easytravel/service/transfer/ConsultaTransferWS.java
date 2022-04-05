@@ -38,7 +38,6 @@ import br.com.infotera.easytravel.model.RQRS.ConsultarGetRS;
 import br.com.infotera.easytravel.model.RQRS.VoucherRQ;
 import br.com.infotera.easytravel.model.RQRS.VoucherRS;
 import br.com.infotera.easytravel.service.SessaoWS;
-import br.com.infotera.easytravel.service.ticket.ConsultaWS;
 import br.com.infotera.easytravel.util.UtilsWS;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +78,6 @@ public class ConsultaTransferWS {
         try {
             // Montando requisição para consulta
             ConsultarGetRQ consultaRQ = UtilsWS.montarConsulta(reservaRQ.getIntegrador(), Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador()));
-//            consultaRQ.setFile(new File(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador())));
-//            consultaRQ.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
             
             consulta = easyTravelShopClient.consultarReserva(reservaRQ.getIntegrador(), consultaRQ);
             
@@ -88,7 +85,7 @@ public class ConsultaTransferWS {
             UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), consulta);
             
         } catch (ErrorException | NumberFormatException ex) {
-            throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "consultar", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(reservaRQ.getIntegrador(), ConfirmarTransferWS.class, "consultar", WSMensagemErroEnum.SCO, 
                     "Erro ao realizar consulta", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
 
@@ -216,7 +213,7 @@ public class ConsultaTransferWS {
                             }
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, UtilsWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a tarifa", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
 
@@ -273,21 +270,21 @@ public class ConsultaTransferWS {
                             });
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, UtilsWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a lista de serviço (WSTransfer)", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
                 }
             } catch (ErrorException error) {
                 throw error;
             } catch (Exception ex) {
-                throw new ErrorException(integrador, ConsultaWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                throw new ErrorException(integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                         "Erro ao montar a reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
             
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                     "Erro ao ler informações de politicas", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -324,7 +321,7 @@ public class ConsultaTransferWS {
                                             service.getActivityTypeName(), 
                                             service.getMaxNumberBaggage() != null && service.getMaxNumberBaggage() > 0 ? service.getMaxNumberBaggage() : 0);
         } catch (Exception ex) {
-            throw new ErrorException (integrador, UtilsWS.class, "montarVeiculoTransfer", WSMensagemErroEnum.SCO, 
+            throw new ErrorException (integrador, ConfirmarTransferWS.class, "montarVeiculoTransfer", WSMensagemErroEnum.SCO, 
                     "Erro ao determinar o tipo de veiculo (WSVeiculoTransfer)", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
         return veiculo;
@@ -347,7 +344,7 @@ public class ConsultaTransferWS {
             info.setStObrigatorio(true);
             
         } catch (Exception ex) {
-            throw new ErrorException (integrador, UtilsWS.class, "montarTransferInfo", WSMensagemErroEnum.SCO, 
+            throw new ErrorException (integrador, ConfirmarTransferWS.class, "montarTransferInfo", WSMensagemErroEnum.SCO, 
                     "Erro ao montar o TransferInfo", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         return info;
@@ -394,7 +391,7 @@ public class ConsultaTransferWS {
                 }
             }
         } catch (Exception ex) {
-            throw new ErrorException (integrador, UtilsWS.class, "montarServicoInfoList", WSMensagemErroEnum.SCO, 
+            throw new ErrorException (integrador, ConfirmarTransferWS.class, "montarServicoInfoList", WSMensagemErroEnum.SCO, 
                     "Erro ao montar a lista de informações sobre o serviço", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         return servicoInfoList;

@@ -14,7 +14,7 @@ public class Tour extends Insumo {
     
     private ServiceType serviceType;
     
-    private List<DatesRateGet> datesRate;
+    private List<DatesRateSearch> datesRate;
     
     private TourType tourType;
     
@@ -26,10 +26,9 @@ public class Tour extends Insumo {
         super();
     }
 
-    public Tour(ServiceType serviceType, List<DatesRateGet> datesRate, TourType tourType, Integer maxNumberPassenger, Integer minNuberPassenger, String activityId, String name, String description, String duration, boolean onrequest, boolean insurance, Integer sequence, List<WeekDay> weekDay, List<Inclusion> inclusions, List<Image> images, List<Category> categories, boolean combo, String externalToken) {
+    public Tour(ServiceType serviceType, List<DatesRateSearch> datesRate, TourType tourType, Integer maxNumberPassenger, Integer minNuberPassenger, String activityId, String name, String description, String duration, boolean onrequest, boolean insurance, Integer sequence, List<WeekDay> weekDay, List<Inclusion> inclusions, List<Image> images, List<Category> categories, boolean combo, String externalToken) {
         super(activityId, name, description, duration, onrequest, insurance, sequence, weekDay, inclusions, images, categories, combo, externalToken);
         this.serviceType = serviceType;
-        this.datesRate = datesRate;
         this.tourType = tourType;
         this.maxNumberPassenger = maxNumberPassenger;
         this.minNuberPassenger = minNuberPassenger;
@@ -43,11 +42,11 @@ public class Tour extends Insumo {
         this.serviceType = serviceType;
     }
 
-    public List<DatesRateGet> getDatesRate() {
+    public List<DatesRateSearch> getDatesRate() {
         return datesRate;
     }
 
-    public void setDatesRate(List<DatesRateGet> datesRate) {
+    public void setDatesRate(List<DatesRateSearch> datesRate) {
         this.datesRate = datesRate;
     }
 

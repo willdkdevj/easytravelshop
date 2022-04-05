@@ -4,8 +4,6 @@
  */
 package br.com.infotera.easytravel.model;
 
-import java.util.Date;
-
 /**
  *
  * @author William Dias
@@ -16,25 +14,19 @@ public class CancellationPolicy {
     
     private Integer bookingId;
     
-//    private Double value;
-    
     private Double price;
     
-    private Date startDate;
+    private String startDate;
     
-    private Date endDate;
+    private String endDate;
     
-    private Date insertDate;
+    private String insertDate;
     
-    private Date updateDate;
+    private String updateDate;
     
     private Integer updatePersonId;
     
-//    public Status status;
-    
     public Currency currency;
-    
-//    public ServiceType serviceType;
     
     private Boolean isRefundable;
     
@@ -43,7 +35,7 @@ public class CancellationPolicy {
     public CancellationPolicy() {
     }
 
-    public CancellationPolicy(Integer id, Double value, Date startDate, Date endDate, Date insertDate, Date updateDate, Integer updatePersonId) {
+    public CancellationPolicy(Integer id, Double value, String startDate, String endDate, String insertDate, String updateDate, Integer updatePersonId) {
         this.id = id;
         this.price = value;
         this.startDate = startDate;
@@ -69,19 +61,19 @@ public class CancellationPolicy {
         this.price = value;
     }
 
-    public Date getInsertDate() {
+    public String getInsertDate() {
         return insertDate;
     }
 
-    public void setInsertDate(Date insertDate) {
+    public void setInsertDate(String insertDate) {
         this.insertDate = insertDate;
     }
 
-    public Date getUpdateDate() {
+    public String getUpdateDate() {
         return updateDate;
     }
 
-    public void setUpdateDate(Date updateDate) {
+    public void setUpdateDate(String updateDate) {
         this.updateDate = updateDate;
     }
 
@@ -93,14 +85,6 @@ public class CancellationPolicy {
         this.updatePersonId = updatePersonId;
     }
 
-//    public Status getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(Status status) {
-//        this.status = status;
-//    }
-
     public Currency getCurrency() {
         return currency;
     }
@@ -108,14 +92,6 @@ public class CancellationPolicy {
     public void setCurrency(Currency currency) {
         this.currency = currency;
     }
-
-//    public ServiceType getServiceType() {
-//        return serviceType;
-//    }
-//
-//    public void setServiceType(ServiceType serviceType) {
-//        this.serviceType = serviceType;
-//    }
 
     public CancellationPolicyValueType getCancellationPolicyValueType() {
         return cancellationPolicyValueType;
@@ -133,19 +109,19 @@ public class CancellationPolicy {
         this.bookingId = bookingId;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
 
@@ -156,13 +132,5 @@ public class CancellationPolicy {
     public void setRefundable(Boolean isRefundable) {
         this.isRefundable = isRefundable;
     }
-
-//    public Double getValue() {
-//        return value;
-//    }
-//
-//    public void setValue(Double value) {
-//        this.value = value;
-//    }
     
 }

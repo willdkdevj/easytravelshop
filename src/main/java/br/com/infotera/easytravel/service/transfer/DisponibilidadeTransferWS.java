@@ -71,7 +71,7 @@ public class DisponibilidadeTransferWS {
         Boolean isTransferTrecho = dispoRQ.getTransferList().size() == 1;
 
         // Monta a lista de transfer até resolver a questão do filtro na disponibilidade
-//        List<Transfer> transfersList = verificarTransfers(dispoRQ.getIntegrador(), search, isTransferTrecho);
+//        List<Transfer> transfersList = verificarTransfers(dispoRQ.getIntegrador(), search, isTransferTrecho); // Aguardando ajuste de filtros no Infotravel
         List<Transfer> transfersList = new ArrayList();
         search.getActivities().stream().map(activity -> {
             Transfer transfer = activity.getTransfers().stream()

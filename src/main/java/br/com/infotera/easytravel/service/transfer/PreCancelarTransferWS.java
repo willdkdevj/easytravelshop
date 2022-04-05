@@ -9,7 +9,6 @@ import br.com.infotera.common.enumerator.WSReservaStatusEnum;
 import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservaRS;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
-import br.com.infotera.easytravel.model.ENUM.TipoCancelamentoEnum;
 import br.com.infotera.easytravel.model.RQRS.CancelRQ;
 import br.com.infotera.easytravel.model.RQRS.CancelRS;
 import br.com.infotera.easytravel.service.SessaoWS;
@@ -65,11 +64,6 @@ public class PreCancelarTransferWS {
                 if (!rsConsulta.getReservaStatus().equals(WSReservaStatusEnum.CANCELADO)) {
 
                     CancelRQ cancel = UtilsWS.montarCancelar(reservaRQ.getIntegrador(), servico.getNrLocalizador());
-//                            new CancelRQ();
-//                    cancel.setFileId(Integer.parseInt(reservaRQ.getReserva().getReservaServicoList().get(0).getNrLocalizador()));
-//                    cancel.setCancellationReasonId(TipoCancelamentoEnum.OUTROS.getId());
-//                    cancel.setCancellationObservation("RESERVA CANCELADA VIA INTEGRAÇÃO COM API (INFOTERA)");
-//                    cancel.setTokenId(reservaRQ.getIntegrador().getSessao().getCdChave());
 
                     CancelRS cancelReturn = easyTravelShopClient.cancelarAtividade(reservaRQ.getIntegrador(), cancel);
 

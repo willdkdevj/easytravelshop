@@ -7,7 +7,6 @@ package br.com.infotera.easytravel.service;
 
 import br.com.infotera.common.ErrorException;
 import br.com.infotera.common.WSIntegrador;
-import br.com.infotera.common.enumerator.WSAmbienteEnum;
 import br.com.infotera.common.enumerator.WSIntegracaoStatusEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
 import br.com.infotera.common.enumerator.WSTransferInOutEnum;
@@ -20,13 +19,11 @@ import br.com.infotera.easytravel.client.EasyTravelShopClient;
 import br.com.infotera.easytravel.model.*;
 import br.com.infotera.easytravel.model.RQRS.LocationSearchRQ;
 import br.com.infotera.easytravel.model.RQRS.LocationSearchRS;
-import br.com.infotera.easytravel.util.UtilsWS;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.lang.Integer;
 
 /**
  * @author William Dias
@@ -131,7 +128,7 @@ public class EstaticoWS {
             
         } else if (obj instanceof WSDisponibilidadeServicoRQ) {
             dispoServico = (WSDisponibilidadeServicoRQ) obj;
-            dsCity = dispoServico.getOrigem().getNmLocal();
+            dsCity = String.valueOf(dispoServico.getOrigem().getIdLocal());
             
             
         }
@@ -166,6 +163,7 @@ public class EstaticoWS {
             case "GRM":
             case "CEL":
             case "16728":
+            case "Gramado":
                 cityTest = "GRAMADO";
                 break;
             default:

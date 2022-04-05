@@ -66,7 +66,7 @@ public class TarifarWS {
         return new WSTarifarServicoRS(reservaServico, tarifarServicoRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
     }
     
-    private SearchRS tarifarServico(WSTarifarServicoRQ tarifarServicoRQ) throws ErrorException {
+    private SearchRS tarifarServicoPasseio(WSTarifarServicoRQ tarifarServicoRQ) throws ErrorException {
         SearchRS retorno = null;
 
         try {
@@ -102,7 +102,7 @@ public class TarifarWS {
             WSServico servicoIngresso = null;
             WSServico servicoPasseio = null;
 
-            // Obtem insumo do Infotravel para realizar verificação no fornecedor a fim de obter detalhes
+            // Determina qual tipo de servico deve ser montada a reserva (WSReserva)
             if (servico instanceof WSIngresso) {
 
                 servicoIngresso = montarReservaIngresso(integrador, servico, dtInicio, dtFim, dsParamTarifarSplit[1]);
@@ -111,13 +111,13 @@ public class TarifarWS {
 
             } else if(servico instanceof WSServicoOutro){
 
-                // Validar Retorno
-                SearchRS searchRS = tarifarServico(tarifarServicoRQ);
+                // Verificar preço de Passeio ao realizar nova chamada ao Search (AtividadeId)
+                SearchRS searchRS = tarifarServicoPasseio(tarifarServicoRQ);
 
                 // Se retorno for falso será lançada uma excessão com o detalhe do erro reportado pelo fornecedor
                 UtilsWS.verificarRetorno(integrador, searchRS);
 
-                servicoPasseio = montarReservaPasseio(integrador, servico, dtInicio, dtFim, searchRS, reservaNomeList);
+                servicoPasseio = montarReservaPasseio(integrador, dtInicio, dtFim, searchRS, reservaNomeList);
 
                 return new WSReservaServico(servicoPasseio);
             }
@@ -177,13 +177,13 @@ public class TarifarWS {
                         "Erro ao ler segmentos da atividade", WSIntegracaoStatusEnum.NEGADO, null);
             }
         } catch (Exception ex) {
-            throw new ErrorException (integrador, TarifarPasseioWS.class, "montarReserva", WSMensagemErroEnum.STA, 
+            throw new ErrorException (integrador, TarifarWS.class, "montarReserva", WSMensagemErroEnum.STA, 
                     "Erro ao montar o Transfer (PacoteServico)", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
         
     }
 
-    private WSServico montarReservaPasseio(WSIntegrador integrador, WSServico servico, Date dtInicio, Date dtFim, SearchRS searchRS, List<WSReservaNome> reservaNomeList) throws ErrorException{
+    private WSServico montarReservaPasseio(WSIntegrador integrador, Date dtInicio, Date dtFim, SearchRS searchRS, List<WSReservaNome> reservaNomeList) throws ErrorException{
         WSServico servicoPasseio = null;
         
         try {
@@ -227,7 +227,7 @@ public class TarifarWS {
             throw error;
         } catch (Exception ex) {
             throw new ErrorException (integrador, TarifarWS.class, "montarReservaPasseio", WSMensagemErroEnum.STA, 
-                    "Erro ao montar o Transfer (PacoteServico)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                    "Erro ao montar o Passeio (Tour)", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
         return servicoPasseio;

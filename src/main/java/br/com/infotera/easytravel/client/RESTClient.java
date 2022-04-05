@@ -184,6 +184,7 @@ public class RESTClient {
     
     private void verificarRetorno(WSIntegrador integrador, Object obj) throws ErrorException{
         if(obj == null) {
+            // use o Gson direto (gson.toJson) para conseguir ter acesso a exceção (Exception)
             throw new ErrorException(integrador, RESTClient.class, "verificarErro", WSMensagemErroEnum.GENCONVERT, 
                     "Não foi possível realizar o parse do objeto - Revise o response obtido e entre em contato com o Fornecedor", WSIntegracaoStatusEnum.NEGADO, null, false);
         }

@@ -78,7 +78,7 @@ public class DisponibilidadePasseioWS {
 
     private List<WSServicoPesquisa> montarServicoPesquisa(WSDisponibilidadeServicoRQ dispRQ, SearchRS search) throws ErrorException {
         List<WSMedia> mediaList = null;
-        List<WSServicoPesquisa> servicoPesquisaList = null;
+        List<WSServicoPesquisa> servicoPesquisaList = new ArrayList<>();
         try {
             if (!Utils.isListNothing(search.getActivities())) {
                 
@@ -86,13 +86,12 @@ public class DisponibilidadePasseioWS {
                 WSServicoTipoEnum servicoTipoEnum = null;
                 int sqPesquisa = 0;
                 for (ActivitySearch activity : search.getActivities()) {
-
                     try { 
                         //caracteristicas do ingresso - utilizado para o processo de homologação, estas informações vão no detalhe da atividade
                         if (!Utils.isListNothing(activity.getTours())) {
                             
                             servicoTipoEnum = WSServicoTipoEnum.PASSEIO;
-                            servicoPesquisaList = new ArrayList<>();
+                            
                             // lista de ingressos
                             for(Tour tour : activity.getTours()){
 
@@ -103,8 +102,8 @@ public class DisponibilidadePasseioWS {
                                     dtServicoInicio = tour.getDatesRate().get(0).getServiceDate();
                                     dtServicoFim = dtServicoInicio;
                                 } catch (Exception ex) {
-                                    throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
-                                            "Erro ao identificar as datas para o serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
+                                    throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarServicoPesquisa", WSMensagemErroEnum.SDI, 
+                                            "Erro ao identificar as datas para o serviço (Passeio - Tour) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
                                 }
                                 
                                 // Monta o descritivo do passeio 
@@ -118,7 +117,6 @@ public class DisponibilidadePasseioWS {
 
                                 // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
                                 String dsParamTarifar = UtilsWS.montarParametro(dispRQ.getIntegrador(), tour, dispRQ.getDtPartida(), dispRQ.getDtRetorno(), search.getSearchId());
-
                                 
                                 // Criada instância do objeto Passeio
                                 servico = new WSServicoOutro();
@@ -128,15 +126,16 @@ public class DisponibilidadePasseioWS {
                                 servico.setNmServico(tour.getName());
                                 servico.setTarifa(tarifa);
                                 servico.setMediaList(mediaList);
+                                servico.setReservaNomeList(dispRQ.getReservaNomeList());
                                 servico.setDsParametro(dsParamTarifar);
                                 servico.setDtServico(dtServicoInicio);
 //                                
                             }
                         } else {
-                            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);
+                            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarServicoPesquisa", WSMensagemErroEnum.SDI, "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, "Erro ao montar Ingresso", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                        throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarServicoPesquisa", WSMensagemErroEnum.SDI, "Erro ao montar Ingresso", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
                     
                     sqPesquisa++;
@@ -148,7 +147,7 @@ public class DisponibilidadePasseioWS {
         } catch(ErrorException error) {
             throw error;
         } catch(Exception ex) {
-            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao obter as Atividades do Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
+            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarServicoPesquisa", WSMensagemErroEnum.SDI, "Erro ao obter as Atividades do Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
         return servicoPesquisaList;

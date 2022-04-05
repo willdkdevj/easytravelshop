@@ -23,7 +23,7 @@ public class Transfer extends Insumo {
     
     private List<Location> locations;
     
-    private List<DatesRateGet> datesRate;
+    private List<DatesRateSearch> datesRate;
     
     private Integer minNumberPassenger;
     
@@ -32,7 +32,7 @@ public class Transfer extends Insumo {
     public Transfer() {
     }
 
-    public Transfer(ServiceType serviceType, boolean transferIn, boolean transferOut, TransferType transferType, List<Location> locations, List<DatesRateGet> datesRate, Integer minNumberPassenger, Integer maxNumberPassenger) {
+    public Transfer(ServiceType serviceType, boolean transferIn, boolean transferOut, TransferType transferType, List<Location> locations, List<DatesRateSearch> datesRate, Integer minNumberPassenger, Integer maxNumberPassenger) {
         this.serviceType = serviceType;
         this.transferIn = transferIn;
         this.transferOut = transferOut;
@@ -83,11 +83,11 @@ public class Transfer extends Insumo {
         this.locations = locations;
     }
 
-    public List<DatesRateGet> getDatesRate() {
+    public List<DatesRateSearch> getDatesRate() {
         return datesRate;
     }
 
-    public void setDatesRate(List<DatesRateGet> datesRate) {
+    public void setDatesRate(List<DatesRateSearch> datesRate) {
         this.datesRate = datesRate;
     }
 

@@ -69,5 +69,4 @@ public class Modality {
         this.datesRate = datesRate;
     }
     
-    
 }
