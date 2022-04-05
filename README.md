@@ -238,6 +238,8 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 	- MontarReservaNomeList - Constroí a lista de Passageiros (List[WSReservaNome]) a fim de obter as informações do pax retornada pelo fornecedor;
 	- MontarServicoListTransfer - Constroí um tipo especifico de objeto para o serviço Transfer a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
 	- MontarServicoInfoList - Constroí um tipo de lista especifica de objetos para os serviços (Ingresso e Passeio) a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
+	- MontarReservar - Constroí a requisição para enviar ao fornecedor verificando qual é a instância (**instanceof**) que está ativa de serviço para determinar sua construção;
+	- MontarCancelar - Constroí a requisição para cancelar uma reserva ativa a fim de enviar ao fornecedor;
 
 - O parâmetro utilizado (DsParametro) são passado valores a fim de serem utilizados no processo do **TarifarWS** (*Reativar - Orçamento*), desta forma, para uso interno (API) é utilizado a função da classe String (**SPLIT** - split()) passando como parâmetro o valor [#] para "quebrar" o texto e utiliza-los em diferentes etapas, a seguir segue suas funcionalidades:
 	- *Dados da Modalidade* - Informação do Código (COD) da Modalida e Valor do Total da diária (vlNeto), separado pelo caracter [~], onde no Infotravel **será refatorado**; 
