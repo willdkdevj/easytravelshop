@@ -5,8 +5,6 @@ import br.com.infotera.common.WSIntegrador;
 import br.com.infotera.common.WSReservaNome;
 import br.com.infotera.common.enumerator.*;
 import br.com.infotera.common.motor.WSMotorLocal;
-import br.com.infotera.common.servico.rqrs.WSDisponibilidadeIngressoRQ;
-import br.com.infotera.common.servico.rqrs.WSDisponibilidadeIngressoRS;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeServicoRQ;
 import br.com.infotera.common.servico.rqrs.WSDisponibilidadeServicoRS;
 import br.com.infotera.common.util.LogWS;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
