@@ -165,7 +165,7 @@ public class DetalheIngressoWS {
                     // Soma o valor da diaria de todos os Pax
                     Double vlTotalDiaria = vlPessoaNetoList.stream().filter(valor -> valor > 0.0).mapToDouble(valor -> valor).sum();
                     
-                    ingressoUtilizacaoData.setDsTarifa(null + "~" + vlTotalDiaria + "#" + activityId + "#" + rate.getServiceId() + "#" + Utils.formatData(dtServicoInicio, "yyyy-MM-dd") + "#" + Utils.formatData(dtServicoFim, "yyyy-MM-dd") + "#" + searchId);
+                    ingressoUtilizacaoData.setDsTarifa(null + "~" + vlTotalDiaria + "#" + activityId + "#" + rate.getServiceId() + "#" + Utils.formatData(dtServicoInicio, "yyyy-MM-dd") + "#" + Utils.formatData(dtServicoFim, "yyyy-MM-dd") + "#" + searchId + "#" + WSServicoTipoEnum.INGRESSO);
                     ingressoUtilizacaoData.setVlTotal(vlTotalDiaria);
                     utilizacaoDatasList.add(ingressoUtilizacaoData);
                     

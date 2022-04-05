@@ -53,10 +53,10 @@ public class PreCancelarWS {
         WSReserva rsConsulta = null;
         
         try {
-            for (WSReservaServico servico : reservaRQ.getReserva().getReservaServicoList()) {
+            for (WSReservaServico rServico : reservaRQ.getReserva().getReservaServicoList()) {
                 try {
                     //validando se a reserva já foi cancelada
-                    rsConsulta = consultaWS.realizarConsulta(new WSReservaRQ(reservaRQ.getIntegrador(), new WSReserva(new WSReservaServico(servico.getNrLocalizador()))), true);
+                    rsConsulta = consultaWS.realizarConsulta(new WSReservaRQ(reservaRQ.getIntegrador(), new WSReserva(new WSReservaServico(rServico.getNrLocalizador()))), true);
                 } catch (ErrorException ex) {
                     Logger.getLogger(PreCancelarWS.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -65,7 +65,7 @@ public class PreCancelarWS {
                 if (!rsConsulta.getReservaStatus().equals(WSReservaStatusEnum.CANCELADO)) {
                     CancelRS cancelReturn = null; 
 
-                    CancelRQ cancel = UtilsWS.montarCancelar(reservaRQ.getIntegrador(), servico.getNrLocalizador());
+                    CancelRQ cancel = UtilsWS.montarCancelar(reservaRQ.getIntegrador(), rServico.getNrLocalizador());
 
                     cancelReturn = easyTravelShopClient.cancelarAtividade(reservaRQ.getIntegrador(), cancel);
 
