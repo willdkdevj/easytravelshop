@@ -235,7 +235,7 @@ A primeira tabela corresponde aos estados possíveis da reserva.
 	- VerificarStatusReserva - Verifica o response do consultar (*Get*) o estado da atividade [Status] no fornecedor a fim de espelha-la no Infotravel;
 	- MontarVoucher - Monta a requisição para obter as informações de voucher para a atividade no fornecedor;
 	- MontarPoliticasVoucher - Constroí a lista de políticas de voucher (List[WSPoliticaVoucher]) para a atividade (Desde que retornado);
-	- MontarReservaNomeList - Constroí a lista de Passageiros (List[WSReservaNome]) a fim de obter as informações do pax retornada pelo fornecedor;
+	- MontarReservaNomeList - Obtem o ReservaNomeList a partir do **Infotravel**, caso por algum motivo não sejá retornado, tenta construir a lista de Passageiros (List[WSReservaNome]) a partir das informações do pax retornada pelo fornecedor (Get);
 	- MontarServicoListTransfer - Constroí um tipo especifico de objeto para o serviço Transfer a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
 	- MontarServicoInfoList - Constroí um tipo de lista especifica de objetos para os serviços (Ingresso e Passeio) a fim de retornar para o Infotravel informações da atividade através dos dados enviados pelo fornecedor;
 	- MontarReservar - Constroí a requisição para enviar ao fornecedor verificando qual é a instância (**instanceof**) que está ativa de serviço para determinar sua construção;
