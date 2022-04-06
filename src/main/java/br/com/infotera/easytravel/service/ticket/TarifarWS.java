@@ -30,7 +30,6 @@ import br.com.infotera.easytravel.model.RQRS.SearchRQ;
 import br.com.infotera.easytravel.model.RQRS.SearchRS;
 import br.com.infotera.easytravel.model.Tour;
 import br.com.infotera.easytravel.service.SessaoWS;
-import br.com.infotera.easytravel.service.tour.TarifarPasseioWS;
 import br.com.infotera.easytravel.util.UtilsWS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,7 +80,7 @@ public class TarifarWS {
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(tarifarServicoRQ.getIntegrador(), TarifarPasseioWS.class, "tarifarTransfer", WSMensagemErroEnum.STA, 
+            throw new ErrorException(tarifarServicoRQ.getIntegrador(), TarifarWS.class, "tarifarTransfer", WSMensagemErroEnum.STA, 
                     "Erro ao obter dados de reserva de serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         

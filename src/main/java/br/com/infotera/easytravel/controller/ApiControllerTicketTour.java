@@ -36,13 +36,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @RestController
 @RequestMapping(value = "/servico")
-public class ApiControllerTicket {
+public class ApiControllerTicketTour {
 
     private static Logger logger;
 
     static {
         try {
-            logger = Logger.getLogger(ApiControllerTicket.class.getName());
+            logger = Logger.getLogger(ApiControllerTicketTour.class.getName());
         } catch (Exception ex) {
             ex.printStackTrace();
 
@@ -85,7 +85,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSTarifarServicoRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSTarifarServicoRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "tarifar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSTarifarServicoRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "tarifar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -103,7 +103,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSPreReservarRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSPreReservarRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "preReservar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSPreReservarRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "preReservar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -120,7 +120,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSReservarRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSReservarRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "reservar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSReservarRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "reservar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -137,7 +137,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSReservaRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "confirmar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "confirmar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -154,7 +154,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSReservaRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "consultar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "consultar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -171,7 +171,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSReservaRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "preCancelar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "preCancelar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -189,7 +189,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSReservaRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "cancelar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "cancelar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -206,7 +206,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSReservaRelatorioRS(null, ex.getIntegrador());
         } catch (Exception ex) {
-            wsRS = new WSReservaRelatorioRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "relatorio", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
+            wsRS = new WSReservaRelatorioRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "relatorio", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }
@@ -223,7 +223,7 @@ public class ApiControllerTicket {
         } catch (ErrorException ex) {
             wsRS = new WSDetalheIngressoRS(ex.getIntegrador(), null);
         } catch (Exception ex) {
-            wsRS = new WSDetalheIngressoRS(new ErrorException(wsRQ.getIntegrador(), ApiControllerTicket.class, "detalheIngresso", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador(), null);
+            wsRS = new WSDetalheIngressoRS(new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "detalheIngresso", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador(), null);
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }

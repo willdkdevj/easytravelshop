@@ -32,7 +32,7 @@ public class ApiControllerTransfer {
 
     static {
         try {
-            logger = Logger.getLogger(ApiControllerTicket.class.getName());
+            logger = Logger.getLogger(ApiControllerTicketTour.class.getName());
         } catch (Exception ex) {
             ex.printStackTrace();
 
