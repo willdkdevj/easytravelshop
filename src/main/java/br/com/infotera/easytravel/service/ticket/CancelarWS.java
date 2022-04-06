@@ -55,7 +55,7 @@ public class CancelarWS {
 
                 //validando se a reserva já foi cancelada, caso contrário, devolve reserva montada no ConsultaWS
                 rsConsulta = consultaWS.realizarConsulta(new WSReservaRQ(reservaRQ.getIntegrador(), 
-                                                                         new WSReserva(new WSReservaServico(reservaServico.getNrLocalizador()))), true);
+                                                                         new WSReserva(reservaServico)), true); //new WSReservaServico(reservaServico.getNrLocalizador())
 
                 if (!rsConsulta.getReservaStatus().equals(WSReservaStatusEnum.CANCELADO)) {
                     CancelRS cancelReturn = null; 

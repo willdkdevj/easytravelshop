@@ -26,6 +26,7 @@ import br.com.infotera.common.media.WSMedia;
 import br.com.infotera.common.politica.WSPolitica;
 import br.com.infotera.common.politica.WSPoliticaCancelamento;
 import br.com.infotera.common.politica.WSPoliticaVoucher;
+import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
 import br.com.infotera.common.servico.WSIngresso;
 import br.com.infotera.common.servico.WSPacoteServico;
 import br.com.infotera.common.servico.WSServico;
@@ -215,7 +216,6 @@ public class UtilsWS {
         WSIntegrador integrador = null;
         
         try {
-             
             if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeIngressoRQ){
                 try {
                     WSDisponibilidadeIngressoRQ disponibilidadeIngressoRQ = (WSDisponibilidadeIngressoRQ) disponibilidadeInfotravelRQ;
@@ -351,7 +351,8 @@ public class UtilsWS {
                         reservaNomeList = pacoteServico.getReservaNomeList();
                         
                         // Trata dsParametro para montar requisição a fim de Re-Tarifar
-                        dsParamTarifar = pacoteServico.getDsParametro().split("#");
+//                        WSTransfer transfer = (WSTransfer) pacoteServico.getTransfer();
+                        dsParamTarifar = pacoteServico.getDsParametro() != null ? pacoteServico.getDsParametro().split("#") : pacoteServico.getDsServico().split("#");
                         
                         searchRQ = new SearchRQ();
                         searchRQ.setSearchTransfer(true);
@@ -1151,11 +1152,33 @@ public class UtilsWS {
         return politicaList;
     }
     
-    public static List<WSReservaNome> montarReservaNomeList(WSIntegrador integrador, List<Passenger> passengers) throws ErrorException {
+    public static List<WSReservaNome> montarReservaNomeList(WSReservaRQ reservaRQ, List<Passenger> passengers) throws ErrorException {
         List<WSReservaNome> reservaNomeList = null;
-        
         try {
-            if(!Utils.isListNothing(passengers)){
+            // Verifica se existe um ReservaNomeList no ReservaServico
+            WSReservaServico reservaServico = reservaRQ.getReserva().getReservaServicoList().stream()
+                    .filter(rs -> rs.getServico() != null && !rs.getServico().getReservaNomeList().isEmpty())
+                    .findFirst().orElse(null);
+            
+            if(reservaServico != null) {
+                if (reservaServico.getServico().getIsStIngresso()) {
+                        WSIngresso ingresso = (WSIngresso) reservaServico.getServico();
+                        reservaNomeList = ingresso.getReservaNomeList();
+                        
+                    } else if(reservaServico.getServico().getIsStTransfer() || reservaServico.getServico().getIsStPacoteServico()) {
+                        WSPacoteServico pacoteServico = (WSPacoteServico) reservaServico.getServico();
+                        reservaNomeList = pacoteServico.getReservaNomeList();
+                        
+                    } else if(reservaServico.getServico().getIsStServicoOutro()) {
+                        WSServicoOutro servicoPasseio = (WSServicoOutro) reservaServico.getServico();
+                        reservaNomeList = servicoPasseio.getReservaNomeList();
+                    }
+
+                    // Retorna ReservaNome do Infotravel
+                    return reservaNomeList;
+                
+            } else if(!Utils.isListNothing(passengers)){
+                // Monta reservaNomeList a partir do retorno do fornecedor caso não encontre o serviço
                 List<WSReservaNome> reservaNomeVerificaList = new ArrayList();
                 passengers.stream().map(nome -> {
                     WSReservaNome nomePax = new WSReservaNome();
@@ -1194,7 +1217,7 @@ public class UtilsWS {
                 }
             }
         } catch (Exception ex) {
-            throw new ErrorException(integrador, UtilsWS.class, "montarReservaNomeList", WSMensagemErroEnum.GENMETHOD, 
+            throw new ErrorException(reservaRQ.getIntegrador(), UtilsWS.class, "montarReservaNomeList", WSMensagemErroEnum.GENMETHOD, 
                     "Erro ao montar a lista de passageiros", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         

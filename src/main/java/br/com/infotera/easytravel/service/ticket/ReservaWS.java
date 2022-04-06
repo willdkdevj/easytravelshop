@@ -68,11 +68,13 @@ public class ReservaWS {
         // Inserindo o ID da reserva (Fornecedor) no Integrador e na ReservaServico
         reservarRQ.getIntegrador().setCdLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
         
-        WSReservaServico wsReservaServico = new WSReservaServico(String.valueOf(bookingRetorno.getFile().getId()));
-        wsReservaServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
+        rServico.setNrLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
+        rServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
+//        WSReservaServico wsReservaServico = new WSReservaServico(String.valueOf(bookingRetorno.getFile().getId()));
+//        wsReservaServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
         
         WSReservaRQ reservaRQ = new WSReservaRQ(reservarRQ.getIntegrador(), 
-                                                new WSReserva(wsReservaServico));
+                                                new WSReserva(rServico)); //(wsReservaServico));
 
         //realizando consultar pós confirmação
         WSReserva reserva = consultaWS.realizarConsulta(reservaRQ, false);

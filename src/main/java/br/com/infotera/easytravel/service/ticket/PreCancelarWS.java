@@ -56,7 +56,7 @@ public class PreCancelarWS {
             for (WSReservaServico rServico : reservaRQ.getReserva().getReservaServicoList()) {
                 try {
                     //validando se a reserva já foi cancelada
-                    rsConsulta = consultaWS.realizarConsulta(new WSReservaRQ(reservaRQ.getIntegrador(), new WSReserva(new WSReservaServico(rServico.getNrLocalizador()))), true);
+                    rsConsulta = consultaWS.realizarConsulta(new WSReservaRQ(reservaRQ.getIntegrador(), new WSReserva(rServico)), true); //new WSReservaServico(rServico.getNrLocalizador())
                 } catch (ErrorException ex) {
                     Logger.getLogger(PreCancelarWS.class.getName()).log(Level.SEVERE, null, ex);
                 }

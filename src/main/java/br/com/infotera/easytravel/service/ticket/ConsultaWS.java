@@ -26,6 +26,7 @@ import br.com.infotera.easytravel.model.RQRS.VoucherRQ;
 import br.com.infotera.easytravel.model.RQRS.VoucherRS;
 import br.com.infotera.easytravel.service.SessaoWS;
 import br.com.infotera.easytravel.util.UtilsWS;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,9 @@ public class ConsultaWS {
     
     @Autowired
     private SessaoWS sessaoWS;
+    
+    @Autowired
+    private Gson gson;
     
     public WSReservaRS consultar(WSReservaRQ reservaRQ, Boolean isCancelamento) throws ErrorException {
          // Verifica Sessão iniciada com Fornecedor
@@ -106,11 +110,11 @@ public class ConsultaWS {
             // Determina qual tipo de servico deve ser montada a reserva (WSReserva)
             if (tipoAPI.equals("INGRESSO")) {
 
-                return montarReservaIngresso(reservaRQ.getIntegrador(), consulta, dsParametro, isCancelamento);
+                return montarReservaIngresso(reservaRQ, consulta, dsParametro, isCancelamento);
 
             } else if(tipoAPI.equals("PASSEIO")){
 
-                return montarReservaPasseio(reservaRQ.getIntegrador(), consulta, dsParametro, isCancelamento);
+                return montarReservaPasseio(reservaRQ, consulta, dsParametro, isCancelamento);
             }
         } catch (Exception ex) {
             throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "realizarConsulta", WSMensagemErroEnum.SCO, 
@@ -119,7 +123,7 @@ public class ConsultaWS {
         return null;
     }
 
-    private WSReserva montarReservaIngresso(WSIntegrador integrador, ConsultarGetRS consulta, String dsParametro, Boolean isCancelamento) throws ErrorException {
+    private WSReserva montarReservaIngresso(WSReservaRQ reservaRQ, ConsultarGetRS consulta, String dsParametro, Boolean isCancelamento) throws ErrorException {
         WSReservaStatusEnum reservaStatus = null;
         
         Integer nrLocalizador = null;
@@ -145,7 +149,7 @@ public class ConsultaWS {
             nrLocalizador = file.getBookings().stream().filter(book -> book != null).findFirst().get().getFileId();
             
             // Verificar o Status da Reserva
-            reservaStatus = UtilsWS.verificarStatusReserva(file, reservaStatus, integrador);
+            reservaStatus = UtilsWS.verificarStatusReserva(file, reservaStatus, reservaRQ.getIntegrador());
             
             try {
                 for(Booking book : file.getBookings()) {
@@ -168,30 +172,30 @@ public class ConsultaWS {
                         }
                                 
                         // Obtem link para mídia
-                        mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage()));
+                        mediaList = UtilsWS.montarMidias(reservaRQ.getIntegrador(), Arrays.asList(book.getImage()));
                         
                         // Montar a lista de Pax
-                        reservaNomeList = UtilsWS.montarReservaNomeList(integrador, book.getPassenger());
+                        reservaNomeList = UtilsWS.montarReservaNomeList(reservaRQ, book.getPassenger());
                         
                         // Buscar politicas de Voucher
-                        VoucherRQ voucherRQ = UtilsWS.montarVoucher(integrador, file);
-                        VoucherRS voucher = easyTravelShopClient.consultarVoucher(integrador, voucherRQ);
+                        VoucherRQ voucherRQ = UtilsWS.montarVoucher(reservaRQ.getIntegrador(), file);
+                        VoucherRS voucher = easyTravelShopClient.consultarVoucher(reservaRQ.getIntegrador(), voucherRQ);
                       
                         // verifica o status da consulta
-                        UtilsWS.verificarRetorno(integrador, voucher);
+                        UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), voucher);
                         
                         // Monta politicas de voucher
                         if(voucher != null) {
-                            politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
+                            politicaList = UtilsWS.montarPoliticasVoucher(reservaRQ.getIntegrador(), voucher);
                         } else if(!Utils.isListNothing(file.getFileVoucher())){
-                            politicaList = UtilsWS.montarPoliticasVoucherGet(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
+                            politicaList = UtilsWS.montarPoliticasVoucherGet(reservaRQ.getIntegrador(), nrLocalizador, book.getFileId(), file.getFileVoucher());
                         }
                         
                         // Obtem as politicas de cancelamento
                         List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
                         if(!Utils.isListNothing(cancellationPolicy)){
                             DatesRateGet rateGet = new DatesRateGet(cancellationPolicy);
-                            List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(integrador, sgMoeda, vlTarifa, rateGet, false);
+                            List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(reservaRQ.getIntegrador(), sgMoeda, vlTarifa, rateGet, false);
                             if(!Utils.isListNothing(politicasCancelamento)){
                                 if(Utils.isListNothing(politicaList)) {
                                     politicaList = new ArrayList<>();
@@ -205,17 +209,17 @@ public class ConsultaWS {
                     }
                 }
             } catch (Exception ex) {
-                throw new ErrorException(integrador, ConsultaWS.class, "montarReservaIngresso", WSMensagemErroEnum.SCO, 
+                throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaIngresso", WSMensagemErroEnum.SCO, 
                         "Erro ao montar as politicas da reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
 
             //Adicionando tarifa adicional em caso de periodo de multa
-            tarifaAdicionalList = verificarMulta(integrador, politicaList, isCancelamento);
+            tarifaAdicionalList = verificarMulta(reservaRQ.getIntegrador(), politicaList, isCancelamento);
             
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montarReservaIngresso", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaIngresso", WSMensagemErroEnum.SCO, 
                     "Erro ao ler informações de politicas", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -240,7 +244,7 @@ public class ConsultaWS {
         
         // reserva servico (servico-ingresso)
         WSReservaServico reservaServico = new WSReservaServico();
-        reservaServico.setIntegrador(integrador);
+        reservaServico.setIntegrador(reservaRQ.getIntegrador());
         reservaServico.setServicoTipo(WSServicoTipoEnum.INGRESSO);
         reservaServico.setServico(servico);
         reservaServico.setNrLocalizador(String.valueOf(nrLocalizador));
@@ -252,7 +256,7 @@ public class ConsultaWS {
         return reserva;
     }
 
-    private WSReserva montarReservaPasseio(WSIntegrador integrador, ConsultarGetRS consulta, String dsParametro, Boolean isCancelamento) throws ErrorException {
+    private WSReserva montarReservaPasseio(WSReservaRQ reservaRQ, ConsultarGetRS consulta, String dsParametro, Boolean isCancelamento) throws ErrorException {
         WSReservaStatusEnum reservaStatus = null;
         
         Integer nrLocalizador = null;
@@ -282,7 +286,7 @@ public class ConsultaWS {
             nrLocalizador = file.getBookings().stream().filter(book -> book != null).findFirst().get().getFileId();
 
             // Verificar o Status da Reserva
-            reservaStatus = UtilsWS.verificarStatusReserva(file, reservaStatus, integrador);
+            reservaStatus = UtilsWS.verificarStatusReserva(file, reservaStatus, reservaRQ.getIntegrador());
             
             try {
                 for(Booking book : file.getBookings()) {
@@ -297,29 +301,28 @@ public class ConsultaWS {
                         dsTour = book.getBookingDetailService().getDescription();
                         
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
                                 "Erro ao obter os dados principais do Passeio " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
                     } 
 
                     // Obtem link para mídia
-                    mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage())); //Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
+                    mediaList = UtilsWS.montarMidias(reservaRQ.getIntegrador(), Arrays.asList(book.getImage())); //Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
 
                     // Montar a lista de Pax
-                    reservaNomeList = UtilsWS.montarReservaNomeList(integrador, book.getPassenger());
+                    reservaNomeList = UtilsWS.montarReservaNomeList(reservaRQ, book.getPassenger());
 
                     // Buscar politicas de Voucher
-//                    politicaList = montarPoliticasVoucher(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
-                    VoucherRQ voucherRQ = UtilsWS.montarVoucher(integrador, file);
-                    VoucherRS voucher = easyTravelShopClient.consultarVoucher(integrador, voucherRQ);
+                    VoucherRQ voucherRQ = UtilsWS.montarVoucher(reservaRQ.getIntegrador(), file);
+                    VoucherRS voucher = easyTravelShopClient.consultarVoucher(reservaRQ.getIntegrador(), voucherRQ);
                     
                     // verifica o status da consulta de voucher
-                    UtilsWS.verificarRetorno(integrador, voucher);
+                    UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), voucher);
 
                     // Monta politicas de voucher ao validar retorno
                     if(voucher != null) {
-                        politicaList = UtilsWS.montarPoliticasVoucher(integrador, voucher);
+                        politicaList = UtilsWS.montarPoliticasVoucher(reservaRQ.getIntegrador(), voucher);
                     } else if(!Utils.isListNothing(file.getFileVoucher())){
-                        politicaList = UtilsWS.montarPoliticasVoucherGet(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
+                        politicaList = UtilsWS.montarPoliticasVoucherGet(reservaRQ.getIntegrador(), nrLocalizador, book.getFileId(), file.getFileVoucher());
                     }
                     
                     // Obtem as politicas de cancelamento
@@ -327,7 +330,7 @@ public class ConsultaWS {
                     List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
                     if(!Utils.isListNothing(cancellationPolicy)){
                         DatesRateGet rateGet = new DatesRateGet(cancellationPolicy);
-                        List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(integrador, sgMoeda, vlTarifa, rateGet, false);
+                        List<WSPolitica> politicasCancelamento = UtilsWS.montarPoliticasDeCancelamento(reservaRQ.getIntegrador(), sgMoeda, vlTarifa, rateGet, false);
                         // atualiza lista de politicas
                         if(!Utils.isListNothing(politicasCancelamento)){
                             if(Utils.isListNothing(politicaList)) {
@@ -355,12 +358,12 @@ public class ConsultaWS {
                             }
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a tarifa", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
                     
                     //Adicionando tarifa adicional em caso de periodo de multa
-                    tarifaAdicionalList = verificarMulta(integrador, politicaList, isCancelamento);
+                    tarifaAdicionalList = verificarMulta(reservaRQ.getIntegrador(), politicaList, isCancelamento);
                     if(!Utils.isListNothing(tarifaAdicionalList)){
                         tarifa.setTarifaAdicionalList(tarifaAdicionalList);
                     }
@@ -368,14 +371,14 @@ public class ConsultaWS {
             } catch (ErrorException error) {
                 throw error;
             } catch (Exception ex) {
-                throw new ErrorException(integrador, ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
+                throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
                         "Erro ao montar a reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
             
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
                     "Erro ao ler informações de politicas", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -393,7 +396,7 @@ public class ConsultaWS {
         
         // reserva servico (servico-transfer)
         WSReservaServico reservaServico = new WSReservaServico();
-        reservaServico.setIntegrador(integrador);
+        reservaServico.setIntegrador(reservaRQ.getIntegrador());
         reservaServico.setServicoTipo(servicoTipoEnum);
         reservaServico.setNrLocalizador(String.valueOf(nrLocalizador));
         reservaServico.setServico(servicoPasseio);

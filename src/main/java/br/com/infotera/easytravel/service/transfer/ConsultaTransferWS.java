@@ -154,7 +154,7 @@ public class ConsultaTransferWS {
                     mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage())); //Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
 
                     // Montar a lista de Pax
-                    reservaNomeList = UtilsWS.montarReservaNomeList(integrador, book.getPassenger());
+                    reservaNomeList = UtilsWS.montarReservaNomeList(reservaRQ, book.getPassenger());
 
                     // Buscar politicas de Voucher
 //                    politicaList = montarPoliticasVoucher(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
