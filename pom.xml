@@ -11,7 +11,7 @@
     </parent>
     <groupId>br.com.infotera.easytravel</groupId>
     <artifactId>easytravelshop</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>easy-travel</name>
     <description>Projeto de API para webservice para o fluxo de processos para compra de ingressos (Ticket), passeios (Tour) e transfer</description>
     <properties>
