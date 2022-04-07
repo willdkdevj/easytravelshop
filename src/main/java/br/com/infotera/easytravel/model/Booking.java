@@ -13,29 +13,29 @@ import java.util.List;
  */
 public class Booking extends Integration {
     
-    public Integer fileId;
-    public String searchId;
-    public Date bookingDate;
-    public String bookingCancelationDate;
-    public Date startDate;
-    public Date endDate;
-    public ServiceType serviceType;
-    public Currency currency;
-    public Double priceRate;
-    public Double priceTotal;
-    public Double markup;
-    public Location locationFrom;
-    public Location locationTo;
-    public IntegrationBooking integrationBooking;
-    public String operatorDeadlineDate;
-    public BookingDetailHotel bookingDetailHotel;
-    public BookingDetailService bookingDetailService;
-    public List<CancellationPolicy> cancellationPolicy;
-    public List<Passenger> passenger;
-    public Image image;
-    public Boolean voucherSupplier;
-    public Boolean voucherSupplierUpload;
-    public Status status;
+    private Integer fileId;
+    private String searchId;
+    private Date bookingDate;
+    private String bookingCancelationDate;
+    private Date startDate;
+    private Date endDate;
+    private ServiceType serviceType;
+    private Currency currency;
+    private Double priceRate;
+    private Double priceTotal;
+    private Double markup;
+    private Location locationFrom;
+    private Location locationTo;
+    private IntegrationBooking integrationBooking;
+    private String operatorDeadlineDate;
+    private BookingDetailHotel bookingDetailHotel;
+    private BookingDetailService bookingDetailService;
+    private List<CancellationPolicy> cancellationPolicy;
+    private List<Passenger> passenger;
+    private Image image;
+    private Boolean voucherSupplier;
+    private Boolean voucherSupplierUpload;
+    private Status status;
 
     public Booking() {
     }

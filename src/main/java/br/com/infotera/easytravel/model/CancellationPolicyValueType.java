@@ -10,10 +10,10 @@ package br.com.infotera.easytravel.model;
  */
 public class CancellationPolicyValueType {
     
-    public Integer id;
-    public String insertDate;
-    public String updateDate;
-    public Integer updatePersonId;
+    private Integer id;
+    private String insertDate;
+    private String updateDate;
+    private Integer updatePersonId;
 
     public CancellationPolicyValueType() {
     }

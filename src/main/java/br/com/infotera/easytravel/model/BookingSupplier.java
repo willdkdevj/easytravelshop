@@ -13,22 +13,22 @@ import java.util.List;
  */
 public class BookingSupplier extends Integration {
     
-    public int bookingId;
-    public Person personSupplier;
-    public IntegrationPersonSupplier integrationPersonSupplier;
-    public Hotel hotel;
-    public IntegrationHotel integrationHotel;
-    public Currency currency;
-    public int currencyRate;
-    public int currencyRatePaid;
-    public int priceRate;
-    public int priceTax;
-    public int priceTotal;
-    public int priceTotalPaid;
-    public Date deadlineDate;
-    public Divergence typeDivergence;
-    public Divergence divergencePerson;
-    public List<CancellationPolicy> cancellationPolicy;
+    private int bookingId;
+    private Person personSupplier;
+    private IntegrationPersonSupplier integrationPersonSupplier;
+    private Hotel hotel;
+    private IntegrationHotel integrationHotel;
+    private Currency currency;
+    private int currencyRate;
+    private int currencyRatePaid;
+    private int priceRate;
+    private int priceTax;
+    private int priceTotal;
+    private int priceTotalPaid;
+    private Date deadlineDate;
+    private Divergence typeDivergence;
+    private Divergence divergencePerson;
+    private List<CancellationPolicy> cancellationPolicy;
 
     public BookingSupplier() {
     }

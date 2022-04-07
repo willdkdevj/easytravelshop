@@ -10,10 +10,10 @@ package br.com.infotera.easytravel.model;
  */
 public class BookingDetailHotel extends Integration {
     
-    public Integer bookingId;
-    public HotelAddress hotelAddress;
-    public HotelPhone hotelPhone;
-    public Integer roomId;
+    private Integer bookingId;
+    private HotelAddress hotelAddress;
+    private HotelPhone hotelPhone;
+    private Integer roomId;
 
     public BookingDetailHotel() {
         super();

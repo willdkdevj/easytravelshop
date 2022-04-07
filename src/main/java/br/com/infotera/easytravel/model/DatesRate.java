@@ -13,12 +13,12 @@ import java.util.List;
  */
 public class DatesRate {
     
-    public String serviceId;
-    public Date serviceDate;
-    public String weekDayName;
-    public BestPrice price;
-    public List<PassengersRate> passengersRate;
-    public int nonRefundableRate;
+    private String serviceId;
+    private Date serviceDate;
+    private String weekDayName;
+    private BestPrice price;
+    private List<PassengersRate> passengersRate;
+    private int nonRefundableRate;
 
     public DatesRate() {
     }

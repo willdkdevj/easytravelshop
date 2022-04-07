@@ -12,10 +12,10 @@ import java.util.Date;
  */
 public class Address extends Integration {
     
-    public Integration typePublicPlace;
-    public int priority;
-    public Integration typeAddress;
-    public String fullAddress;
+    private Integration typePublicPlace;
+    private int priority;
+    private Integration typeAddress;
+    private String fullAddress;
 
     public Address() {
     }

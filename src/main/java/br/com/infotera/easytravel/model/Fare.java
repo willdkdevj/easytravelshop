@@ -13,15 +13,15 @@ import java.util.List;
  */
 public class Fare extends Integration {
     
-    public int bookingId;
-    public int passengerId;
-    public BestPrice price;
-    public List<RatesDetail> ratesDetail;
+    private Integer bookingId;
+    private Integer passengerId;
+    private BestPrice price;
+    private List<RatesDetail> ratesDetail;
 
     public Fare() {
     }
 
-    public Fare(int bookingId, int passengerId, BestPrice price, List<RatesDetail> ratesDetail, int id, String insertDate, String updateDate, int updatePersonId) {
+    public Fare(Integer bookingId, Integer passengerId, BestPrice price, List<RatesDetail> ratesDetail, Integer id, String insertDate, String updateDate, Integer updatePersonId) {
         super(id, insertDate, updateDate, updatePersonId);
         this.bookingId = bookingId;
         this.passengerId = passengerId;
@@ -29,19 +29,19 @@ public class Fare extends Integration {
         this.ratesDetail = ratesDetail;
     }
 
-    public int getBookingId() {
+    public Integer getBookingId() {
         return bookingId;
     }
 
-    public void setBookingId(int bookingId) {
+    public void setBookingId(Integer bookingId) {
         this.bookingId = bookingId;
     }
 
-    public int getPassengerId() {
+    public Integer getPassengerId() {
         return passengerId;
     }
 
-    public void setPassengerId(int passengerId) {
+    public void setPassengerId(Integer passengerId) {
         this.passengerId = passengerId;
     }
 

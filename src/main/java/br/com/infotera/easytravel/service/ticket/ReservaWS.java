@@ -51,7 +51,7 @@ public class ReservaWS {
                     .orElseThrow(RuntimeException::new);
         
             // Montar RQ para Ingresso (Ticket)
-            BookingRQ booking = UtilsWS.montarReservar(reservarRQ.getIntegrador(), rServico.getServico());
+            BookingRQ booking = UtilsWS.montarReservar(reservarRQ.getIntegrador(), rServico.getServico(), reservarRQ.getReserva().getContato());
             // Realiza chamada ao Fornecedor
             bookingRetorno = easyTravelShopClient.reservarAtividade(reservarRQ.getIntegrador(), booking);
 

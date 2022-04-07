@@ -26,11 +26,11 @@ public class CancellationPolicy {
     
     private Integer updatePersonId;
     
-    public Currency currency;
+    private Currency currency;
     
     private Boolean isRefundable;
     
-    public CancellationPolicyValueType cancellationPolicyValueType;
+    private CancellationPolicyValueType cancellationPolicyValueType;
     
     public CancellationPolicy() {
     }

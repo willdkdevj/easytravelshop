@@ -50,9 +50,6 @@ public class ConsultaWS {
     @Autowired
     private SessaoWS sessaoWS;
     
-    @Autowired
-    private Gson gson;
-    
     public WSReservaRS consultar(WSReservaRQ reservaRQ, Boolean isCancelamento) throws ErrorException {
          // Verifica Sessão iniciada com Fornecedor
         if(reservaRQ.getIntegrador().getSessao() == null) {
@@ -88,7 +85,7 @@ public class ConsultaWS {
             
             consulta = easyTravelShopClient.consultarReserva(reservaRQ.getIntegrador(), consultaRQ);
             
-            // verifica o status da consulta
+            // Verifica o status da consulta
             UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), consulta);
             
             // Verifica o tipo de atividade (Ingresso/Passeio) retornado pelo fornecedor
@@ -100,8 +97,8 @@ public class ConsultaWS {
                     .getServiceType()
                     .getName()
                     .toUpperCase();
-           
-        } catch (Exception ex) {
+            
+        } catch (NumberFormatException ex) {
             throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "realizarConsulta", WSMensagemErroEnum.SCO, 
                     "Erro ao realizar consulta", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
@@ -116,10 +113,11 @@ public class ConsultaWS {
 
                 return montarReservaPasseio(reservaRQ, consulta, dsParametro, isCancelamento);
             }
-        } catch (Exception ex) {
+        } catch (ErrorException ex) {
             throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "realizarConsulta", WSMensagemErroEnum.SCO, 
                     "Erro ao determinar a reserva a ser montada", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
+        
         return null;
     }
 

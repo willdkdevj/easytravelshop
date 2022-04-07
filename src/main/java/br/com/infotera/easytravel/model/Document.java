@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public class Document extends Integration {
     
-    public DocumentType documentType;
-    public String documentNumber;
+    private DocumentType documentType;
+    private String documentNumber;
 
     public Document() {
     }

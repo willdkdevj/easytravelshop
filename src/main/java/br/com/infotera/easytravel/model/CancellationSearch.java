@@ -30,15 +30,15 @@ public class CancellationSearch {
     
     private Integer updatePersonId;
     
-    public Status status;
+    private Status status;
     
-    public Currency currency;
+    private Currency currency;
     
-    public ServiceType serviceType;
+    private ServiceType serviceType;
     
     private Boolean isRefundable;
     
-    public CancellationPolicyValueType cancellationPolicyValueType;
+    private CancellationPolicyValueType cancellationPolicyValueType;
     
     public CancellationSearch() {
     }

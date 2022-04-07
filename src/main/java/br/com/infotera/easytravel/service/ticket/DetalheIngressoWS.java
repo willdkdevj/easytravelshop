@@ -76,8 +76,9 @@ public class DetalheIngressoWS {
         String dsTicket = null;
         
         List<WSIngressoModalidade> ingressoModalidadeList = null;
+        List<WSReservaNome> reservaNomeListObrigatorio = null;
+        List<WSReservaNome> reservaNomeList = disDetalhesIngressoRQ.getIngressoDetalhe().getIngresso().getReservaNomeList();
         try {
-            List<WSReservaNome> reservaNomeList = disDetalhesIngressoRQ.getIngressoDetalhe().getIngresso().getReservaNomeList();
             if (!Utils.isListNothing(search.getActivities())) {
                 ingressoModalidadeList = new ArrayList<>();
                 for (ActivitySearch activity : search.getActivities()) {
@@ -106,6 +107,11 @@ public class DetalheIngressoWS {
                                     tarifa = UtilsWS.retornarTarifa(disDetalhesIngressoRQ.getIntegrador(), rate, reservaNomeList);
                                 }
                                 
+                                // Verifica a obrigatoriedade de Documento
+                                reservaNomeListObrigatorio = UtilsWS.obrigatoriedadeDocAtividades(disDetalhesIngressoRQ.getIntegrador(),
+                                                                                      reservaNomeList, 
+                                                                                      activity.getRequiredDocuments());
+                                
                                 // Lista a disponibilidade de datas e valor
                                 ingressoModalidadeList.add(new WSIngressoModalidade(ticket.getActivityId(),
                                                     ticket.getModalities().get(0).getName(), tarifa, utilizacaoDatasList));
@@ -129,6 +135,7 @@ public class DetalheIngressoWS {
         ingresso.setCdServico(activityId);
         ingresso.setNmServico(nmTicket);
         ingresso.setDsServico(dsTicket);
+        ingresso.setReservaNomeList(!Utils.isListNothing(reservaNomeListObrigatorio) ? reservaNomeListObrigatorio : reservaNomeList);
             
         return new WSDetalheIngresso(WSServicoTipoEnum.INGRESSO, ingresso, ingressoModalidadeList);
     }

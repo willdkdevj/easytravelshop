@@ -10,17 +10,17 @@ package br.com.infotera.easytravel.model;
  */
 public class DocumentType {
     
-    public String name;
-    public int id;
+    private String name;
+    private Integer id;
 
     public DocumentType() {
     }
 
-    public DocumentType(int id) {
+    public DocumentType(Integer id) {
         this.id = id;
     }
     
-    public DocumentType(String name, int id) {
+    public DocumentType(String name, Integer id) {
         this.name = name;
         this.id = id;
     }
@@ -33,11 +33,11 @@ public class DocumentType {
         this.name = name;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     

@@ -43,9 +43,6 @@ public class DisponibilidadeWS {
     
     @Autowired
     private EstaticoWS estaticoWS;
-    
-    @Autowired
-    private UtilsWS utilsWS;
 
     public WSDisponibilidadeIngressoRS disponibilidade(WSDisponibilidadeIngressoRQ disponibilidadeIngressoRQ) throws ErrorException {
         // Verifica Sessão iniciada com Fornecedor
@@ -57,7 +54,7 @@ public class DisponibilidadeWS {
         Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeIngressoRQ.getIntegrador(), disponibilidadeIngressoRQ);
         
         // Monta requisição para realizar pesquisa a disponibilidade ao Fornecedor
-        SearchRQ searchRQ = utilsWS.montarSearch(disponibilidadeIngressoRQ, locationId);
+        SearchRQ searchRQ = UtilsWS.montarSearch(disponibilidadeIngressoRQ, locationId);
         
         // Obtém o retorno a disponibilidade de Ingressos no Fornecedor
         SearchRS search = easyTravelShopClient.buscarAtividades(disponibilidadeIngressoRQ.getIntegrador(), searchRQ);
@@ -94,10 +91,10 @@ public class DisponibilidadeWS {
                             for(Ticket ticket : activity.getTickets()){
 
                                 // Monta o descritivo do ingresso/passeio 
-                                dsServico = utilsWS.montarDescritivo(dispRQ.getIntegrador(), ticket);
+                                dsServico = UtilsWS.montarDescritivo(dispRQ.getIntegrador(), ticket);
 
                                 // Mídias (Imagens)
-                                mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), ticket.getImages());
+                                mediaList = UtilsWS.montarMidias(dispRQ.getIntegrador(), ticket.getImages());
 
                                 // Criação do Descritivo de Parâmetro a ser utilizado no TarifarWS
                                 String dsParamTarifar = UtilsWS.montarParametro(dispRQ.getIntegrador(), ticket, dispRQ.getDtInicio(), dispRQ.getDtFim(), search.getSearchId());

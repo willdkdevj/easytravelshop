@@ -10,30 +10,30 @@ package br.com.infotera.easytravel.model;
  */
 public class Divergence {
     
-    public boolean checked;
-    public int id;
+    private Boolean checked;
+    private Integer id;
 
     public Divergence() {
     }
 
-    public Divergence(boolean checked, int id) {
+    public Divergence(Boolean checked, int id) {
         this.checked = checked;
         this.id = id;
     }
 
-    public boolean isChecked() {
+    public Boolean isChecked() {
         return checked;
     }
 
-    public void setChecked(boolean checked) {
+    public void setChecked(Boolean checked) {
         this.checked = checked;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
     
