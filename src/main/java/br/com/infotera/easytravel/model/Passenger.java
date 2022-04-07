@@ -24,6 +24,7 @@ public class Passenger extends Integration {
     public String externalId;
     public List<Fare> fares;
     public Status status;
+    private String phone;
     public Boolean mainPassenger;
     
     public Passenger() {
@@ -123,6 +124,14 @@ public class Passenger extends Integration {
 
     public void setMainPassenger(Boolean mainPassenger) {
         this.mainPassenger = mainPassenger;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     
