@@ -45,9 +45,6 @@ public class DisponibilidadePasseioWS {
     
     @Autowired
     private EstaticoWS estaticoWS;
-    
-    @Autowired
-    private UtilsWS utilsWS;
 
     public WSDisponibilidadeServicoRS disponibilidade(WSDisponibilidadeServicoRQ disponibilidadeServicoRQ) throws ErrorException {
         // Verifica Sessão iniciada com Fornecedor
@@ -59,7 +56,7 @@ public class DisponibilidadePasseioWS {
         Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeServicoRQ.getIntegrador(), disponibilidadeServicoRQ);
         
         // Monta requisição para realizar pesquisa a disponibilidade ao Fornecedor
-        SearchRQ searchRQ = utilsWS.montarSearch(disponibilidadeServicoRQ, locationId);
+        SearchRQ searchRQ = UtilsWS.montarSearch(disponibilidadeServicoRQ, locationId);
         
         // Obtém o retorno a disponibilidade de Ingressos no Fornecedor
         SearchRS search = easyTravelShopClient.buscarAtividades(disponibilidadeServicoRQ.getIntegrador(), searchRQ);
@@ -107,10 +104,10 @@ public class DisponibilidadePasseioWS {
                                 }
                                 
                                 // Monta o descritivo do passeio 
-                                String dsServico = utilsWS.montarDescritivo(dispRQ.getIntegrador(), tour);
+                                String dsServico = UtilsWS.montarDescritivo(dispRQ.getIntegrador(), tour);
 
                                 // Mídias (Imagens)
-                                mediaList = utilsWS.montarMidias(dispRQ.getIntegrador(), tour.getImages());
+                                mediaList = UtilsWS.montarMidias(dispRQ.getIntegrador(), tour.getImages());
 
                                 // tarifa
                                 WSTarifa tarifa = UtilsWS.retornarTarifa(dispRQ.getIntegrador(), tour.getDatesRate().get(0), dispRQ.getReservaNomeList());//montarTarifa(dispoRQ.getIntegrador(), transfer.getDatesRate());
