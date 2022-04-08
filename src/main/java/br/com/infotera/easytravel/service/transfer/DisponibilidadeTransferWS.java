@@ -49,7 +49,7 @@ public class DisponibilidadeTransferWS {
         }
         
         // Localiza ID da Localidade (Cidade) utilizada pelo Fornecedor
-        Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeTransferRQ.getIntegrador(), disponibilidadeTransferRQ);
+        Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeTransferRQ.getIntegrador(), disponibilidadeTransferRQ); //UtilsWS.verificarLocationId(disponibilidadeTransferRQ); //
         
         // Monta requisição para realizar pesquisa a disponibilidade ao Fornecedor
         SearchRQ searchRQ = UtilsWS.montarSearch(disponibilidadeTransferRQ, locationId);
@@ -143,6 +143,9 @@ public class DisponibilidadeTransferWS {
                             servicoTipoEnum,
                             pacoteServico));
                 }
+            } else {
+                throw new ErrorException(dispoRQ.getIntegrador(), DisponibilidadeTransferWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, 
+                        "Não encontrado disponibilidade para a atividade", WSIntegracaoStatusEnum.NEGADO, null, false);
             }
         } catch (ErrorException error) {
             throw error;
