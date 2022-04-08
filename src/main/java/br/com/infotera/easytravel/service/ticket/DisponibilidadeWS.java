@@ -51,7 +51,7 @@ public class DisponibilidadeWS {
         }
         
         // Localiza ID da Localidade (Cidade) utilizada pelo Fornecedor
-        Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeIngressoRQ.getIntegrador(), disponibilidadeIngressoRQ);
+        Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeIngressoRQ.getIntegrador(), disponibilidadeIngressoRQ); //UtilsWS.verificarLocationId(disponibilidadeIngressoRQ); //
         
         // Monta requisição para realizar pesquisa a disponibilidade ao Fornecedor
         SearchRQ searchRQ = UtilsWS.montarSearch(disponibilidadeIngressoRQ, locationId);
@@ -124,10 +124,12 @@ public class DisponibilidadeWS {
                                 
                             }
                         } else {
-                            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadeWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);
+                            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadeWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, 
+                                    "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadeWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, "Erro ao montar Ingresso", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                        throw new ErrorException (dispRQ.getIntegrador(), DisponibilidadeWS.class, "montarPesquisa", WSMensagemErroEnum.SDI, 
+                                "Erro ao montar Ingresso", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
                     
                     sqPesquisa++;
@@ -136,11 +138,15 @@ public class DisponibilidadeWS {
 
                     ingressoPesquisaList.add(ingressoPesquisa);
                 }
+            } else {
+                throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadeWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, 
+                        "Não encontrado disponibilidade para a atividade", WSIntegracaoStatusEnum.NEGADO, null, false);
             }
         } catch(ErrorException error) {
             throw error;
         } catch(Exception ex) {
-            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadeWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, "Erro ao obter as Atividades do Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
+            throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadeWS.class, "montaPesquisa", WSMensagemErroEnum.SDI, 
+                    "Erro ao obter as Atividades do Fornecedor", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
         return ingressoPesquisaList;
