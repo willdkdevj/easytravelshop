@@ -108,19 +108,14 @@ public class DisponibilidadeWS {
                                     ingressoModalidadeList.add(modalidade);
                                 }
                                 
-                                
                                 // Criada instância do objeto Ingresso
-                                ingresso = new WSIngresso(ticket.getActivityId(),
-                                                            ticket.getName(),
-                                                            dsServico,
-                                                            null,//data de serviço
-                                                            null,
-                                                            null,
-                                                            dispRQ.getReservaNomeList(),//ajustar
-                                                            null,
-                                                            mediaList,
-                                                            dsParamTarifar,
-                                                            null);
+                                ingresso = new WSIngresso();
+                                ingresso.setCdServico(ticket.getActivityId());
+                                ingresso.setNmServico(ticket.getName());
+                                ingresso.setDsServico(dsServico);
+                                ingresso.setReservaNomeList(dispRQ.getReservaNomeList());
+                                ingresso.setMediaList(mediaList);
+                                ingresso.setDsParametro(dsParamTarifar);
                                 
                             }
                         } else {
