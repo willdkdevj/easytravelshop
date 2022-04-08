@@ -49,7 +49,7 @@ public class ReservaTransferWS {
             if (rServico.getServico().getIsStTransfer() || rServico.getServico().getIsStPacoteServico()) {
                 try {
                     // Montar requisição para reservar (DoBooking)
-                    BookingRQ booking = UtilsWS.montarReservar(reservarRQ.getIntegrador(), rServico.getServico()); //new BookingRQ();
+                    BookingRQ booking = UtilsWS.montarReservar(reservarRQ.getIntegrador(), rServico.getServico(), reservarRQ.getReserva().getContato()); //new BookingRQ();
 
                     bookingRetorno = easyTravelShopClient.reservarAtividade(reservarRQ.getIntegrador(), booking);
                     
