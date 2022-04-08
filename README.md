@@ -105,7 +105,7 @@ Para acesso aos ambientes (*Homologação/Produção*) da MikeTec se faz necess�
 
 
 ### Limites e Restrições
-O fornecedor **ETS** em seu retorno (*response*) é devolvidas algumas regras de negócio, são elas:
+O fornecedor **ETS**, em seu retorno [response], são devolvidas algumas regras de negócio, são elas:
 - Na Disponibilidade (*Search*) - caso retornado o parâmetro ***requiredDocuments*** é analisado qual o tipo de documento (*TipoDocumentoEnum*) retornado a fim de exigir uma inserção na pré-reserva;
 - Na Disponibilidade (*Search*) - é analisado o parâmetro ***passangersRate*** de cada atividade retornada a fim de verificar os subparâmetros **startAge** e **endAge** com intuito de obter o range de idade permitido para atividade para apresenta-lo;
 
