@@ -189,8 +189,7 @@ public class ConsultaTransferWS {
                     // verificação do tipo de veiculo (transfer)
                     WSVeiculoTransfer veiculoTransfer = montarVeiculoTransfer(integrador, book.getBookingDetailService());
                     
-                    // montagem do Transfer Info
-                    WSTransferInfo info = montarTransferInfo(integrador, book);
+                    
                     
                     // montagem da lista de informações sobre o servico (ServicoInfoList)
                     List<WSServicoInfo> servicoInfoList = montarServicoInfoList(integrador, file.getFileVoucher());
@@ -223,6 +222,9 @@ public class ConsultaTransferWS {
                         int idaVolta = 2;
                         if(book.getBookingDetailService().isTransferIn() && book.getBookingDetailService().isTransferOut()){
                             for(int i = 0; i < idaVolta; i++){
+                                // montagem do Transfer Info
+                                WSTransferInfo info = montarTransferInfo(integrador, book);
+                    
                                 WSTransfer transferIdaVolta = new WSTransfer();
                                 transferIdaVolta.setSqServico(i);
                                 transferIdaVolta.setTransferInOut(i == 0 ? WSTransferInOutEnum.IN : WSTransferInOutEnum.OUT);
@@ -246,6 +248,9 @@ public class ConsultaTransferWS {
                             }
 
                         } else {
+                            // montagem do Transfer Info
+                            WSTransferInfo info = montarTransferInfo(integrador, book);
+                                
                             WSTransfer transferTrecho = new WSTransfer();
                             transferTrecho.setSqServico(0);
                             transferTrecho.setTransferInOut(WSTransferInOutEnum.IN);
