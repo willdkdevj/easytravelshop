@@ -1362,10 +1362,9 @@ public class UtilsWS {
             
             WSIngresso ingresso = null;
             WSPacoteServico pacoteServico = null;
-            WSTransfer transfer = null;
+//            WSTransfer transfer = null;
             WSServicoOutro servicoPasseio = null;
             
-            List<WSTransfer> transferList = null;
             if(contato != null){
                 dsTelefone = "(11) 98416-3234"; //contato.getTelefone().getNrDDD() + " " + contato.getTelefone().getNrTelefone();
 //            } else {
@@ -1408,24 +1407,34 @@ public class UtilsWS {
                         List<WSServico> collect = pacoteServico.getServicoList().stream()
                                 .filter(servicoPct -> servicoPct != null)
                                 .collect(Collectors.toList());
-                        transferList.addAll((Collection<? extends WSTransfer>) (WSTransfer) collect);
-//                                                                .findFirst()
-//                                                                .orElseThrow(RuntimeException::new);
+                        
+                        List<WSTransfer> transferList = new ArrayList();
+                        collect.forEach(servicoTransfer -> {
+                            WSTransfer transfer = (WSTransfer) servicoTransfer;
+                            transferList.add(transfer);
+                        });
                         
                         // Obtem o WSTransferInfo para passagem de parâmetros de localização do passageiro
-                        WSTransferInfo transferInfo = transferList.get(0).getTransferInfo();
+                        WSTransferInfo transferInfoIda = transferList.get(0).getTransferInfo();
+                        WSTransferInfo transferInfoVolta = transferList.size() > 1 ? transferList.get(1).getTransferInfo() : null;
                         
-                        String localOrigem = transferInfo.getNmOrigem();
-                        String localDestino = transferInfo.getNmDestino();
-                        String nmTransp = transferInfo.getNmTransporte();
-                        String nrTransp = transferInfo.getNrTransporte();
-                        String horaChegada = Utils.formatData(transferInfo.getDtTransporte(), "HH:mm");
-                        String horaSaida = Utils.formatData(transferInfo.getDtTransporte(), "HH:mm");
+                        String localOrigem = transferInfoIda.getNmOrigem();
+                        String localDestino = transferInfoIda.getNmDestino();
+                        String nmTranspCheg = transferInfoIda.getNmTransporte();
+                        String nmTranspSai = null;
+                        String nrTransp = transferInfoIda.getNrTransporte();
+                        String horaChegada = Utils.formatData(transferInfoIda.getDtTransporte(), "HH:mm");
+                        String horaSaida = null;
 
+                        if(transferInfoVolta != null){
+                            nmTranspSai= transferInfoVolta.getNmTransporte();
+                            horaSaida = Utils.formatData(transferInfoVolta.getDtTransporte(), "HH:mm");
+                        }
+                        
                         action.setLocationPickup(localOrigem);
                         action.setLocationDropoff(localDestino);
-                        action.setFlightNumberArrival(nmTransp);
-                        action.setFlightNumberDeparture(nmTransp);
+                        action.setFlightNumberArrival(nmTranspCheg);
+                        action.setFlightNumberDeparture(nmTranspSai);
                         action.setFlightHourArrival(horaChegada);
                         action.setFlightHourDeparture(horaSaida);
                         action.setFlightLocNumber(nrTransp);
