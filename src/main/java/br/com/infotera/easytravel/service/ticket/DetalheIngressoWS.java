@@ -95,12 +95,6 @@ public class DetalheIngressoWS {
                                 // Monta lista de IngressoUtilizacaoData
                                 List<WSIngressoUtilizacaoData> utilizacaoDatasList = montaDataUtilizacaoList(disDetalhesIngressoRQ.getIntegrador(), reservaNomeList, ticket.getModalities().get(0).getDatesRate(), activityId, search.getSearchId());
                                 
-                                // Obter vlNeto a partir da lista de Datas de Utilização
-                                Double vlTarifa = utilizacaoDatasList.stream()
-                                        .filter(util -> util.getVlTotal() > 0.0)
-                                        .mapToDouble(util -> util.getVlTotal())
-                                        .sum();
-
                                 //monta politica por diaria (ticket)
                                 WSTarifa tarifa = null;
                                 for(DatesRateSearch rate : ticket.getModalities().get(0).getDatesRate()){
@@ -172,7 +166,7 @@ public class DetalheIngressoWS {
                     // Soma o valor da diaria de todos os Pax
                     Double vlTotalDiaria = vlPessoaNetoList.stream().filter(valor -> valor > 0.0).mapToDouble(valor -> valor).sum();
                     
-                    ingressoUtilizacaoData.setDsTarifa(null + "~" + vlTotalDiaria + "#" + activityId + "#" + rate.getServiceId() + "#" + Utils.formatData(dtServicoInicio, "yyyy-MM-dd") + "#" + Utils.formatData(dtServicoFim, "yyyy-MM-dd") + "#" + searchId + "#" + WSServicoTipoEnum.INGRESSO);
+                    ingressoUtilizacaoData.setDsTarifa(activityId + "~" + vlTotalDiaria + "#" + activityId + "#" + rate.getServiceId() + "#" + Utils.formatData(dtServicoInicio, "yyyy-MM-dd") + "#" + Utils.formatData(dtServicoFim, "yyyy-MM-dd") + "#" + searchId + "#" + WSServicoTipoEnum.INGRESSO);
                     ingressoUtilizacaoData.setVlTotal(vlTotalDiaria);
                     utilizacaoDatasList.add(ingressoUtilizacaoData);
                     
