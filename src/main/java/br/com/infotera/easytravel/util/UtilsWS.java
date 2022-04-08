@@ -1,11 +1,14 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * API desenvolvida por William Dias
+ * Documentação da API no link https://github.com/InfoteraTecnologia/easytravelshop/blob/master/assets/Miketec-API-DocumentationV3_2.pdf
+ * Para análise dos pontos levantados para seu desenvolvimento leaia o arquivo README no clique https://github.com/InfoteraTecnologia/easytravelshop#readme
  */
 package br.com.infotera.easytravel.util;
 
 import br.com.infotera.common.ErrorException;
+import br.com.infotera.common.WSContato;
 import br.com.infotera.common.WSDocumento;
+import br.com.infotera.common.WSInfoAdicional;
 import br.com.infotera.common.WSIntegrador;
 import br.com.infotera.common.WSReservaNome;
 import br.com.infotera.common.WSReservaServico;
@@ -17,6 +20,7 @@ import br.com.infotera.common.enumerator.WSMediaCategoriaEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
 import br.com.infotera.common.enumerator.WSPagtoFornecedorTipoEnum;
 import br.com.infotera.common.enumerator.WSPaxTipoEnum;
+import br.com.infotera.common.enumerator.WSPoliticaTipoEnum;
 import br.com.infotera.common.enumerator.WSReservaStatusEnum;
 import br.com.infotera.common.enumerator.WSServicoTipoEnum;
 import br.com.infotera.common.enumerator.WSSexoEnum;
@@ -86,8 +90,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 /**
@@ -114,6 +120,34 @@ public class UtilsWS {
         } catch (IOException e) {
             e.printStackTrace(); 
         } 
+    }
+    
+    public static Integer verificarLocationId(Object disponibilidadeInfotravelRQ) throws ErrorException{
+        Integer fornecedorId = null;
+        WSIntegrador integrador = null;
+        
+        try {
+            if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeIngressoRQ){
+                    WSDisponibilidadeIngressoRQ disponibilidadeIngressoRQ = (WSDisponibilidadeIngressoRQ) disponibilidadeInfotravelRQ;
+                    integrador = disponibilidadeIngressoRQ.getIntegrador();
+                    fornecedorId = Integer.parseInt(disponibilidadeIngressoRQ.getCdDestino());
+                   
+            } else if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeServicoRQ) {
+                    WSDisponibilidadeServicoRQ disponibilidadeServicoRQ = (WSDisponibilidadeServicoRQ) disponibilidadeInfotravelRQ;
+                    integrador = disponibilidadeServicoRQ.getIntegrador();
+                    fornecedorId = Integer.parseInt(disponibilidadeServicoRQ.getOrigem().getCdLocal());
+
+            } else if(disponibilidadeInfotravelRQ instanceof WSDisponibilidadeTransferRQ) {
+                    WSDisponibilidadeTransferRQ disponibilidadeTransferRQ = (WSDisponibilidadeTransferRQ) disponibilidadeInfotravelRQ;
+                    integrador = disponibilidadeTransferRQ.getIntegrador();
+                    fornecedorId = Integer.parseInt(disponibilidadeTransferRQ.getTransferList().stream().filter(transfer -> transfer.getOrigem() != null).findFirst().get().getOrigem().getCdDestino());
+            }
+        } catch (NumberFormatException ex) {
+            throw new ErrorException(integrador, UtilsWS.class, "verificarLocationId", WSMensagemErroEnum.GENMETHOD, 
+                    "Erro ao obter o ID da localização do destino", WSIntegracaoStatusEnum.NEGADO, ex, false);
+        }
+        
+        return fornecedorId;
     }
     
     public static SearchRQ montarSearch(Object disponibilidadeInfotravelRQ, Integer locationId) throws ErrorException {
@@ -226,7 +260,7 @@ public class UtilsWS {
                         searchResponse.getActivities().forEach(action -> {
                             action.getTickets().forEach(ticket -> {
                                 ticket.getModalities().forEach(modality -> {
-                                    // Verifica a partir do DatesRateGet >> PassengerRate se existe ingresso com a sugestão de pax (idade)
+                                    // Verifica a partir do DatesRateSearch >> PassengerRate se existe ingresso com a sugestão de pax (idade)
                                     modality.getDatesRate().forEach(rate -> {
                                         rate.getPassengersRate().stream()
                                                 .filter(pax -> paxDispo.getQtIdade() >= pax.getStartAge() && paxDispo.getQtIdade() <= pax.getEndAge())
@@ -252,7 +286,7 @@ public class UtilsWS {
                         searchResponse.getActivities().forEach(action -> {
                             action.getTours().forEach(tour -> {
                                 tour.getDatesRate().forEach(datesRate -> {
-                                    // Verifica a partir do DatesRateGet >> PassengerRate se existe ingresso com a sugestão de pax (idade)
+                                    // Verifica a partir do DatesRateSearch >> PassengerRate se existe ingresso com a sugestão de pax (idade)
                                     datesRate.getPassengersRate().stream()
                                                 .filter(pax -> paxDispo.getQtIdade() >= pax.getStartAge() && paxDispo.getQtIdade() <= pax.getEndAge())
                                                 .findFirst()
@@ -272,6 +306,20 @@ public class UtilsWS {
                     WSDisponibilidadeTransferRQ disponibilidadeTransferRQ = (WSDisponibilidadeTransferRQ) disponibilidadeInfotravelRQ;
                     integrador = disponibilidadeTransferRQ.getIntegrador();
                     
+                    // Verifica a partir do ReervaNome a idade selecionada para busca de passeios
+                    disponibilidadeTransferRQ.getReservaNomeList().forEach( paxDispo -> {
+                        searchResponse.getActivities().forEach(action -> {
+                            action.getTours().forEach(tour -> {
+                                tour.getDatesRate().forEach(datesRate -> {
+                                    // Verifica a partir do DatesRateSearch >> PassengerRate se existe transfer com a sugestão de pax (idade)
+                                    datesRate.getPassengersRate().stream()
+                                                .filter(pax -> paxDispo.getQtIdade() >= pax.getStartAge() && paxDispo.getQtIdade() <= pax.getEndAge())
+                                                .findFirst()
+                                                .orElseThrow(RuntimeException::new);
+                                });
+                            });
+                        });
+                    });
                     
                 } catch (Exception ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "validarResponse", WSMensagemErroEnum.GENMETHOD, 
@@ -351,7 +399,6 @@ public class UtilsWS {
                         reservaNomeList = pacoteServico.getReservaNomeList();
                         
                         // Trata dsParametro para montar requisição a fim de Re-Tarifar
-//                        WSTransfer transfer = (WSTransfer) pacoteServico.getTransfer();
                         dsParamTarifar = pacoteServico.getDsParametro() != null ? pacoteServico.getDsParametro().split("#") : pacoteServico.getDsServico().split("#");
                         
                         searchRQ = new SearchRQ();
@@ -495,6 +542,7 @@ public class UtilsWS {
         List<CancellationSearch> cancellationSearch = null;
 
         try {
+            // Processo de montagem de politica quando vem do método Get (devido tipo de parâmetros diferentes do startdate)
             if(objDatesRate instanceof DatesRateGet){
                 DatesRateGet rate = (DatesRateGet) objDatesRate;
                 try {
@@ -522,16 +570,15 @@ public class UtilsWS {
                                     + "Esta data e hora calculam-se em base no horário local do pais de destino.";
 
                             if (vlCancelamento != 0.0) {
-                                cancelamento = new WSPoliticaCancelamento("Politica Cancelamento",
-                                        dsPoliticaCancelamento + "<br>",
-                                        moeda,
-                                        vlCancelamento,
-                                        null, 
-                                        null,
-                                        false,
-                                        dtMinCancelamento,
-                                        null,
-                                        isNaoReembolsavel);
+                                cancelamento = new WSPoliticaCancelamento();
+                                cancelamento.setPoliticaTipo(WSPoliticaTipoEnum.CANCELAMENTO);
+                                cancelamento.setNmPolitica("Politica Cancelamento");
+                                cancelamento.setDsPolitica(dsPoliticaCancelamento + "<br>");
+                                cancelamento.setSgMoeda(moeda);
+                                cancelamento.setVlCancelamento(vlCancelamento);
+                                cancelamento.setStMultaImediata(false);
+                                cancelamento.setDtMinCancelamento(dtMinCancelamento);
+                                cancelamento.setStNaoReembolsavel(isNaoReembolsavel);
 
                                 politicCancelList.add(cancelamento);
                             }
@@ -552,6 +599,7 @@ public class UtilsWS {
                         WSMensagemErroEnum.GENMETHOD, "Erro ao ler informações de politicas de cancelamento (ConsultaWS)", WSIntegracaoStatusEnum.NEGADO, ex);
                 }
             } else if(objDatesRate instanceof DatesRateSearch) {
+                    // Processo de montagem de politica quando vem do método Search (devido tipo de parâmetros diferentes do startdate)
                     DatesRateSearch rate = (DatesRateSearch) objDatesRate;
                     try {
                         // Data do serviço
@@ -581,16 +629,16 @@ public class UtilsWS {
                                         + "Esta data e hora calculam-se em base no horário local do pais de destino.";
 
                                 if (vlCancelamento != 0.0) {
-                                    cancelamento = new WSPoliticaCancelamento("Politica Cancelamento",
-                                            dsPoliticaCancelamento + "<br>",
-                                            moeda,
-                                            vlCancelamento,
-                                            vlPercentual,
-                                            null,
-                                            false,
-                                            dtMinCancelamento,
-                                            null,
-                                            isNaoReembolsavel);
+                                    cancelamento = new WSPoliticaCancelamento();
+                                    cancelamento.setPoliticaTipo(WSPoliticaTipoEnum.CANCELAMENTO);
+                                    cancelamento.setNmPolitica("Politica Cancelamento");
+                                    cancelamento.setDsPolitica(dsPoliticaCancelamento + "<br>");
+                                    cancelamento.setSgMoeda(moeda);
+                                    cancelamento.setVlCancelamento(vlCancelamento);
+                                    cancelamento.setPcCancelamento(vlPercentual);
+                                    cancelamento.setStMultaImediata(false);
+                                    cancelamento.setDtMinCancelamento(dtMinCancelamento);
+                                    cancelamento.setStNaoReembolsavel(isNaoReembolsavel);
 
                                     politicCancelList.add(cancelamento);
                                 }
@@ -865,7 +913,6 @@ public class UtilsWS {
                 if(docRequerido != null) {
                     requerido = true;
                     tipoDoc = docRequerido.getName();
-                    
                 }
                 
                 if(!Utils.isListNothing(reservaNomeList)){
@@ -1002,9 +1049,9 @@ public class UtilsWS {
                         }
 
                         // QR Code
-                        if (response.getQrCode()!= null && !response.getQrCode().equals("")) {
-                            politicaVoucherList.add(new WSPoliticaVoucher("QR Code: ", response.getQrCode()));
-                        }
+//                        if (response.getQrCode()!= null && !response.getQrCode().equals("")) {
+//                            politicaVoucherList.add(new WSPoliticaVoucher("QR Code: ", response.getQrCode()));
+//                        }
 
                         // Nome da modalidade no voucher
                         politicaVoucherList.add(new WSPoliticaVoucher("Destino: ", response.getLocationTo()));
@@ -1162,20 +1209,20 @@ public class UtilsWS {
             
             if(reservaServico != null) {
                 if (reservaServico.getServico().getIsStIngresso()) {
-                        WSIngresso ingresso = (WSIngresso) reservaServico.getServico();
-                        reservaNomeList = ingresso.getReservaNomeList();
-                        
-                    } else if(reservaServico.getServico().getIsStTransfer() || reservaServico.getServico().getIsStPacoteServico()) {
-                        WSPacoteServico pacoteServico = (WSPacoteServico) reservaServico.getServico();
-                        reservaNomeList = pacoteServico.getReservaNomeList();
-                        
-                    } else if(reservaServico.getServico().getIsStServicoOutro()) {
-                        WSServicoOutro servicoPasseio = (WSServicoOutro) reservaServico.getServico();
-                        reservaNomeList = servicoPasseio.getReservaNomeList();
-                    }
+                    WSIngresso ingresso = (WSIngresso) reservaServico.getServico();
+                    reservaNomeList = ingresso.getReservaNomeList();
 
-                    // Retorna ReservaNome do Infotravel
-                    return reservaNomeList;
+                } else if(reservaServico.getServico().getIsStTransfer() || reservaServico.getServico().getIsStPacoteServico()) {
+                    WSPacoteServico pacoteServico = (WSPacoteServico) reservaServico.getServico();
+                    reservaNomeList = pacoteServico.getReservaNomeList();
+
+                } else if(reservaServico.getServico().getIsStServicoOutro()) {
+                    WSServicoOutro servicoPasseio = (WSServicoOutro) reservaServico.getServico();
+                    reservaNomeList = servicoPasseio.getReservaNomeList();
+                }
+
+                // Retorna ReservaNome do Infotravel
+                return reservaNomeList;
                 
             } else if(!Utils.isListNothing(passengers)){
                 // Monta reservaNomeList a partir do retorno do fornecedor caso não encontre o serviço
@@ -1237,14 +1284,16 @@ public class UtilsWS {
         // Veículo
         WSVeiculoTransfer veiculo = montarVeiculoTransfer(integrador, transfer, veiculoTransfer);
         
-        // Transfer Info
-        WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer);        
+                
         
         try {
             servicoList = new ArrayList();
             int idaVolta = 2;
             if(isIdaVolta){
                 for(int i = 0; i < idaVolta; i++){
+                    // Transfer Info
+                    WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer);
+        
                     WSTransfer transferIdaVolta = new WSTransfer();
                     transferIdaVolta.setSqServico(i);
                     transferIdaVolta.setTransferInOut(i == 0 ? WSTransferInOutEnum.IN : WSTransferInOutEnum.OUT);
@@ -1268,6 +1317,9 @@ public class UtilsWS {
                 }
 
             } else {
+                // Transfer Info
+                WSTransferInfo wsTransferInfo = montarTransferInfo(integrador, transfer);
+                    
                 WSTransfer transferTrecho = new WSTransfer();
                 transferTrecho.setSqServico(sqServico);
                 transferTrecho.setTransferInOut(WSTransferInOutEnum.IN);
@@ -1300,18 +1352,28 @@ public class UtilsWS {
         return servicoList;
     }
     
-    public static BookingRQ montarReservar(WSIntegrador integrador, WSServico servico) throws ErrorException{
+    public static BookingRQ montarReservar(WSIntegrador integrador, WSServico servico, WSContato contato) throws ErrorException{
         BookingRQ booking = null;
         
         try {
             String dsParametro = null;
+            String dsTelefone = null;
             String[] chaveActivity = null;
             
             WSIngresso ingresso = null;
             WSPacoteServico pacoteServico = null;
             WSTransfer transfer = null;
             WSServicoOutro servicoPasseio = null;
-                    
+            
+            List<WSTransfer> transferList = null;
+            if(contato != null){
+                dsTelefone = "(11) 98416-3234"; //contato.getTelefone().getNrDDD() + " " + contato.getTelefone().getNrTelefone();
+//            } else {
+//                // Infotravel não enviou o WSContato na WSReserva para obter o telefone para contato do Reservar (DoBooking - Fornecedor)
+//                throw new ErrorException(integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
+//                        "Erro ao obter o WSContato para envio de telefone para contato", WSIntegracaoStatusEnum.NEGADO, null, false);
+            }
+            
             if (servico.getIsStIngresso()) {
                 // realiza o parse para o objeto WSIngresso
                 ingresso = (WSIngresso) servico;
@@ -1343,13 +1405,15 @@ public class UtilsWS {
                     // Caso seja Transfer é passado parâmetros de localidade do passageiro do seu desembarque
                     if(servico.getIsStPacoteServico()){
                         // realiza o parse para o objeto WSTransfer
-                        transfer = (WSTransfer) pacoteServico.getServicoList().stream()
-                                                                .filter(servicoPct -> servicoPct != null)
-                                                                .findFirst()
-                                                                .orElseThrow(RuntimeException::new);
+                        List<WSServico> collect = pacoteServico.getServicoList().stream()
+                                .filter(servicoPct -> servicoPct != null)
+                                .collect(Collectors.toList());
+                        transferList.addAll((Collection<? extends WSTransfer>) (WSTransfer) collect);
+//                                                                .findFirst()
+//                                                                .orElseThrow(RuntimeException::new);
                         
                         // Obtem o WSTransferInfo para passagem de parâmetros de localização do passageiro
-                        WSTransferInfo transferInfo = transfer.getTransferInfo();
+                        WSTransferInfo transferInfo = transferList.get(0).getTransferInfo();
                         
                         String localOrigem = transferInfo.getNmOrigem();
                         String localDestino = transferInfo.getNmDestino();
@@ -1393,6 +1457,15 @@ public class UtilsWS {
                         }).forEachOrdered(passenger -> {
                             passengers.add(passenger);
                         });
+                        
+                        boolean stPrincipal = true;
+                        for(Passenger pass : passengers) {
+                            if(stPrincipal && dsTelefone != null){
+                                pass.setPhone(dsTelefone);
+                                pass.setMainPassenger(stPrincipal);
+                                stPrincipal = false;
+                            }
+                        }
                         booking.setPassengers(passengers);
                     }
                 } catch (Exception ex) {
