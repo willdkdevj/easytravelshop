@@ -70,8 +70,6 @@ public class ReservaWS {
         
         rServico.setNrLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
         rServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
-//        WSReservaServico wsReservaServico = new WSReservaServico(String.valueOf(bookingRetorno.getFile().getId()));
-//        wsReservaServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
         
         WSReservaRQ reservaRQ = new WSReservaRQ(reservarRQ.getIntegrador(), 
                                                 new WSReserva(rServico)); //(wsReservaServico));
