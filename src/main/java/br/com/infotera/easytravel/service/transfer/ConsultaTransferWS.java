@@ -157,7 +157,6 @@ public class ConsultaTransferWS {
                     reservaNomeList = UtilsWS.montarReservaNomeList(reservaRQ, book.getPassenger());
 
                     // Buscar politicas de Voucher
-//                    politicaList = montarPoliticasVoucher(integrador, nrLocalizador, book.getFileId(), file.getFileVoucher());
                     VoucherRQ voucherRQ = UtilsWS.montarVoucher(integrador, file);
                     VoucherRS voucher = easyTravelShopClient.consultarVoucher(integrador, voucherRQ);
                     
@@ -172,7 +171,6 @@ public class ConsultaTransferWS {
                     }
 
                     // Obtem as politicas de cancelamento
-//                    politicaList = new ArrayList<>();
                     List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
                     if(!Utils.isListNothing(cancellationPolicy)){
                         DatesRateGet rateGet = new DatesRateGet(cancellationPolicy);

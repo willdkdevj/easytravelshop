@@ -75,9 +75,6 @@ public class ReservaTransferWS {
         // Inserindo o ID da reserva (Fornecedor) no Integrador e na ReservaServico
         reservarRQ.getIntegrador().setCdLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
         
-//        WSReservaServico wsReservaServico = new WSReservaServico(String.valueOf(bookingRetorno.getFile().getId()));
-//        wsReservaServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
-        
         // Inserindo o N Localizador na ReservaServico
         rServico.setNrLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
         rServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores

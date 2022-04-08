@@ -53,7 +53,7 @@ public class DisponibilidadePasseioWS {
         }
         
         // Localiza ID da Localidade (Cidade) utilizada pelo Fornecedor
-        Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeServicoRQ.getIntegrador(), disponibilidadeServicoRQ);
+        Integer locationId = UtilsWS.verificarLocationId(disponibilidadeServicoRQ); //estaticoWS.verificarLocalidades(disponibilidadeServicoRQ.getIntegrador(), disponibilidadeServicoRQ);
         
         // Monta requisição para realizar pesquisa a disponibilidade ao Fornecedor
         SearchRQ searchRQ = UtilsWS.montarSearch(disponibilidadeServicoRQ, locationId);
