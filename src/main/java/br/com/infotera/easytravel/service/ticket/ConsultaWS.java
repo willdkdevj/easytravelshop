@@ -26,7 +26,6 @@ import br.com.infotera.easytravel.model.RQRS.VoucherRQ;
 import br.com.infotera.easytravel.model.RQRS.VoucherRS;
 import br.com.infotera.easytravel.service.SessaoWS;
 import br.com.infotera.easytravel.util.UtilsWS;
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -228,17 +227,17 @@ public class ConsultaWS {
         WSIngressoModalidade modalidade = new WSIngressoModalidade(cdModalidade, nmModalidade, tarifa, utilizacaoDatasList);
 
         // servico (ingresso)
-        WSServico servico = new WSIngresso(cdModalidade,
-                        nmModalidade,
-                        null,
-                        dtInicial,
-                        dtFinal,
-                        modalidade,
-                        reservaNomeList,
-                        tarifa,
-                        mediaList,
-                        dsParametro,
-                        null);
+        WSIngresso servico = new WSIngresso();
+        servico.setCdServico(cdModalidade);
+        servico.setNmServico(nmModalidade);
+        servico.setDtServico(dtInicial);
+        servico.setDtServicoFim(dtFinal);
+        servico.setIngressoModalidade(modalidade);
+        servico.setReservaNomeList(reservaNomeList);
+        servico.setTarifa(tarifa);
+        servico.setMediaList(mediaList);
+        servico.setDsParametro(dsParametro);
+        servico.setStDisponivel(true);
         
         // reserva servico (servico-ingresso)
         WSReservaServico reservaServico = new WSReservaServico();
@@ -267,7 +266,6 @@ public class ConsultaWS {
         String dsTour = null;
 
         Date dtInicial = null;
-        Date dtFinal = null;
             
         List<WSPolitica> politicaList = null;
         List<WSMedia> mediaList = null;
@@ -290,21 +288,21 @@ public class ConsultaWS {
                 for(Booking book : file.getBookings()) {
                     // Periodo de utilização dos serviços
                     try {
+                        // data do transporte
                         dtInicial = book.getStartDate();
-                        dtFinal = book.getEndDate();
 
                         // informações sobre a modalidade
-                        cdTour = String.valueOf(book.getBookingDetailService().getId());
-                        nmTour = book.getBookingDetailService().getName();
-                        dsTour = book.getBookingDetailService().getDescription();
-                        
+                        cdTour = book.getBookingDetailService() != null && book.getBookingDetailService().getId() != null ? String.valueOf(book.getBookingDetailService().getId()) : String.valueOf(book.getId());
+                        nmTour = book.getBookingDetailService() != null && book.getBookingDetailService().getName() != null ? book.getBookingDetailService().getName() : reservaRQ.getReserva().getReservaServicoList().stream().filter(rServ -> rServ.getServico() != null).findFirst().get().getServico().getNmServico();
+                        dsTour = book.getBookingDetailService() != null && book.getBookingDetailService().getDescription() != null ? book.getBookingDetailService().getDescription() : reservaRQ.getReserva().getReservaServicoList().stream().filter(rServ -> rServ.getServico() != null).findFirst().get().getServico().getDsServico();
+
                     } catch (Exception ex) {
-                        throw new ErrorException (reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
-                                "Erro ao obter os dados principais do Passeio " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
-                    } 
+                        throw new ErrorException(reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
+                            "Reserva Inconsistente ou Negada - Entre em contato com o Fornecedor (ETS)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                    }
 
                     // Obtem link para mídia
-                    mediaList = UtilsWS.montarMidias(reservaRQ.getIntegrador(), Arrays.asList(book.getImage())); //Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
+                    mediaList = UtilsWS.montarMidias(reservaRQ.getIntegrador(), Arrays.asList(book.getImage())); 
 
                     // Montar a lista de Pax
                     reservaNomeList = UtilsWS.montarReservaNomeList(reservaRQ, book.getPassenger());
@@ -312,7 +310,7 @@ public class ConsultaWS {
                     // Buscar politicas de Voucher
                     VoucherRQ voucherRQ = UtilsWS.montarVoucher(reservaRQ.getIntegrador(), file);
                     VoucherRS voucher = easyTravelShopClient.consultarVoucher(reservaRQ.getIntegrador(), voucherRQ);
-                    
+
                     // verifica o status da consulta de voucher
                     UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), voucher);
 
@@ -322,9 +320,8 @@ public class ConsultaWS {
                     } else if(!Utils.isListNothing(file.getFileVoucher())){
                         politicaList = UtilsWS.montarPoliticasVoucherGet(reservaRQ.getIntegrador(), nrLocalizador, book.getFileId(), file.getFileVoucher());
                     }
-                    
+
                     // Obtem as politicas de cancelamento
-//                    politicaList = new ArrayList<>();
                     List<CancellationPolicy> cancellationPolicy = !Utils.isListNothing(book.getCancellationPolicy()) ? book.getCancellationPolicy() : null;
                     if(!Utils.isListNothing(cancellationPolicy)){
                         DatesRateGet rateGet = new DatesRateGet(cancellationPolicy);
@@ -337,10 +334,11 @@ public class ConsultaWS {
                             politicaList.addAll(politicasCancelamento);
                         }
                     }
-                    
+
                     try {
                         // Obtendo a sigla da moeda para montagem da tarifa
                         if(book.getCurrency() != null) {
+                            // sigla da moeda
                             sgMoeda = book.getCurrency().getIso();
                             // valor da reserva
                             vlTarifa = book.getPriceTotal();
@@ -350,7 +348,7 @@ public class ConsultaWS {
                             tarifa.setSgMoedaNeto(sgMoeda);
                             tarifa.setVlNeto(vlTarifa);
                             tarifa.setPagtoFornecedor(WSPagtoFornecedorTipoEnum.FATURADO);
-                            
+
                             if(!Utils.isListNothing(politicaList)){
                                 tarifa.setPoliticaList(politicaList);
                             }
@@ -359,7 +357,7 @@ public class ConsultaWS {
                         throw new ErrorException (reservaRQ.getIntegrador(), ConsultaWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a tarifa", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
-                    
+
                     //Adicionando tarifa adicional em caso de periodo de multa
                     tarifaAdicionalList = verificarMulta(reservaRQ.getIntegrador(), politicaList, isCancelamento);
                     if(!Utils.isListNothing(tarifaAdicionalList)){
@@ -391,6 +389,7 @@ public class ConsultaWS {
         servicoPasseio.setServicoTipo(servicoTipoEnum);
         servicoPasseio.setMediaList(mediaList);
         servicoPasseio.setDsParametro(dsParametro);
+        servicoPasseio.setStDisponivel(true);
         
         // reserva servico (servico-transfer)
         WSReservaServico reservaServico = new WSReservaServico();
@@ -400,7 +399,7 @@ public class ConsultaWS {
         reservaServico.setServico(servicoPasseio);
         reservaServico.setReservaStatus(reservaStatus);
         reservaServico.setDsParametro(dsParametro);
-
+        
         WSReserva reserva = new WSReserva(reservaServico);
         reserva.setReservaStatus(reservaStatus);
 

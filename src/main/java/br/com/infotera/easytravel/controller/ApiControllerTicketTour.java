@@ -21,7 +21,6 @@ import br.com.infotera.easytravel.service.ticket.ConsultaWS;
 import br.com.infotera.easytravel.service.ticket.DetalheIngressoWS;
 import br.com.infotera.easytravel.service.ticket.PreCancelarWS;
 import br.com.infotera.easytravel.service.ticket.PreReservaWS;
-import br.com.infotera.easytravel.service.ticket.RelatorioWS;
 import br.com.infotera.easytravel.service.ticket.ReservaWS;
 import br.com.infotera.easytravel.service.ticket.TarifarWS;
 import com.google.gson.Gson;
@@ -61,8 +60,6 @@ public class ApiControllerTicketTour {
     private PreCancelarWS preCancelarWS;
     @Autowired
     private PreReservaWS preReservaWS;
-    @Autowired
-    private RelatorioWS relatorioWS;
     @Autowired
     private ReservaWS reservaWS;
     @Autowired
@@ -190,23 +187,6 @@ public class ApiControllerTicketTour {
             wsRS = new WSReservaRS(null, ex.getIntegrador());
         } catch (Exception ex) {
             wsRS = new WSReservaRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "cancelar", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
-        } finally {
-            LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
-        }
-        return gson.toJson(wsRS);
-    }
-
-    @RequestMapping(value = "/relatorio", method = RequestMethod.POST)
-    public String relatorio(@RequestBody String jsonRQ) {
-        WSReservaRelatorioRS wsRS = null;
-        WSReservaRelatorioRQ wsRQ = gson.fromJson(jsonRQ, WSReservaRelatorioRQ.class);
-        wsRQ.getIntegrador().setDsMetodo("relatorio");
-        try {
-            wsRS = relatorioWS.relatorio(wsRQ);
-        } catch (ErrorException ex) {
-            wsRS = new WSReservaRelatorioRS(null, ex.getIntegrador());
-        } catch (Exception ex) {
-            wsRS = new WSReservaRelatorioRS(null, new ErrorException(wsRQ.getIntegrador(), ApiControllerTicketTour.class, "relatorio", WSMensagemErroEnum.GENNULO, "", WSIntegracaoStatusEnum.NEGADO, ex).getIntegrador());
         } finally {
             LogWS.gerarLog(wsRS.getIntegrador(), jsonRQ, wsRS);
         }

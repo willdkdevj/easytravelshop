@@ -8,7 +8,6 @@ package br.com.infotera.easytravel.util;
 import br.com.infotera.common.ErrorException;
 import br.com.infotera.common.WSContato;
 import br.com.infotera.common.WSDocumento;
-import br.com.infotera.common.WSInfoAdicional;
 import br.com.infotera.common.WSIntegrador;
 import br.com.infotera.common.WSReservaNome;
 import br.com.infotera.common.WSReservaServico;
@@ -90,7 +89,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -224,7 +222,7 @@ public class UtilsWS {
                     searchRQ = new SearchRQ();
                     searchRQ.setSearchTransfer(true);
                     
-                } catch (Exception ex) {
+                } catch (ErrorException ex) {
                     throw new ErrorException(integrador, UtilsWS.class, "montarSearch", WSMensagemErroEnum.GENMETHOD, 
                             "Erro ao montar requisição de pesquisa para Tranfer", WSIntegracaoStatusEnum.NEGADO, ex, false);
                 }
@@ -709,9 +707,6 @@ public class UtilsWS {
         Double vlTarifa = 0.0;
         Double vlPessoaNeto = 0.0;
 
-        DatesRateGet rateGet = null;
-        DatesRateSearch rateSearch = null;
-        
         try {
             
             String tpPax = null;
@@ -788,14 +783,12 @@ public class UtilsWS {
             // Montar politica de cancelamento conforme o retorno da tarifa
             politicaCancelamentoList = montarPoliticasDeCancelamento(integrador, moeda, vlTarifa, rate, false);
 
-            tarifa = new WSTarifa(moeda,
-                    vlTarifa, //valor
-                    vlPessoaNeto, //preço por pessoa = vlNeto, pois apresenta apenas preço por unidade
-                    null,
-                    null,
-                    WSPagtoFornecedorTipoEnum.FATURADO,
-                    politicaCancelamentoList);
-
+            tarifa = new WSTarifa();
+            tarifa.setSgMoedaNeto(moeda);
+            tarifa.setVlNeto(vlTarifa);
+            tarifa.setVlPessoaNeto(vlPessoaNeto); //preço por pessoa = vlNeto, pois apresenta apenas preço por unidade
+            tarifa.setPagtoFornecedor(WSPagtoFornecedorTipoEnum.FATURADO);
+            tarifa.setPoliticaList(politicaCancelamentoList);
             tarifa.setTarifaNomeList(tarifaNomeList);
             
         } catch (ErrorException error) {
@@ -919,8 +912,11 @@ public class UtilsWS {
                     // Modifica estrutura da lista para inserir obrigatoriedade de doc na tela (PRE-RESERVAR)
                     for(WSReservaNome pax : reservaNomeList) {
                         WSReservaNome reservaPax = new WSReservaNome();
+                        reservaPax.setNmNome(pax.getNmNome());
+                        reservaPax.setNmSobrenome(pax.getNmSobrenome());
                         reservaPax.setPaxTipo(pax.getPaxTipo());
                         reservaPax.setQtIdade(pax.getQtIdade());
+                        reservaPax.setDtNascimento(pax.getDtNascimento());
                         reservaPax.setStPrincipal(pax.isStPrincipal());
                         
                         if(pax.getDocumento() == null) {
@@ -930,7 +926,6 @@ public class UtilsWS {
                             reservaPax.getDocumento().setDocumentoTipo(WSDocumentoTipoEnum.valueOf(tipoDoc));
                             reservaPax.getDocumento().setStObrigatorio(requerido);
                         }
-                        
                         nomeList.add(reservaPax);
                     }
                     
@@ -1284,8 +1279,6 @@ public class UtilsWS {
         // Veículo
         WSVeiculoTransfer veiculo = montarVeiculoTransfer(integrador, transfer, veiculoTransfer);
         
-                
-        
         try {
             servicoList = new ArrayList();
             int idaVolta = 2;
@@ -1308,6 +1301,7 @@ public class UtilsWS {
                     transferIdaVolta.setTransferInfo(wsTransferInfo);
                     transferIdaVolta.setDsParametro(dsParametro);
                     transferIdaVolta.setServicoTipo(servicoTipoEnum);
+                    transferIdaVolta.setStDisponivel(true);
 
                     if(i == 1){
                         transferIdaVolta.getTransferInfo().setDtTransporte(dtServicoFim);
@@ -1334,6 +1328,7 @@ public class UtilsWS {
                 transferTrecho.setTransferInfo(wsTransferInfo);
                 transferTrecho.setDsParametro(dsParametro);
                 transferTrecho.setServicoTipo(servicoTipoEnum);
+                transferTrecho.setStDisponivel(true);
 
                 servicoList.add(transferTrecho);
             }
@@ -1362,15 +1357,14 @@ public class UtilsWS {
             
             WSIngresso ingresso = null;
             WSPacoteServico pacoteServico = null;
-//            WSTransfer transfer = null;
             WSServicoOutro servicoPasseio = null;
             
             if(contato != null){
-                dsTelefone = "(11) 98416-3234"; //contato.getTelefone().getNrDDD() + " " + contato.getTelefone().getNrTelefone();
-//            } else {
-//                // Infotravel não enviou o WSContato na WSReserva para obter o telefone para contato do Reservar (DoBooking - Fornecedor)
-//                throw new ErrorException(integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
-//                        "Erro ao obter o WSContato para envio de telefone para contato", WSIntegracaoStatusEnum.NEGADO, null, false);
+                dsTelefone = contato.getTelefone().getNrDDD() + " " + contato.getTelefone().getNrTelefone(); 
+            } else {
+                // Infotravel não enviou o WSContato na WSReserva para obter o telefone para contato do Reservar (DoBooking - Fornecedor)
+                throw new ErrorException(integrador, UtilsWS.class, "montarReservar", WSMensagemErroEnum.GENMETHOD, 
+                        "Erro ao obter o WSContato para envio de telefone para contato", WSIntegracaoStatusEnum.NEGADO, null, false);
             }
             
             if (servico.getIsStIngresso()) {

@@ -32,7 +32,7 @@ public class PreCancelarTransferWS {
     private EasyTravelShopClient easyTravelShopClient;
 
     @Autowired
-    private ConsultaTransferWS consultaWS;
+    private ConsultarTransferWS consultaWS;
 
     @Autowired
     private SessaoWS sessaoWS;

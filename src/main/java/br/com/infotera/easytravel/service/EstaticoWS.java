@@ -100,18 +100,6 @@ public class EstaticoWS {
             dispoIngresso = (WSDisponibilidadeIngressoRQ) obj;
             dsCity = dispoIngresso.getCdDestino();
             
-//            String lambdaCity = Utils.tiraAcento(dsCity).toLowerCase();
-//            locationSearch = location.getLocationSearch().stream()
-//                    .filter(local -> local.getName()!= null && Utils.tiraAcento(local.getName()).toLowerCase().equals(lambdaCity))
-//                    .findFirst()
-//                    .orElse(null);
-            
-//            String lambdaIata = dsIata;
-//            locationSearch = location.getLocationSearch().stream()
-//                    .filter(local -> local.getIata() != null && local.getIata().equals(lambdaIata))
-//                    .findFirst()
-//                    .orElse(null);
-            
         } else if (obj instanceof WSDisponibilidadeTransferRQ) {
             dispoTransfer = (WSDisponibilidadeTransferRQ) obj;
             WSTransfer transferIN = dispoTransfer.getTransferList().stream().filter(transfer -> transfer.getTransferInOut().equals(WSTransferInOutEnum.IN)).findFirst().orElse(null);
@@ -119,12 +107,6 @@ public class EstaticoWS {
             if(transferIN != null){
                 dsCity = transferIN.getOrigem().getCdDestino();
             }
-            
-//            String lambdaCity = Utils.tiraAcento(dsCity).toLowerCase();
-//            locationSearch = location.getLocationSearch().stream()
-//                    .filter(local -> local.getName()!= null && Utils.tiraAcento(local.getName()).toLowerCase().equals(lambdaCity))
-//                    .findFirst()
-//                    .orElse(null);
             
         } else if (obj instanceof WSDisponibilidadeServicoRQ) {
             dispoServico = (WSDisponibilidadeServicoRQ) obj;

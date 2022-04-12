@@ -51,7 +51,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class ConsultaTransferWS {
+public class ConsultarTransferWS {
 
     @Autowired
     private EasyTravelShopClient easyTravelShopClient;
@@ -85,7 +85,7 @@ public class ConsultaTransferWS {
             UtilsWS.verificarRetorno(reservaRQ.getIntegrador(), consulta);
             
         } catch (ErrorException | NumberFormatException ex) {
-            throw new ErrorException(reservaRQ.getIntegrador(), ConfirmarTransferWS.class, "consultar", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(reservaRQ.getIntegrador(), ConsultarTransferWS.class, "consultar", WSMensagemErroEnum.SCO, 
                     "Erro ao realizar consulta", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
 
@@ -138,20 +138,20 @@ public class ConsultaTransferWS {
                         dsTransfer = book.getBookingDetailService().getDescription();
                         
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, TarifarTransferWS.class, "montarReserva", WSMensagemErroEnum.SCO, 
-                                "Erro ao obter os dados principais do Transfer " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
-                    } 
+                        throw new ErrorException(reservaRQ.getIntegrador(), ConsultarTransferWS.class, "montarReservaPasseio", WSMensagemErroEnum.SCO, 
+                            "Reserva Inconsistente ou Negada - Entre em contato com o Fornecedor (ETS)", WSIntegracaoStatusEnum.NEGADO, ex, false);
+                    }
                     
                     try {
                         //descobre se é só ida ou ida e volta
                         servicoTipoEnum = book.getBookingDetailService().isTransferIn() && book.getBookingDetailService().isTransferOut() ? WSServicoTipoEnum.TRANSFER : WSServicoTipoEnum.TRANSFER_TRECHO;
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, TarifarTransferWS.class, "montarReserva", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (integrador, ConsultarTransferWS.class, "montarReserva", WSMensagemErroEnum.SCO, 
                                 "Erro ao identificar o tipo de serviço (Transfer) " + ex.getMessage(), WSIntegracaoStatusEnum.NEGADO, ex, false);
                     } 
 
                     // Obtem link para mídia
-                    mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage())); //Arrays.asList(new WSMedia(WSMediaCategoriaEnum.SERVICO, book.getImage().getUrl()));
+                    mediaList = UtilsWS.montarMidias(integrador, Arrays.asList(book.getImage())); 
 
                     // Montar a lista de Pax
                     reservaNomeList = UtilsWS.montarReservaNomeList(reservaRQ, book.getPassenger());
@@ -210,7 +210,7 @@ public class ConsultaTransferWS {
                             }
                         }
                     } catch (Exception ex) {
-                        throw new ErrorException (integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                        throw new ErrorException (integrador, ConsultarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a tarifa", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
 
@@ -237,7 +237,8 @@ public class ConsultaTransferWS {
                                 transferIdaVolta.setTransferInfo(info);
                                 transferIdaVolta.setDsParametro(dsParametro);
                                 transferIdaVolta.setServicoTipo(servicoTipoEnum);
-
+                                transferIdaVolta.setStDisponivel(true);
+                                
                                 if(i == 1){
                                     transferIdaVolta.getTransferInfo().setDtTransporte(dtFinal);
                                 }
@@ -263,7 +264,8 @@ public class ConsultaTransferWS {
                             transferTrecho.setTransferInfo(info);
                             transferTrecho.setDsParametro(dsParametro);
                             transferTrecho.setServicoTipo(servicoTipoEnum);
-
+                            transferTrecho.setStDisponivel(true);
+                            
                             servicoList.add(transferTrecho);
                         }
                         // ordernar por menor data
@@ -272,22 +274,22 @@ public class ConsultaTransferWS {
                                 return s1.getDtServico().compareTo(s2.getDtServico());
                             });
                         }
-                    } catch (Exception ex) {
-                        throw new ErrorException (integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                    } catch (ErrorException ex) {
+                        throw new ErrorException (integrador, ConsultarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                                 "Erro ao montar a lista de serviço (WSTransfer)", WSIntegracaoStatusEnum.NEGADO, ex, false);
                     }
                 }
             } catch (ErrorException error) {
                 throw error;
             } catch (Exception ex) {
-                throw new ErrorException(integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+                throw new ErrorException(integrador, ConsultarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                         "Erro ao montar a reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
             }
             
         } catch (ErrorException error) {
             throw error;
         } catch (Exception ex) {
-            throw new ErrorException(integrador, ConfirmarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
+            throw new ErrorException(integrador, ConsultarTransferWS.class, "montaReserva", WSMensagemErroEnum.SCO, 
                     "Erro ao ler informações de politicas", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         
@@ -301,6 +303,7 @@ public class ConsultaTransferWS {
         pctServico.setDtServico(dtInicial);
         pctServico.setServicoList(servicoList);
         pctServico.setServicoTipo(servicoTipoEnum);
+        pctServico.setStDisponivel(true);
         
         // reserva servico (servico-transfer)
         WSReservaServico reservaServico = new WSReservaServico();
@@ -324,7 +327,7 @@ public class ConsultaTransferWS {
                                             service.getActivityTypeName(), 
                                             service.getMaxNumberBaggage() != null && service.getMaxNumberBaggage() > 0 ? service.getMaxNumberBaggage() : 0);
         } catch (Exception ex) {
-            throw new ErrorException (integrador, ConfirmarTransferWS.class, "montarVeiculoTransfer", WSMensagemErroEnum.SCO, 
+            throw new ErrorException (integrador, ConsultarTransferWS.class, "montarVeiculoTransfer", WSMensagemErroEnum.SCO, 
                     "Erro ao determinar o tipo de veiculo (WSVeiculoTransfer)", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }  
         return veiculo;
@@ -347,7 +350,7 @@ public class ConsultaTransferWS {
             info.setStObrigatorio(true);
             
         } catch (Exception ex) {
-            throw new ErrorException (integrador, ConfirmarTransferWS.class, "montarTransferInfo", WSMensagemErroEnum.SCO, 
+            throw new ErrorException (integrador, ConsultarTransferWS.class, "montarTransferInfo", WSMensagemErroEnum.SCO, 
                     "Erro ao montar o TransferInfo", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         return info;
@@ -394,7 +397,7 @@ public class ConsultaTransferWS {
                 }
             }
         } catch (Exception ex) {
-            throw new ErrorException (integrador, ConfirmarTransferWS.class, "montarServicoInfoList", WSMensagemErroEnum.SCO, 
+            throw new ErrorException (integrador, ConsultarTransferWS.class, "montarServicoInfoList", WSMensagemErroEnum.SCO, 
                     "Erro ao montar a lista de informações sobre o serviço", WSIntegracaoStatusEnum.NEGADO, ex, false);
         }
         return servicoInfoList;

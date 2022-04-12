@@ -3,7 +3,7 @@ package br.com.infotera.easytravel.service.transfer;
 import br.com.infotera.common.*;
 import br.com.infotera.common.enumerator.WSIntegracaoStatusEnum;
 import br.com.infotera.common.enumerator.WSMensagemErroEnum;
-import br.com.infotera.common.reserva.rqrs.WSReservaRQ;
+import br.com.infotera.common.enumerator.WSReservaStatusEnum;
 import br.com.infotera.common.reserva.rqrs.WSReservarRQ;
 import br.com.infotera.common.reserva.rqrs.WSReservarRS;
 import br.com.infotera.easytravel.client.EasyTravelShopClient;
@@ -26,9 +26,6 @@ public class ReservaTransferWS {
     private EasyTravelShopClient easyTravelShopClient;
 
     @Autowired
-    private ConsultaTransferWS consultaWS;
-    
-    @Autowired
     private SessaoWS sessaoWS;
     
     public WSReservarRS reservar(WSReservarRQ reservarRQ) throws ErrorException {
@@ -39,6 +36,7 @@ public class ReservaTransferWS {
         
         BookingRS bookingRetorno = null;
         WSReservaServico rServico = null;
+        WSReservaStatusEnum reservaStatus = null;
         try {
 //        String dsParametro = null;
             rServico = reservarRQ.getReserva().getReservaServicoList().stream()
@@ -56,6 +54,8 @@ public class ReservaTransferWS {
                     // verifica o retorno do fornecedor
                     UtilsWS.verificarRetorno(reservarRQ.getIntegrador(), bookingRetorno);
                     
+                    // Verificar o Status da Reserva
+                    reservaStatus = UtilsWS.verificarStatusReserva(bookingRetorno.getFile(), reservaStatus, reservarRQ.getIntegrador());
                 } catch(Exception ex){
                     throw new ErrorException(reservarRQ.getIntegrador(), ReservaWS.class, "reservar", WSMensagemErroEnum.SRE, 
                             "Erro ao criar requisição para o envio da Reserva", WSIntegracaoStatusEnum.NEGADO, ex, false);
@@ -78,14 +78,9 @@ public class ReservaTransferWS {
         // Inserindo o N Localizador na ReservaServico
         rServico.setNrLocalizador(String.valueOf(bookingRetorno.getFile().getId()));
         rServico.setDsParametro(rServico.getServico().getDsParametro()); // passagem do parâmetro para chamadas posteriores
+        rServico.setReservaStatus(reservaStatus); // Status da Reserva
         
-        WSReservaRQ reservaRQ = new WSReservaRQ(reservarRQ.getIntegrador(), 
-                                                new WSReserva(rServico)); // new WSReserva(wsReservaServico));
-
-        //realizando consultar pós confirmação
-        WSReserva reserva = consultaWS.realizarConsulta(reservaRQ, false);
-        
-        return  new WSReservarRS(reserva, reservarRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
+        return  new WSReservarRS(new WSReserva(rServico), reservarRQ.getIntegrador(), WSIntegracaoStatusEnum.OK);
     }
 }
 

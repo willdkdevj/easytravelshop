@@ -44,7 +44,7 @@ public class ApiControllerTransfer {
     @Autowired
     private CancelarTransferWS cancelarTransferWS;
     @Autowired
-    private ConsultaTransferWS consultaTransferWS;
+    private ConsultarTransferWS consultaTransferWS;
     @Autowired
     private PreCancelarTransferWS preCancelarTransferWS;
     @Autowired

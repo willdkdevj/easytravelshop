@@ -167,6 +167,8 @@ public class TarifarWS {
 
             if (modalidade != null) {
                 ingresso.setIngressoModalidade(modalidade);
+                ingresso.setStDisponivel(true);
+                
                 servicoIngresso = (WSServico) ingresso;
 
                 return servicoIngresso;
@@ -218,7 +220,7 @@ public class TarifarWS {
                         servicoPasseio.setMediaList(mediaList);
                         servicoPasseio.setServicoTipo(servicoTipoEnum);
                         servicoPasseio.setDsParametro(dsParametro);
-
+                        servicoPasseio.setStDisponivel(true);
                     }
                 }
             }

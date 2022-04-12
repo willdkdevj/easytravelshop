@@ -49,7 +49,7 @@ public class DisponibilidadeTransferWS {
         }
         
         // Localiza ID da Localidade (Cidade) utilizada pelo Fornecedor
-        Integer locationId = estaticoWS.verificarLocalidades(disponibilidadeTransferRQ.getIntegrador(), disponibilidadeTransferRQ); //UtilsWS.verificarLocationId(disponibilidadeTransferRQ); //
+        Integer locationId = UtilsWS.verificarLocationId(disponibilidadeTransferRQ); //estaticoWS.verificarLocalidades(disponibilidadeTransferRQ.getIntegrador(), disponibilidadeTransferRQ); //
         
         // Monta requisição para realizar pesquisa a disponibilidade ao Fornecedor
         SearchRQ searchRQ = UtilsWS.montarSearch(disponibilidadeTransferRQ, locationId);
@@ -135,7 +135,8 @@ public class DisponibilidadeTransferWS {
                     pacoteServico.setServicoList(servicoList);
                     pacoteServico.setServicoTipo(servicoTipoEnum);
                     pacoteServico.setDsParametro(dsParametro);
-
+                    pacoteServico.setStDisponivel(true);
+                    
                     // Lista TransferPesquisa
                     transferPesquisaList.add(new WSTransferPesquisa(sqServico++,
                             dispoRQ.getIntegrador(),

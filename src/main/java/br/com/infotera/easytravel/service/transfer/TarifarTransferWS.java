@@ -138,6 +138,8 @@ public class TarifarTransferWS {
                     pacoteServico.setServicoList(servicoList);
                     pacoteServico.setServicoTipo(servicoTipoEnum);
                     pacoteServico.setDsParametro(dsParametro);
+                    pacoteServico.setStDisponivel(true);
+                    
                     sqServico++;
                    
                 }

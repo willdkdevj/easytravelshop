@@ -126,7 +126,7 @@ public class DisponibilidadePasseioWS {
                                 servico.setReservaNomeList(dispRQ.getReservaNomeList());
                                 servico.setDsParametro(dsParamTarifar);
                                 servico.setDtServico(dtServicoInicio);
-//                                
+                                servico.setStDisponivel(true);
                             }
                         } else {
                             throw new ErrorException(dispRQ.getIntegrador(), DisponibilidadePasseioWS.class, "montarServicoPesquisa", WSMensagemErroEnum.SDI, "Erro ao ler modalidades: Informações de modalidade ausente", WSIntegracaoStatusEnum.NEGADO, null, false);

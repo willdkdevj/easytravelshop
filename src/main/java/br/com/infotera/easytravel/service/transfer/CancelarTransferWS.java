@@ -36,7 +36,7 @@ public class CancelarTransferWS {
     private SessaoWS sessaoWS;
     
     @Autowired
-    private ConsultaTransferWS consultaWS;
+    private ConsultarTransferWS consultaWS;
 
     public WSReservaRS cancelar(WSReservaRQ reservaRQ) throws ErrorException {
         // Verifica Sessão iniciada com Fornecedor
