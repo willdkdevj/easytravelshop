@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: br.com.infotera.it:it-common:1.9.14.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/br/com/infotera/it/it-common/1.9.14.0-SNAPSHOT/it-common-1.9.14.0-20220610.150154-123.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/br/com/infotera/it/it-common/1.9.14.0-SNAPSHOT/it-common-1.9.14.0-20220610.150154-123-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/br/com/infotera/it/it-common/1.9.14.0-SNAPSHOT/it-common-1.9.14.0-20220610.150154-123-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
